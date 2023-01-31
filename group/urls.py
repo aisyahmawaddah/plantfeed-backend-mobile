@@ -16,9 +16,9 @@ from .views import *
 app_name = 'group'
 urlpatterns = [
     path('MainGroup',views.mainGroup, name="MainGroup"),
-    path('Group',views.group, name="Group"),
+    path('AddGroup',views.AddGroup, name="AddGroup"),
     path('MyGroup',views.myGroup, name="MyGroup"),
-    # path('ViewGroup',views.viewGroup, name="ViewGroup"),
+    path('ViewGroup/<str:pk>',views.viewGroup, name="ViewGroup"),
     path('JoinGroup/<str:pk>',views.joinGroup, name="JoinGroup"),
     path('DeleteGroup/<str:pk>',views.deleteGroup, name="DeleteGroup"),
     path('UpdateGroup/<str:pk>',views.updateGroup, name="UpdateGroup"),

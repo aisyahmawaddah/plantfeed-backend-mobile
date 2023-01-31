@@ -23,12 +23,11 @@ class Group_tbl(models.Model):
     def save(self):
         # group = self
         super().save()
-        super().save(using='farming')
+        #super().save(using='farming')
         # return group
         return self.id
     
-    def deleteRecordFarming(self):
-        super().delete(using='farming')
+    
         
     def deleteRecordIgrow(self):
         super().delete()
@@ -46,7 +45,6 @@ class GroupMembership(models.Model):
 
     def save(self):
         super().save()
-        super().save(using='farming')
 
     
     class Meta:
@@ -64,11 +62,7 @@ class GroupSoilTagging(models.Model):
 
     def save(self):
         super().save()
-        super().save(using='farming')
    
-    def deleteRecordFarming(self):
-        super().delete(using='farming')
-        
     def deleteRecordIgrow(self):
         super().delete()
 
@@ -83,11 +77,7 @@ class GroupPlantTagging(models.Model):
 
     def save(self):
         super().save()
-        super().save(using='farming')
    
-    def deleteRecordFarming(self):
-        super().delete(using='farming')
-        
     def deleteRecordIgrow(self):
         super().delete()
 

@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     'member.apps.MemberConfig',
     'sharing.apps.SharingConfig',
     'group.apps.GroupConfig',
+    'marketplace.apps.MarketplaceConfig',
+    'basket.apps.BasketConfig',
+    'django.contrib.sites',
 ]
 
 MIDDLEWARE = [

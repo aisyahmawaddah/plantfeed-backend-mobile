@@ -12,5 +12,8 @@ urlpatterns = [
     path('', include('member.urls')),
     path('sharing/', include('sharing.urls')),
     path('group/', include('group.urls')),
+    path('marketplace/', include('marketplace.urls')),
+    path('basket/', include('basket.urls')),
+
 
 ]

@@ -15,7 +15,7 @@ from cryptography.fernet import Fernet
 from django.db import IntegrityError
 from .models import Group_tbl, GroupMembership, GroupPlantTagging, GroupSoilTagging
 from .forms import GroupForm
-from member.models import Person, SoilTag, PlantTag
+from member.models import Person, SoilTag, PlantTag, Memberlist
 
 
 #group
@@ -25,22 +25,23 @@ def mainGroup(request):
         Age = request.POST.get('Age')
         State = request.POST.get('State')
         searchgp=Group_tbl.objects.raw('select * from Group_tbl where Age="'+Age+'" and State="'+State+'"')
-        return render(request,'MainGroup.html', {'person':person,'group':searchgp})
+        return render(request,'MainPageGroup.html', {'person':person,'group':searchgp})
     
     try:
         
         person=Person.objects.get(Email=request.session['Email'])
         group=Group_tbl.objects.all()
+        groupMember=GroupMembership.objects.filter(GroupMember=person)
         searchgp=Group_tbl.objects.raw('select * from Group_tbl')
         fss =FileSystemStorage()
         uploaded_file = fss.url(group)
-        return render(request,'MainGroup.html',{'group':group, 'uploaded_file':uploaded_file, 'person':person})
+        return render(request,'MainPageGroup.html',{'group':group, 'uploaded_file':uploaded_file, 'person':person, 'groupMember':groupMember})
 
     except Group_tbl.DoesNotExist:
         raise Http404('Data does not exist')
 
 
-def group(request):
+def AddGroup(request):
     Username=Person.objects.get(Email=request.session['Email'])
     soilTagList=SoilTag.objects.all()
     plantTagList=PlantTag.objects.all()
@@ -72,7 +73,7 @@ def group(request):
         
         return redirect('group:JoinGroup', groupID)
     else :
-        return render(request,'group.html', {'SoilTag':soilTagList, 'PlantTag':plantTagList})
+        return render(request,'AddNewGroup.html', {'SoilTag':soilTagList, 'PlantTag':plantTagList})
 
 
 def myGroup(request):
@@ -83,6 +84,17 @@ def myGroup(request):
         # ambil group yg user join
         groupMembership=GroupMembership.objects.filter(GroupMember=Username)
         return render(request,'MyGroup.html',{'group':group,'groupMembership':groupMembership})
+    except Group_tbl.DoesNotExist:
+        raise Http404('Data does not exist')
+
+def viewGroup(request,pk):
+    try:
+        user=Person.objects.get(Email=request.session['Email'])
+        group = Group_tbl.objects.get(id=pk)
+        groupMembership=GroupMembership.objects.filter(GroupName=group)
+        memberList = Memberlist.objects.all().filter(to_person=user,from_person=user)
+        #memberList2 = Memberlist.objects.all().filter(to_person=user)
+        return render(request,'ViewGroup.html',{'group':group,'groupMembership':groupMembership, 'memberList':memberList})
     except Group_tbl.DoesNotExist:
         raise Http404('Data does not exist')
 
@@ -265,3 +277,4 @@ def Group_PlantTag(request):
         }
         
         return render(request,'MainGroup.html',{'group':group, 'uploaded_file':uploaded_file, 'person':person, 'context_PlantTags':context}) 
+
