@@ -1,5 +1,10 @@
 from django.db import models
 from datetime import datetime
+from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from rest_framework.authtoken.models import Token
+
 
 class Person(models.Model):
     Email = models.CharField(max_length=150, unique=True)
@@ -16,6 +21,14 @@ class Person(models.Model):
     MaritalStatus = models.CharField(max_length=150)
     UserLevel = models.CharField(max_length=10)
     
+    @property
+    def is_anonymous(self):
+   
+        return False
+    @property
+    def is_authenticated(self):
+   
+        return False
 
     def upload_photo(self, filename):
         path = 'media/uploads/{}'.format(filename)
@@ -180,4 +193,7 @@ class PlantTag(models.Model):
 
 
 
-    
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_auth_token(sender, instance=None, created=False, **kwargs):
+    if created:
+        Token.objects.create(user=instance)

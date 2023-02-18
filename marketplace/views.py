@@ -108,7 +108,7 @@ def deleteProduct(request,fk1):
         
     except prodProduct.DoesNotExist:
         messages.success(request, 'The product does not exist')
-        return redirect('MainMarketplace')
+        return redirect('marketplace:MainMarketplace')
     
 def updateProduct(request,fk1):
     product = prodProduct.objects.get(pk=fk1) 

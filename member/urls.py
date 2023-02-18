@@ -3,6 +3,12 @@ from . import views
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.urls import path
+#from django.conf.urls import url
+#from member.views import LoginView
+from .import api
+from member.api import UserAuthentication, UserList
+from .views import RegisterView, LoginView
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -21,8 +27,23 @@ urlpatterns = [
     path('ChatRoom/<str:room>', views.chatRoom, name='ChatRoom'),
     path('send', views.send, name='send'),
     path('getMessages/<str:room>/', views.getMessages, name='getMessages'),
+    
+    #url(r'^api/users_lists/$', UserList.as_view(), name='user_list'),
+    #url(r'^api/users_list/(?P<id>\d+)/$', UserDetail.as_view(), name='user_list'),
+    #url(r'^api/auth/$', UserAuthentication.as_view(), name='User Authentication API'),
+    #url(r'^rest-auth/', include('rest_auth.urls')),
+    #url(r'^rest-auth/registration/', include('rest_auth.registration.urls'))
+    #path('login/', MyObtainTokenPairView.as_view(), name='token_obtain_pair'),
+    #path('login/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    #path('userlist/', views.user_list, name='userlist'),
+    #path('login', obtain_auth_token, name='login')
+    path('users/login/', api.login_user, name='login'),
+    path('users/token/<pk>', api.getUserFromToken, name='user-token'),
 
+    path('register/', RegisterView.as_view(), name='register'),
+    path('login/', LoginView.as_view(), name='login'),
 
+    
 ] + static(settings.MEDIA_URL, document_root= settings.MEDIA_ROOT)
 
 urlpatterns += staticfiles_urlpatterns()

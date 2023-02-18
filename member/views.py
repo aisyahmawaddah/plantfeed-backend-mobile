@@ -3,6 +3,8 @@ from django.template import loader
 from django.http.response import Http404
 from django.shortcuts import render, redirect, get_object_or_404, resolve_url
 from django.contrib import messages
+
+#from member.serializers import PersonSerializer
 from .models import Person, Memberlist, MemberRequest, Room, Message
 from django.contrib import auth
 from plantfeed import encryption_util
@@ -224,6 +226,42 @@ def getMessages(request, room):
 
     messages = Message.objects.filter(room=room.id)
     return JsonResponse({"messages":list(messages.values())})
+
+
+
+
+#APIView
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Person
+from .serializers import PersonSerializer
+
+class RegisterView(APIView):
+    def post(self, request):
+        serializer = PersonSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class LoginView(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        person = Person.objects.filter(Email=email).first()
+        if person:
+            if person.Password == password:
+                serializer = PersonSerializer(person)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+
+
+
 
 
 

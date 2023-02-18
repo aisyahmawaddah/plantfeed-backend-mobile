@@ -14,6 +14,6 @@ urlpatterns = [
     path('group/', include('group.urls')),
     path('marketplace/', include('marketplace.urls')),
     path('basket/', include('basket.urls')),
-
+    #path('api-auth/', include('rest_framework.urls')),
 
 ]
