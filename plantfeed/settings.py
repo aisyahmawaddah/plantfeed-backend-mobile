@@ -45,7 +45,11 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'rest_framework',
     'rest_framework.authtoken',
+    #'rest_framework_simplejwt.token_blacklist',
+    'rest_framework_simplejwt',
 ]
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -78,22 +82,14 @@ TEMPLATES = [
 WSGI_APPLICATION = 'plantfeed.wsgi.application'
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-    ],
     'DEFAULT_PERMISSION_CLASSES': [
-        #'rest_framework.permissions.IsAuthenticated',
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
     ],
-    'DEFAULT_THROTTLE_CLASSES': [
-        'rest_framework.throttling.AnonRateThrottle',
-        'rest_framework.throttling.UserRateThrottle'
-    ],
-    'DEFAULT_THROTTLE_RATES': {
-        'anon': '100/day',
-        'user': '1000/day'
-    }
+    'DEFAULT_AUTHENTICATION_CLASSES':[
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ]
 }
 
 # Database
@@ -109,7 +105,7 @@ REST_FRAMEWORK = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'igrow',
+        'NAME': 'newplantfeed',
         'USER':'root',
         'PASSWORD':'',
         'HOST':'localhost',
@@ -118,17 +114,7 @@ DATABASES = {
             'init_command':"SET sql_mode='STRICT_TRANS_TABLES'",
         }
     },
-    'farming': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'farming',
-        'USER':'root',
-        'PASSWORD':'',
-        'HOST':'localhost',
-        'PORT':'3306',
-        'OPTIONS':{
-            'init_command':"SET sql_mode='STRICT_TRANS_TABLES'",
-        }
-    }
+    
 }
 
 # Password validation
@@ -150,7 +136,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 #Encryption
-ENCRYPT_KEY = b'tes4-Vdc4kwat6Uz_x0cNSAQ78EXUm3jt3gS1RWMYd4='
+#ENCRYPT_KEY = b'tes4-Vdc4kwat6Uz_x0cNSAQ78EXUm3jt3gS1RWMYd4='
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
@@ -178,6 +164,7 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
 
+AUTH_USER_MODEL = 'member.Person'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 

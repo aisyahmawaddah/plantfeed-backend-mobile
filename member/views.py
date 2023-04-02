@@ -3,14 +3,15 @@ from django.template import loader
 from django.http.response import Http404
 from django.shortcuts import render, redirect, get_object_or_404, resolve_url
 from django.contrib import messages
-
+from django.contrib.auth import authenticate
 #from member.serializers import PersonSerializer
 from .models import Person, Memberlist, MemberRequest, Room, Message
 from django.contrib import auth
-from plantfeed import encryption_util
+#from plantfeed import encryption_util
 from django.core.files.storage import FileSystemStorage
 from django.db import IntegrityError
-
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
 
 def index(request):
   template = loader.get_template('index.html')
@@ -19,7 +20,7 @@ def index(request):
 def UserReg(request):
     if request.method=='POST':
         Email = request.POST.get('email')
-        Password = request.POST.get('password')
+        password = request.POST.get('password')
         Username=request.POST.get('username')
         Name=request.POST.get('name')
         DateOfBirth=request.POST.get('dob')
@@ -33,8 +34,11 @@ def UserReg(request):
         UserLevel = request.POST.get('userlevel')
         #Photo = request.POST.get('Photo')
         Photo=request.FILES['Photo']
-        Person(Email=Email,Password=Password,Username=Username,Name=Name,DateOfBirth=DateOfBirth,Age=Age,District=District,State=State,
+        Person(Email=Email,password=password,Username=Username,Name=Name,DateOfBirth=DateOfBirth,Age=Age,District=District,State=State,
             Occupation=Occupation,About=About,Gender=Gender,MaritalStatus=MaritalStatus,UserLevel=UserLevel,Photo=Photo).save(),
+
+        #user = Person.objects.create_user(username=Username, email=Email, password=password)
+        #user.save(),
 
         messages.success(request,'The new user ' + Username + " is save succesfully..!")
         return render(request,'registration.html')
@@ -46,7 +50,7 @@ def UserReg(request):
 def login(request):
     if request.method == "POST":
         try:
-            Userdetails = Person.objects.get(Email = request.POST['Email'], Password = (request.POST['Pwd']))
+            Userdetails = Person.objects.get(Email = request.POST['Email'], password = (request.POST['Pwd']))
             UserLevel = (request.POST.get('UserLevel'))
             print("Username", Userdetails)
             request.session['Email'] = Userdetails.Email
@@ -92,7 +96,7 @@ def EditProfile(request):
     #p = Person.objects.get(pk=fk1)
     if request.method=='POST':
         t = Person.objects.get(Email=request.session['Email'])
-        t.Password=request.POST['Password']
+        t.password=request.POST['Password']
         t.Username=request.POST.get('Username')
         t.Name=request.POST.get('Name')
         t.DateOfBirth=request.POST.get('DateOfBirth')
@@ -229,34 +233,6 @@ def getMessages(request, room):
 
 
 
-
-#APIView
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .models import Person
-from .serializers import PersonSerializer
-
-class RegisterView(APIView):
-    def post(self, request):
-        serializer = PersonSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class LoginView(APIView):
-    def post(self, request):
-        email = request.data.get('email')
-        password = request.data.get('password')
-
-        person = Person.objects.filter(Email=email).first()
-        if person:
-            if person.Password == password:
-                serializer = PersonSerializer(person)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-
-        return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 

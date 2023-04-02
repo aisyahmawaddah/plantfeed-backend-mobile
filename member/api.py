@@ -1,4 +1,5 @@
 from ast import Delete
+from rest_framework import generics
 import json
 from pyexpat import model
 from django.core.exceptions import ValidationError
@@ -44,17 +45,18 @@ def login_user(request):
     password = body['password']
 
     try:
-        Account = Person.objects.get(Email=email, Password=password)
+        Account = Person.objects.get(Email=email, password=password)
         token = Token.objects.get_or_create(user=Account)[0].key
         user = Token.objects.get(key=token).user
         print(user.Name)
         Res = {
-            "Name": Account.Name,
-            "Age": Account.Age,
-            "DateOfBirth": Account.DateOfBirth,
+            #"Name": Account.Name,
+            #"Age": Account.Age,
+            #"DateOfBirth": Account.DateOfBirth,
             #"email": Account.Email,
-            "Username":Account.Username,
+            #"Username": Account.username,
             "Email": Account.Email,
+            "Password": Account.password,
             "token": token
             
         }
@@ -70,5 +72,3 @@ def getUserFromToken(request, pk):
     user = Token.objects.get(key=pk).user
     serializer = UsersSerializer(user, many=False)
     return Response(serializer.data)
-
-

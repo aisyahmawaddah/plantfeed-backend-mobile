@@ -7,8 +7,8 @@ from django.urls import path
 #from django.conf.urls import url
 #from member.views import LoginView
 from .import api
-from member.api import UserAuthentication, UserList
-from .views import RegisterView, LoginView
+#from member.api import PersonCreateView, UserAuthentication, UserList
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -39,11 +39,9 @@ urlpatterns = [
     #path('login', obtain_auth_token, name='login')
     path('users/login/', api.login_user, name='login'),
     path('users/token/<pk>', api.getUserFromToken, name='user-token'),
-
-    path('register/', RegisterView.as_view(), name='register'),
-    path('login/', LoginView.as_view(), name='login'),
-
     
+    
+
 ] + static(settings.MEDIA_URL, document_root= settings.MEDIA_ROOT)
 
 urlpatterns += staticfiles_urlpatterns()

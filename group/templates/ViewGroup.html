@@ -146,7 +146,7 @@
                     <table style="border: 0; width: 650px;">
                         <th style="padding-bottom: 0; text-align: center;">
                             <p style="padding-top: 15px;" value="{{ group.About }}">{{ group.About }}</p>
-                            <p style="padding-top: 15px;" value="{{ group.Usernam.Username }}">Created by: {{ group.Username.Username }}</p>
+                            <p style="padding-top: 15px;" value="{{ group.Username.Username }}">Created by: {{ group.Username.Username }}</p>
                         </th>
                         
                         <th>
@@ -169,7 +169,7 @@
                           <div class="user-image">
                             
                             <img class="rounded-circle" src="../media/{{person.GroupMember.Photo}}" alt="..." style="width: 45px; height: 45px; margin: 10px;">
-                            <span class="username">{{ person.GroupMember.Name }}</span>
+                            <span class="username">{{ person.GroupMember.Username }}</span>
 
                             {% if person.GroupMember.Email != memberList.to_person.Email and person.GroupMember.Email != request.session.Email %}
                               <a  href="{% url 'sendMemberRequest' person.GroupMember %}" target="_blank" role="button " style="margin-left: 50px;">

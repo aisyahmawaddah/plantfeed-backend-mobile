@@ -1,14 +1,16 @@
 from django.db import models
 from datetime import datetime
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
+from django.dispatch import receiver
 
 class Person(models.Model):
     Email = models.CharField(max_length=150, unique=True)
-    Password = models.CharField(max_length=150)
+    password = models.CharField(max_length=150)
     Username = models.CharField(max_length=150)
     Name = models.CharField(max_length=150)
     DateOfBirth = models.CharField(max_length=150)
@@ -20,7 +22,7 @@ class Person(models.Model):
     Gender = models.CharField(max_length=1)
     MaritalStatus = models.CharField(max_length=150)
     UserLevel = models.CharField(max_length=10)
-    
+
     @property
     def is_anonymous(self):
    
@@ -29,7 +31,9 @@ class Person(models.Model):
     def is_authenticated(self):
    
         return False
-
+    
+    
+    
     def upload_photo(self, filename):
         path = 'media/uploads/{}'.format(filename)
         return path
@@ -41,12 +45,10 @@ class Person(models.Model):
 
     def save(self):
         super().save()
-        self.pk=None
+        
     
-    def user_form(sender, instance, created, **kwargs):
-        if created:
-            Person.objects.create(user=instance)
-            instance.Person.save()
+    USERNAME_FIELD = 'Email'
+    REQUIRED_FIELDS = ['username']
 
 class MemberRequest(models.Model):
 
