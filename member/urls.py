@@ -40,7 +40,7 @@ urlpatterns = [
     path('users/login/', api.login_user, name='login'),
     #path('users/update/', api.UpdateProfileView, name='update'),
     path('users/token/<pk>', api.getUserFromToken, name='user-token'),
-    path('users/updateProfile/<int:pk>/', api.UpdateProfileView.as_view(), name='auth_update_profile'),
+    #path('users/updateProfile/<int:pk>/', api.UpdateProfileView.as_view(), name='auth_update_profile'),
     
 
 ] + static(settings.MEDIA_URL, document_root= settings.MEDIA_ROOT)
