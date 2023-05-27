@@ -12,6 +12,7 @@ urlpatterns = [
     path('', include('member.urls')),
     path('sharing/', include('sharing.urls')),
     path('group/', include('group.urls')),
+    path('workshop/', include('workshop.urls')),
     path('marketplace/', include('marketplace.urls')),
     path('basket/', include('basket.urls')),
     #path('api-auth/', include('rest_framework.urls')),

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'member.apps.MemberConfig',
     'sharing.apps.SharingConfig',
     'group.apps.GroupConfig',
+    'workshop.apps.WorkshopConfig',
     'marketplace.apps.MarketplaceConfig',
     'basket.apps.BasketConfig',
     'django.contrib.sites',

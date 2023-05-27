@@ -10,6 +10,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from .import views
 #from django.conf.urls import url
 from .views import *
+from .import api
 
 # from .api import UserList, UserDetail, UserAuthentication
 
@@ -33,6 +34,8 @@ urlpatterns = [
     path('Forum/<str:pk>/Filter_PlantTag',views.Sharing_PlantTag, name="Sharing_PlantTag"),
     # path('Sharing_PlantTag',views.Sharing_GeneralPlantTag, name="Sharing_GeneralPlantTag"),
     # path('Sharing_PlantTag/<str:plantTag>',views.Sharing_PlantTag, name="Sharing_PlantTag"),
+    path('users/post-feed/', api.postFeed),
+    path('users/feed/<int:creator_id>/', api.CreatorFeedView.as_view(), name='creator_feed'),
 
 
 ] + static(settings.MEDIA_URL, document_root= settings.MEDIA_ROOT)

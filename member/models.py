@@ -193,6 +193,16 @@ class PlantTag(models.Model):
     def deleteRecordIgrow(self):
         super().delete()
 
+class Feed(models.Model):
+    Title = models.CharField(max_length=255)
+    Message = models.TextField()
+    Creator_id = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    Photo = models.ImageField(upload_to='media/uploads/feeds', null=True, blank=True)
+
+    class Meta:
+        db_table = 'feed'
+
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)

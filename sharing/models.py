@@ -20,6 +20,7 @@ class Feed(models.Model):
     Photo = models.ImageField(upload_to ='uploads/', blank=True,null=True, default="")
     Video = models.FileField(upload_to='uploads/', blank=True, null=True, default="")
     created_at = models.DateTimeField(default=datetime.now, blank=True)
+    #Creator_id = models.IntegerField()
     #Group = models.ForeignKey(Group_tbl, on_delete=models.CASCADE)
     Creator = models.ForeignKey(Person, on_delete=models.CASCADE)
     #Links = models.CharField(max_length=255)

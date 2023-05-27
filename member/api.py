@@ -34,11 +34,11 @@ class UserList(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-#class UpdateProfileView(generics.UpdateAPIView):
+class UpdateProfileView(generics.UpdateAPIView):
 
-    #queryset = Person.objects.all()
-    #permission_classes = (AllowAny,)
-    #serializer_class = UpdateProfileSerializer
+    queryset = Person.objects.all()
+    permission_classes = (AllowAny,)
+    serializer_class = UpdateProfileSerializer
 
 #Login
 @api_view(["POST"])
@@ -77,3 +77,42 @@ def getUserFromToken(request, pk):
     user = Token.objects.get(key=pk).user
     serializer = UsersSerializer(user, many=False)
     return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def postFeed(request):
+    """
+    Create a new post.
+    """
+    serializer = FeedSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"message": "Feed Posted"}, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class CreatorFeedView(APIView):
+    permission_classes = [AllowAny]
+    def get(self, request, creator_id):
+        feeds = Feed.objects.filter(Creator_id=creator_id).order_by('-created_at')
+        serializer = FeedSerializer(feeds, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class DeleteFeedView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        feed_id = request.data.get('id')
+        try:
+            feed = Feed.objects.get(id=feed_id)
+            feed.delete()
+            return Response({'message': 'Feed deleted successfully.'}, status=status.HTTP_200_OK)
+        except Feed.DoesNotExist:
+            return Response({'message': 'Feed not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class UpdateProfileView(generics.UpdateAPIView):
+
+    queryset = Person.objects.all()
+    permission_classes = (AllowAny,)
+    serializer_class = UpdateProfileSerializer
