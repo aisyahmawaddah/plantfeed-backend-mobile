@@ -18,6 +18,7 @@ from .models import Feed, Comment, GroupTimeline, GroupTimelineComment,Likes
 from group.models import Group_tbl, GroupMembership
 from member.models import Person, SoilTag, PlantTag, Memberlist
 from sharing.models import FeedSoilTagging, FeedPlantTagging
+from group.views import viewGroup
 
 # Create your views here.
 
@@ -80,45 +81,7 @@ def AddSharing(request):
         # taggingSoil=SoilTag.objects.all()
         return render(request,'AddNewSharing.html', {'SoilTag':soilTagList, 'PlantTag':plantTagList})
 
-def sharingGroup(request, pk):
-    
-    group_forum = Group_tbl.objects.get(id=pk)
-    creator=Person.objects.get(Email=request.session['Email'])
-    soilTagList=SoilTag.objects.all()
-    plantTagList=PlantTag.objects.all()
 
-    if request.method=='POST':
-        taggingSoil=SoilTag.objects.all()
-        GroupTitle=request.POST.get('Title')
-        GroupMessage=request.POST.get('Message')
-        GroupSkill=request.POST.get('Skill')
-        GroupState=request.POST.get('State')
-        # Photo=request.FILES['Photo']
-        # Video=request.FILES['Video']
-        GroupPhoto=request.FILES.get('Photo',None)
-        GroupVideo=request.FILES.get('Video', None)
-        fss =FileSystemStorage()
-        
-        Gfeed_id = GroupTimeline(GroupTitle=GroupTitle,GroupMessage=GroupMessage,GroupPhoto=GroupPhoto,GroupVideo=GroupVideo,GroupFK=group_forum,CreatorFK=creator,GroupSkill=GroupSkill,GroupState=GroupState).save()
-        Gfeed = GroupTimeline.objects.get(id=Gfeed_id)
-
-        soilTagsID = request.POST.getlist('SoilTag')
-        plantTagsID = request.POST.getlist('PlantTag')
-
-        for soilTagsID in soilTagsID:
-            soilTag = SoilTag.objects.get(id=soilTagsID)
-            FeedSoilTagging(FeedSoilTag = Gfeed, soilTag=soilTag).save()
-
-        for plantTagsID in plantTagsID:
-            plantTag = PlantTag.objects.get(id=plantTagsID)
-            FeedPlantTagging(FeedPlantTag = Gfeed, plantTag=plantTag).save()
-
-        messages.success(request,'The new feed is save succesfully..!')
-        return render(request,'sharing.html')
-
-    else :
-        # taggingSoil=SoilTag.objects.all()
-        return render(request,'sharing.html', {'SoilTag':soilTagList, 'PlantTag':plantTagList})
 
   
 

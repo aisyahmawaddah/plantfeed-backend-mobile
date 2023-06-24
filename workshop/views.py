@@ -12,7 +12,7 @@ from django.core.files.storage import FileSystemStorage
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from cryptography.fernet import Fernet
-from .models import Workshop, Booking, WorkshopSoilTagging, WorkshopPlantTagging, WorkshopSharing
+from .models import Workshop, Booking, WorkshopSoilTagging, WorkshopPlantTagging, WorkshopSharing, Inbox
 from member.models import Person, SoilTag, PlantTag
 from django.db import IntegrityError
 
@@ -33,8 +33,12 @@ def workshop(request):
     try:
             data=Workshop.objects.all()
             person=Person.objects.get(Email=request.session['Email'])
+            booking = Booking.objects.filter(Participant=person)
+            bookingCount = booking.count()
+            inbox = Inbox.objects.filter(Participant=person, is_read=False)
+            inboxCount = inbox.count()
             searchobj=Workshop.objects.raw('select * from Workshop') 
-            return render(request,'MainPageWorkshop.html', {'person':person,'data':data})
+            return render(request,'MainPageWorkshop.html', {'person':person,'data':data, 'inbox':inbox, 'inboxCount':inboxCount, 'booking':booking, 'bookingCount':bookingCount})
     except Workshop.DoesNotExist:
             raise Http404('Data does not exist') 
             
@@ -49,6 +53,7 @@ def createWorkshop(request):
         Speaker=request.POST.get('Speaker')
         Description=request.POST.get('Description')
         Date=request.POST.get('Date')
+        RegistrationDue = request.POST.get('RegDate')
         Gender=request.POST.get('Gender')
         # Session=request.POST.get('Session')
         StartTime=request.POST.get('StartTime')
@@ -58,7 +63,7 @@ def createWorkshop(request):
         Poster = request.FILES['Photo']
         #fss =FileSystemStorage()
         #file = fss.save(Poster.name, Poster)
-        workshop_id = Workshop(ProgrammeName=ProgrammeName,Speaker=Speaker,Description=Description,Date=Date,Gender=Gender,StartTime=StartTime,EndTime=EndTime,State=State,Venue=Venue,PIC=pic,Poster=Poster).save()
+        workshop_id = Workshop(ProgrammeName=ProgrammeName,Speaker=Speaker,Description=Description,Date=Date,RegistrationDue=RegistrationDue, Gender=Gender,StartTime=StartTime,EndTime=EndTime,State=State,Venue=Venue,PIC=pic,Poster=Poster).save()
         workshop = Workshop.objects.get(id=workshop_id)
 
         soilTagsID = request.POST.getlist('SoilTag')
@@ -75,7 +80,7 @@ def createWorkshop(request):
         
         messages.success(request,'The new ' + request.POST['ProgrammeName'] + " is save succesfully..!")   
 
-        return render(request,'CreateWorkshop.html')
+        return redirect('workshop:MainWorkshop')
     else :
         return render(request,'CreateWorkshop.html', {'SoilTag':soilTagList, 'PlantTag':plantTagList})
 
@@ -191,19 +196,34 @@ def deleteWorkshop(request, pk):
     # workshop = get_object_or_404(Workshop, id=pk)
     try:
         workshop=Workshop.objects.get(id=pk)
+        participantList=Booking.objects.filter(BookWorkshop=workshop)
+        participant_count = Booking.objects.filter(BookWorkshop=workshop).count()
+        
+        #messages= "This workshop has been cancelled by the organizer"
         #workshop2=Workshop.objects.get(id=pk)
         # workshop_farming=Workshop.objects.using('farming').get(id=pk)
         
         data=Workshop.objects.all()
         if request.method=='POST':
+            workshop=Workshop.objects.get(id=pk)
+            participantList=Booking.objects.filter(BookWorkshop=workshop)
+            participant_count = Booking.objects.filter(BookWorkshop=workshop).count()
+            
+
+            if participant_count != 0:
+                for participant in participantList:
+                    p = participant.Participant.id
+                    person=Person.objects.get(id=p)
+                    Inbox(Messages="Workshop" + workshop.ProgrammeName+ "has been cancelled by the organizer",Participant=person, WorkshopTitle=workshop.ProgrammeName).save()
+            
             workshop.deleteRecordIgrow()
             #workshop2.deleteRecordFarming()
             # workshop_farming.delete()
-            messages.success(request,'The ' + workshop.ProgrammeName + " is deleted succesfully..!")
+            #messages.success(request,'The ' + workshop.ProgrammeName + " is deleted succesfully..!")
             return redirect('workshop:MainWorkshop')
         
         else:
-            return render(request, 'deleteWorkshop.html', {'workshop':workshop})
+            return render(request, 'deleteWorkshop.html', {'workshop':workshop, 'participantList':participantList, 'participant_count':participant_count})
         
     except Workshop.DoesNotExist:
         messages.success(request,'No record of the workshop!')
@@ -241,11 +261,12 @@ def booking(request, pk):
 def deleteBooking(request, pk):
     try:
         booking=Booking.objects.get(id=pk)
-        booking2=Booking.objects.get(id=pk)
+        #booking2=Booking.objects.get(id=pk)
+        #participantList=Booking.objects.filter(BookWorkshop=workshop)
         
         # if request.method=='POST':
         booking.deleteRecordIgrow()
-        booking2.deleteRecordFarming()
+        #booking2.deleteRecordFarming()
         messages.success(request,'The booking of workshop ' + booking.ProgrammeName + " is cancelled succesfully..!")
         return redirect('workshop:MyBooking')
         
@@ -389,3 +410,18 @@ def Workshop_PlantTag(request):
         }
 
         return render(request,'workshop.html', {'person':person,'data':data, 'context_PlantTags':context})
+    
+def viewInbox(request):
+    try:
+        person=Person.objects.get(Email=request.session['Email'])
+        inbox = Inbox.objects.filter(Participant=person)
+        unread_notifications = Inbox.objects.filter(Participant=person, is_read=False)
+        
+        for notification in unread_notifications:
+            notification.is_read = True
+            notification.save()
+
+        return render(request, 'Inbox.html', {'inbox':inbox})
+    except Inbox.DoesNotExist:
+        raise Http404('Data does not exist')
+    

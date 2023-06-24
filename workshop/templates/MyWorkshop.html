@@ -75,9 +75,7 @@
       <li class="nav-item">
         <a class="nav-link " href="{% url 'Home' %}">Home</a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{% url 'sharing:MainSharing' %}">Sharing</a>
-      </li>
+      
       <li class="nav-item">
         <a class="nav-link " href=" {% url 'group:MainGroup' %}">Group</a>
       </li>
@@ -143,6 +141,7 @@
               
               <th><a class="btn btn-secondary" href="{% url 'workshop:UpdateWorkshop' data.id %}" role="button">Edit</a></th>
               <th><a class="btn btn-danger" href="{% url 'workshop:DeleteWorkshop' data.id %}" role="button">Delete</a></th>
+              
               
               <th><a class="btn btn-info" href="{% url 'workshop:WorkshopParticipant' data.id %}" role="button" target="_blank">Participants</a></th>
 

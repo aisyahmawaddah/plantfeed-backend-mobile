@@ -79,3 +79,6 @@ class GroupPlantTagging(models.Model):
     def deleteRecordIgrow(self):
         super().delete()
 
+
+
+

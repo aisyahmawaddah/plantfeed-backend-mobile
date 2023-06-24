@@ -96,7 +96,7 @@ def EditProfile(request):
     #p = Person.objects.get(pk=fk1)
     if request.method=='POST':
         t = Person.objects.get(Email=request.session['Email'])
-        t.password=request.POST['Password']
+        t.password=request.POST['password']
         t.Username=request.POST.get('Username')
         t.Name=request.POST.get('Name')
         t.DateOfBirth=request.POST.get('DateOfBirth')
@@ -108,12 +108,20 @@ def EditProfile(request):
         t.Gender=request.POST.get('Gender')
         t.MaritalStatus=request.POST.get('MaritalStatus')
         #t.Photo=request.POST.get('photo')
-        t.Photo=request.FILES['Photo']
+        #Photo=request.FILES['Photos']
+        #t.Photo = Photo
         # Video=request.FILES['Video']
         #Photo=request.FILES.get('Photo',None)
         #Video=request.FILES.get('Video', None)
-        fss =FileSystemStorage()
-        file = fss.save(t.Photo.name, t.Photo)
+        #fss =FileSystemStorage()
+        #file = fss.save(t.Photo)
+
+        if 'Photo' in request.FILES:
+            Photo = request.FILES['Photo']
+            t.Photo = Photo
+        else:
+            t.Photo = t.Photo
+              
         t.save()
         return render(request,'profile2.html',{'person': person})
     else:
@@ -123,13 +131,15 @@ def EditProfile(request):
 def MainMember(request):
     
     user=Person.objects.get(Email=request.session['Email'])
+    user3 = Person.objects.all()[:3]
+    userList = Person.objects.all()
 
     
     try:
         userRequestList = MemberRequest.objects.all().filter(to_user=user)
         memberList = Memberlist.objects.all().filter(to_person=user) 
         
-        return render(request, 'MemberMainPage.html',{'userRequestList':userRequestList, 'memberList':memberList })
+        return render(request, 'MemberMainPage.html',{'userRequestList':userRequestList, 'memberList':memberList, 'userList':userList, 'user3':user3 })
     
     except:
         return render(request, 'MemberMainPage.html')
@@ -146,6 +156,19 @@ def SearchMember(request):
         # cuba
         Name2 = Name.exclude(Email=request.session['Email'])
         return render(request, 'MemberMainPage.html', {'Name': Name2,'userRequestList':userRequestList, 'memberList':memberList})
+
+def openProfileMember(request, pk):
+    person = Person.objects.get(id=pk)
+    user=Person.objects.get(Email=request.session['Email'])
+    
+    try:
+        userRequestList = MemberRequest.objects.all().filter(to_user=user)
+        memberList = Memberlist.objects.all().filter(to_person=user) 
+        
+        return render(request, 'openProfileMember.html', {'person':person, 'userRequestList':userRequestList, 'memberList':memberList})
+
+    except:
+        return render(request, 'MemberMainPage.html')
 
 def sendMemberRequest(request, userID):
     
@@ -165,6 +188,35 @@ def sendMemberRequest(request, userID):
     except IntegrityError:
         messages.error(request,'You already sent friend request to ' + to_user.Name + '!')
         return redirect('v2MainSearchbar',to_user_id)
+    
+def deleteMemberReq(request, pk):
+
+    try:
+        request = MemberRequest.objects.get(id=pk)
+
+        request.deleteRecordIgrow()
+        return redirect('MemberMainPage')
+    
+    except MemberRequest.DoesNotExist:
+        messages.success(request,'Record does not exist')
+        redirect('MemberMainPage')
+
+def deleteMember(request, pk1, pk2):
+
+    try:
+        member1 = Memberlist.objects.filter(from_person=pk1)
+        member1 = member1.get(to_person=pk2)
+        member2 = Memberlist.objects.filter(to_person=pk1)
+        member2 = member2.get(from_person=pk2)
+
+        member1.deleteRecordIgrow()
+        member2.deleteRecordIgrow()
+        return redirect('MemberMainPage')
+    
+    except Memberlist.DoesNotExist:
+        messages.success(request,'Record does not exist')
+        redirect('MemberMainPage')
+
 
 def v2MainSearchbar(request, pk):
     user=Person.objects.get(Email=request.session['Email'])

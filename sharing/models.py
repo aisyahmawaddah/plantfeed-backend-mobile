@@ -94,7 +94,7 @@ class GroupTimelineComment(models.Model):
     GrpMessage = models.TextField()
     GrpPictures = models.ImageField(upload_to='uploads/', null=True)
     GrpVideo = models.FileField(upload_to='uploads/', null=True)
-    GrpFeedFK = models.ForeignKey(Feed, related_name="groupcomments", on_delete=models.CASCADE)
+    GrpFeedFK = models.ForeignKey(GroupTimeline, related_name="groupcomments", on_delete=models.CASCADE)
     GrpCommenterFK = models.ForeignKey(Person, on_delete=models.CASCADE)
 
     def save(self):

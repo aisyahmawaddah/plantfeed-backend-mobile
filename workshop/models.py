@@ -1,3 +1,5 @@
+
+from datetime import datetime
 from django.db import models, migrations
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
@@ -13,12 +15,14 @@ class Workshop(models.Model):
     Speaker=models.CharField(max_length=150, default="")
     Description=models.CharField(max_length=150,default="")
     Date = models.DateField()
+    RegistrationDue = models.DateField()
     Gender = models.CharField(max_length=20,default="")
     StartTime = models.TimeField()
     EndTime = models.TimeField()
     State = models.CharField(max_length=100,default="")
     Venue = models.CharField(max_length=100,default="")
     Poster = models.ImageField(upload_to='uploads/',default="")
+    #RegistrationDue = models.DateField()
     # Session = models.CharField(max_length=150)
     # nanti next version or bila share version ni, sila remove null=true okay
     PIC = models.ForeignKey(Person, on_delete=models.SET_NULL, null=True)
@@ -69,6 +73,7 @@ class Booking(models.Model):
     # nanti next version or bila share version ni, sila remove null=true okay
     BookWorkshop = models.ForeignKey(Workshop, on_delete=models.CASCADE, null=True)
     Participant = models.ForeignKey(Person, on_delete=models.SET_NULL, null=True)
+    Messages = models.CharField(max_length=250, default="",null=True)
 
     def save(self):
         super().save()
@@ -81,6 +86,21 @@ class Booking(models.Model):
         
         unique_together = [['BookWorkshop', 'Participant']]
 
+class Inbox(models.Model):
+    class Meta:
+        db_table = 'inbox'
+    Messages = models.CharField(max_length=250, default="",null=True)
+    WorkshopTitle = models.CharField(max_length=250, default="",null=True)
+    Participant = models.ForeignKey(Person, on_delete=models.CASCADE, null=True)
+    created_at = models.DateTimeField(default=datetime.now, blank=True)
+    #WorkshopFk = models.ForeignKey(Workshop, on_delete=models.CASCADE, null=True)
+    is_read = models.BooleanField(default=False)
+
+    def save(self):
+        super().save()
+        
+    def deleteRecordIgrow(self):
+        super().delete()
 
 class WorkshopSoilTagging(models.Model):
 

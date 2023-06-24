@@ -141,7 +141,11 @@
       </div>
       <br/><br/>
       <div class="col-12">
-        <button type="submit" class="btn btn-success" value="DeleteWorkshop">Delete</button>
+        {% if participantList.count >= 1 %}
+        <button type="submit" class="btn btn-success" value="DeleteWorkshop" onclick="return confirmDelete()">Delete</button>
+        {% else %}
+        <button type="submit" class="btn btn-success" value="DeleteWorkshop" onclick="return confirmDelete2()">Delete</button>
+        {% endif %}
       </div>
       {% if messages %}
       {% for msg in messages %}
@@ -151,4 +155,14 @@
     </form>
    </form>
   {% endblock %}
+
+  <script>
+    function confirmDelete(){
+      return confirm("This workshop has number of participants. Notify the participants and continue to delete?");
+    }
+
+    function confirmDelete2(){
+      return confirm("This workshop has 0 participant. Continue to delete?");
+    }
+  </script>
 

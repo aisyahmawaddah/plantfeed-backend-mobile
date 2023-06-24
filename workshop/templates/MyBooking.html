@@ -138,7 +138,7 @@
               <th scope="row" value="{{ data.StartTime|time:'h:i:s' }}">{{ data.BookWorkshop.StartTime }}</th>
               <th scope="row" value="{{ data.EndTime|time:'h:i:s' }}">{{ data.BookWorkshop.EndTime }}</th>
               
-              <th><a class="btn btn-warning" href="#" role="button">Cancel Booking</a> </th>
+              <th><a class="btn btn-warning" href="{% url 'workshop:DeleteBooking' data.id %}" role="button" onclick="return confirmDelete()">Cancel Booking</a> </th>
             </tr>
             {% endfor %}
           </tbody>
@@ -160,5 +160,11 @@
   <br />
 </body>
 {% endblock body %}
+
+<script>
+  function confirmDelete(){
+    return confirm("Are you sure to cancel the booking?")
+  }
+</script>
 
 </html>

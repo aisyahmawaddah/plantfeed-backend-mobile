@@ -155,7 +155,7 @@ setInterval(function(){
             $("#display").empty();
             for (var key in response.messages)
             {
-                var temp="</b><div class='col-md-6 col-lg-7 col-xl-8' id='chatContainer'><div class='pt-3 pe-3' data-mdb-perfect-scrollbar='true' style='position: relative; height: 100px'><div class='d-flex flex-row justify-content-start'><img src='https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp' style='width: 45px; height: 100%;'><b>"+response.messages[key].sender+"</b><div><p class='small p-2 ms-3 mb-1 rounded-3' style='background-color: #f5f6f7;'><p>"+
+                var temp="</b><div class='col-md-6 col-lg-7 col-xl-8' id='chatContainer'><div class='pt-3 pe-3' data-mdb-perfect-scrollbar='true' style='position: relative; height: 100px'><div class='d-flex flex-row justify-content-start'><img src='/media/{{user.Username}}' style='width: 45px; height: 100%;'><b>"+response.messages[key].sender+"</b><div><p class='small p-2 ms-3 mb-1 rounded-3' style='background-color: #f5f6f7;'><p>"+
                   response.messages[key].value+"</p><p class='small ms-3 mb-3 rounded-3 text-muted float-end'>"+response.messages[key].date+"</div></div>";
                 $("#display").append(temp);
             }

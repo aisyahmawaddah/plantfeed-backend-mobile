@@ -20,8 +20,11 @@ urlpatterns = [
     path('EditProfile', views.EditProfile, name='EditProfile'),
     path('ViewProfile', views.Profile, name='ViewProfile'),
     path('MemberMainPage', views.MainMember, name='MemberMainPage'),
+    path('OpenProfileMember/<str:pk>', views.openProfileMember, name='OpenProfileMember'),   
     path('SearchMember', views.SearchMember, name='SearchMember'),
     path('SearchMember/<str:pk>', views.v2MainSearchbar, name='v2MainSearchbar'),
+    path('DeleteMemberRequest/<str:pk>', views.deleteMemberReq, name='DeleteMemberRequest'),
+    path('DeleteMember/<str:pk1>/<str:pk2>', views.deleteMember, name='DeleteMember'),
     path('sendMemberRequest/<str:userID>', views.sendMemberRequest, name='sendMemberRequest'),
     path('acceptMemberRequest/<str:requestID>', views.acceptMemberRequest, name='acceptMemberRequest'),
     path('ChatRoom/<str:room>', views.chatRoom, name='ChatRoom'),
@@ -41,10 +44,10 @@ urlpatterns = [
     #path('users/update/', api.UpdateProfileView, name='update'),
     path('users/token/<pk>', api.getUserFromToken, name='user-token'),
     path('users/updateProfile/<int:pk>/', api.UpdateProfileView.as_view(), name='auth_update_profile'),
-    path('users/post-feed/', api.postFeed),
-    path('users/feed/<int:creator_id>/', api.CreatorFeedView.as_view(), name='creator_feed'),
-    path('users/feed/delete/', api.DeleteFeedView.as_view(), name='delete_feed'),
-    path('users/feed/<int:creator_id>/', api.CreatorFeedView.as_view(), name='creator_feed'),
+    #path('users/post-feed/', api.postFeed),
+    #path('users/feed/<int:creator_id>/', api.CreatorFeedView.as_view(), name='creator_feed'),
+    #path('users/feed/delete/', api.DeleteFeedView.as_view(), name='delete_feed'),
+    #path('users/feed/<int:creator_id>/', api.CreatorFeedView.as_view(), name='creator_feed'),
 
 ] + static(settings.MEDIA_URL, document_root= settings.MEDIA_ROOT)
 

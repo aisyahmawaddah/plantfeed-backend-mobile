@@ -17,12 +17,13 @@ from .import api
 app_name = 'sharing'
 urlpatterns = [
     #path('MainSharing',views.mainSharing, name="MainSharing"),
-    path('SharingGroup/<str:pk>',views.sharingGroup, name="SharingGroup"),
+    #path('SharingGroup/<str:pk>',views.sharingGroup, name="SharingGroup"),
     path('UpdateSharing/<str:pk>',views.updateSharing, name="UpdateSharing"),
     path('DeleteSharing/<str:pk>', views.deleteSharing, name="DeleteSharing"),
     path('Forum/<str:pk>', views.viewForum, name="Forum"),
     path('MainSharing',views.mainSharing, name="MainSharing"),
     path('AddNewSharing',views.AddSharing, name="AddSharing"),
+    
     #path(',../MainPageSharing.html/<str:pk>', views.addLikes, name="AddLikes"),
     path('AddComment/<str:pk>', views.addComment, name="AddComment"),
     path('UpdateComment/<str:pk>',views.updateComment, name="UpdateComment"),

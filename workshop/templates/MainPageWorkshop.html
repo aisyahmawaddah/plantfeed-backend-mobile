@@ -74,6 +74,11 @@
     <ul class="navbar-nav mr-auto">
       <li class="nav-item">
         <a class="nav-link " href="{% url 'Home' %}">Home</a>
+        {% if person.UserLevel == 'user' %}
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'sharing:MainSharing' %}">Sharing</a>
+      </li>
+      {% endif %}
       </li>
             <li class="nav-item">
         <a class="nav-link " href=" {% url 'group:MainGroup' %}">Group</a>
@@ -81,6 +86,7 @@
       <li class="nav-item">
         <a class="nav-link" href="{% url 'MemberMainPage' %}">Member</a>
       </li>
+      
       <li class="nav-item">
         <a class="nav-link active" href="{% url 'workshop:MainWorkshop' %}">Workshop</a>
       </li>
@@ -118,7 +124,14 @@
     
     {% else %}
     <a class="btn btn-primary" href="{% url 'workshop:MyBooking' %}" role="button">View Your Booking</a>
+
     
+    {% if inboxCount != 0 %}
+      <a class="btn btn-primary" href="{% url 'workshop:ViewInbox' %}" role="button">Inbox  <span class="badge badge-light">{{inboxCount}}</span></a>
+    {% else %}
+      <a class="btn btn-primary" href="{% url 'workshop:ViewInbox' %}" role="button">Inbox  <span class="badge badge-light">0</span></a>
+    {% endif %}
+   
     <br />
     <br />
     {% endif %}
@@ -257,7 +270,7 @@
             <th scope="col">End Time</th>
             <th scope="col">Location</th>
             <th scope="col">Venue</th>
-            <th scope="col">Tagging Details</th>
+            <th scope="col">Registration Due</th>
             <th colspan="2" style="text-align: center;" scope="col">Action</th>
           </tr>
         </thead>
@@ -275,38 +288,55 @@
             <th scope="row" value="{{ data.EndTime }}">{{ data.EndTime }}</th>
             <th scope="row" value="{{ data.State }}">{{ data.State }}</th>
             <th scope="row" value="{{ data.Venue }}">{{ data.Venue }}</th>
-            <th>
-              {% if data.soilTagging.all %}
-              <i>
-                {% for soilTags in data.soilTagging.all %}
-                {{soilTags.soilTag.SoilTagName}} {% if not forloop.last %},{% endif %}
-                {% endfor %}
-              </i>
-              {% endif %}
 
-              {% if data.plantTagging.all %}
-              <i>
-                {% for plantTags in data.plantTagging.all %}
-                {{plantTags.plantTag.PlantTagName}} {% if not forloop.last %},{% endif %}
-                {% endfor %}
-              </i>
+            {% if person.Email == data.PIC.Email and data.RegistrationDue == dateTime.now %}
+            <th scope="row" value="{{ data.RegistrationDue }}">Closed</th>
+            <th><a class="btn btn-secondary" href="" role="button">Edit</a></th>
+            <th><a class="btn btn-secondary" href="{% url 'workshop:DeleteWorkshop' data.id %}" role="button">Delete</a></th>
+            {% elif person.Email == data.PIC.Email and data.RegistrationDue != dateTime.now %}
+            <th scope="row" value="{{ data.RegistrationDue }}">{{ data.RegistrationDue }}</th>
+            <th><a class="btn btn-primary" href="" role="button">Edit</a></th>
+            <th><a class="btn btn-danger" href="{% url 'workshop:DeleteWorkshop' data.id %}" role="button">Delete</a></th>
+            {% elif person.UserLevel == 'user' and data.RegistrationDue > dateTime.now %}
+            <th scope="row" value="{{ data.RegistrationDue }}">Closed</th>
+            <th><a href="" class="btn btn-secondary" role="button">Closed</a></th>
+            {% for booking in booking %}
+              {% if booking.BookWorkshop.id == data.id %}
+                <th><a href="#" class="btn btn-primary" role="button">Booked</a></th>
+              {% elif booking.BookWorkshop.id != data.id or forloop.last %}
+                <th><a href="{% url 'workshop:Booking' data.id %}" class="btn btn-primary" role="button">Book</a></th>
+              {% else %}
+              <th><a href="{% url 'workshop:Booking' data.id %}" class="btn btn-primary" role="button">Book</a></th>
               {% endif %}
-            </th>
-            {% if person.Email == data.PIC.Email %}
-            <!-- <th><a href="#" class="card-link">Delete</a></th> -->
-            <th><a class="btn btn-secondary" href="{% url 'workshop:UpdateWorkshop' data.id %}" role="button">Edit</a></th>
-              <th><a class="btn btn-danger" href="{% url 'workshop:DeleteWorkshop' data.id %}" role="button">Delete</a></th>
+            {% endfor %}
+
             {% else %}
-            {% if person.UserLevel == 'user' %}
-            <th>
-              <a href="{% url 'workshop:Booking' data.id %}" class="card-link">Book</a>
-            </th>
+            <th scope="row" value="{{ data.RegistrationDue }}">{{ data.RegistrationDue }}</th>
+
+            {% if bookingCount == 0 %}
+              <th><a href="{% url 'workshop:Booking' data.id %}" class="btn btn-primary" role="button" onclick="return ConfirmBooking()">Book</a></th>
+            
+            {% else %}
+            {% for booking in booking %}
+            {% if booking.BookWorkshop.id == data.id %}
+              <th><a href="{% url 'workshop:MainWorkshop' %}" class="btn btn-primary" role="button" onclick="return DuplicationWarning()">Booked</a></th>
+            {% elif booking.BookWorkshop.id != data.id and forloop.last %}
+              <th><a href="{% url 'workshop:Booking' data.id %}" class="btn btn-primary" role="button" onclick="return ConfirmBooking()">Book</a></th>
+            {% else %}
             {% endif %}
+            {% endfor %}
+
             {% endif %}
+
+            {% endif %} 
+            
+            
+            
 
           </tr>
-          {% endfor %}
+   
         </tbody>
+        {%endfor%}
       </table>
 
     </div>
@@ -321,10 +351,21 @@
     <hr>
   </div>
 
-  {% endif %}
-
+  
+  {% endif%}
+  
   <br/>
   {% endblock body %}
 
 </body>
+
+<script>
+  function DuplicationWarning(){
+    return confirm("You already booked this workshop. Choose another workshop available.")
+  }
+
+  function ConfirmBooking(){
+    return confirm("Confirm to join and book this workshop?")
+  }
+</script>
 </html>

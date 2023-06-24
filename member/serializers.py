@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Person, Feed
+from .models import Person
 from rest_framework.exceptions import NotAuthenticated
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.authtoken.models import Token
@@ -75,10 +75,10 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
             token['username'] = user.username
             return token
 
-class FeedSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Feed
-        fields = ['id', 'Title', 'Message', 'Creator_id', 'created_at' ,'Photo']
+#class FeedSerializer(serializers.ModelSerializer):
+#    class Meta:
+#        model = Feed
+#        fields = ['id', 'Title', 'Message', 'Creator_id', 'created_at' ,'Photo']
 
 class PhotoField(serializers.ImageField):
     def init(self, args, **kwargs):
@@ -92,12 +92,12 @@ class PhotoField(serializers.ImageField):
         self.upload_to += '/'
         return super().to_internal_value(data)
 
-#class UpdateProfileSerializer(serializers.ModelSerializer):
+class UpdateProfileSerializer(serializers.ModelSerializer):
 #    Photo = PhotoField(allow_null=True, required=False, upload_to='media/uploads/profile')
 
-#    class Meta:
-#        model = Person
-#        fields = ('Name', 'Age', 'Username',  'State', 'District', 'Photo')
+    class Meta:
+        model = Person
+        fields = ('Name', 'Age', 'Username',  'State', 'District', 'Photo')
 
     def validate_email(self, value):
         user = self.context['request'].user

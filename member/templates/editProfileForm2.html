@@ -2,6 +2,53 @@
 <html lang="en">
 <head>
     <style>
+      .profile-pic {
+  color: transparent;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  transition: all 0.3s ease;
+}
+.profile-pic input {
+  display: none;
+}
+.profile-pic img {
+  position: absolute;
+  object-fit: cover;
+  width: 165px;
+  height: 165px;
+  box-shadow: 0 0 10px 0 rgba(255, 255, 255, 0.35);
+  border-radius: 100px;
+  z-index: 0;
+}
+.profile-pic .-label {
+  cursor: pointer;
+  height: 165px;
+  width: 165px;
+}
+.profile-pic:hover .-label {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 10000;
+  color: #fafafa;
+  transition: background-color 0.2s ease-in-out;
+  border-radius: 100px;
+  margin-bottom: 0;
+}
+.profile-pic span {
+  display: inline-flex;
+  padding: 0.2em;
+  height: 2em;
+}
+
+
+body a:hover {
+  text-decoration: none;
+}
       @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
       *{
         padding: 0;
@@ -10,7 +57,7 @@
     }
     
     .container{
-        height: 1000px;;
+        height: 1300px;;
         display:flex;
         justify-content:center;
         align-items:center;
@@ -20,7 +67,7 @@
 
     .card{
         width:350px;
-        height:960px;
+        height:1160px;
 
         background-color:#fff;
         box-shadow:0px 15px 30px rgba(0,0,0,0.1);
@@ -72,6 +119,8 @@
     .card .inputs input[type="text"][readonly]{
         border: 2px solid rgba(0,0,0,0)
     }
+
+    
     </style>
 </head>
 
@@ -184,7 +233,7 @@
 </nav>
 
 <div class="bg-success container" style="background-image: url('https://static.vecteezy.com/system/resources/previews/002/008/838/original/retro-styled-wavy-wallpaper-design-free-vector.jpg');">
-    <form method="POST"><input type="hidden" name="csrfmiddlewaretoken" value="LUo8yACYeqTzOUYPx81ouuqmkcDTGHdxJkRjbmc5wCVtI7LYrhK5sUxWg2LWIEWX">
+    <form method="POST"  enctype="multipart/form-data"><input type="hidden" name="csrfmiddlewaretoken">
         {% csrf_token %}
         {%for person in person%}
         
@@ -193,13 +242,27 @@
         <span>Edit Your Profile</span> 
             </div> 
     <div class="forms"> 
+
+      <div class="profile-pic">
+        <label class="-label" for="file">
+          <span class="glyphicon glyphicon-camera"></span>
+          <span>Change Image</span>
+        </label>
+        <input id="file" type="file" name="Photo" value="{{ person.Photo }}" onchange="loadFile(event)"/>
+        <img src="media/{{person.Photo}}" name="Photo" value="{{ person.Photo }}" id="Photo" width="200" />
+      </div>
+
         <div class="inputs"> 
             <span>Email</span> 
             <input type="text" readonly name="Email" value="{{ person.Email }}"   maxlength="150" required="" id="id_Email"> 
         </div>
         <div class="inputs"> 
             <span>Password</span> 
-            <input type="text"  name="Password" value="{{ person.Password }}" class="vTextField" maxlength="150" required="" id="id_Password"> </div> 
+            <input type="password"  name="password" value="{{ person.password }}" class="vTextField" maxlength="150" required="" id="password"> 
+          </div> 
+          <input type="checkbox" id="showPasswordCheckbox" onchange="togglePasswordVisibility()">
+            <label for="showPasswordCheckbox">Show Password</label>
+          
         <div class="inputs"> 
             <span>Username</span> 
             <input type="text"  name="Username" value="{{ person.Username }}" class="vTextField" maxlength="150" required="" id="id_Username"> 
@@ -210,11 +273,11 @@
             </div> 
         <div class="inputs"> 
             <span>Date of Birth</span> 
-            <input type="text"  name="DateOfBirth" value="{{ person.DateOfBirth }}" class="vTextField" maxlength="150" required="" id="id_DateOfBirth"> 
+            <input type="date"  name="DateOfBirth" value="{{ person.DateOfBirth }}" required="" id="id_DateOfBirth" onchange="calculateAge()"> 
         </div>
         <div class="inputs"> 
             <span>Age</span> 
-            <input type="number" name="Age" value="{{ person.Age }}" class="vIntegerField" required="" id="id_Age"> 
+            <input type="number" name="Age" value="{{ person.Age }}" class="vIntegerField" required="" id="id_Age" readonly> 
         </div> 
         <div class="inputs"> 
             <span>District</span> 
@@ -238,8 +301,29 @@
         </div>
         <div class="inputs"> 
             <span>Marital Status</span> 
-            <input type="text"  name="MaritalStatus" value="{{ person.MaritalStatus }}" class="vTextField" maxlength="150" required="" id="id_MaritalStatus"> 
-        </div>
+            <!-- <input type="text"  name="MaritalStatus" value="{{ person.MaritalStatus }}" class="vTextField" maxlength="150" required="" id="id_MaritalStatus">   -->
+            <!-- <label for="inputState" class="container text-left" name="MaritalStatus">Marital Status</label> -->
+              <select id="MaritalStatus" class="form-control" name="MaritalStatus" required>
+                <option selected>Enter marital status</option>
+                {% if person.MaritalStatus == 'Married' %}
+                <option value="Married" name="MaritalStatus" selected>Married</option>
+                <option value="Unmarried" name="MaritalStatus">Unmarried</option>
+                <option value="Divorced" name="MaritalStatus">Divorced</option>
+                
+                {% elif person.MaritalStatus == 'Unmarried' %}
+                <option value="Married" name="MaritalStatus">Married</option>
+                <option value="Unmarried" name="MaritalStatus" selected>Unmarried</option>
+                <option value="Divorced" name="MaritalStatus">Divorced</option>
+                
+                {% else %}
+                <option value="Married" name="MaritalStatus">Married</option>
+                <option value="Unmarried" name="MaritalStatus">Unmarried</option>
+                <option value="Divorced" name="MaritalStatus" selected>Divorced</option>
+                
+                {% endif %}
+                
+                </select>
+          </div>
     </div>
     {%endfor%}
         <div class="info"> <button type="submit" class="btn btn-success"  href="{% url 'EditProfile' %}">SAVE</button> 
@@ -248,4 +332,40 @@
 
 </div>
 </form>
+
+<script>
+  var loadFile = function (event) {
+  var image = document.getElementById("Photo");
+  image.src = URL.createObjectURL(event.target.files[0]);
+  }
+
+    function togglePasswordVisibility() {
+        var passwordField = document.getElementById("passwordField");
+        var showPasswordCheckbox = document.getElementById("showPasswordCheckbox");
+
+        if (showPasswordCheckbox.checked) {
+            password.type = "text";
+        } else {
+            password.type = "password";
+        }
+    }
+
+  function calculateAge() {
+  var dobField = document.getElementById("id_DateOfBirth");
+  var ageField = document.getElementById("id_Age");
+
+  var selectedDate = new Date(dobField.value);
+  var today = new Date();
+  
+  var age = today.getFullYear() - selectedDate.getFullYear();
+  var monthDiff = today.getMonth() - selectedDate.getMonth();
+
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < selectedDate.getDate())) {
+    age--;
+  }
+
+  ageField.value = age;
+}
+</script>
+
 </html>

@@ -79,10 +79,10 @@
         <a class="nav-link " href="{% url 'sharing:MainSharing' %}">Sharing</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href=" {% url 'group:MainGroup' %}">Group</a>
+        <a class="nav-link active" href=" {% url 'group:MainGroup' %}">Group</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link active" href="{% url 'MemberMainPage' %}">Member</a>
+        <a class="nav-link " href="{% url 'MemberMainPage' %}">Member</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="#">Workshop</a>
@@ -127,8 +127,10 @@
 
 <div class="container" style="position: relative;">
 <div class="col-12">
-    <a class="btn btn-primary" href="#" role="button">Add New Sharing</a>
+  
+    <a class="btn btn-primary" href="{% url 'group:AddGroupSharing' group.id %}" role="button">Add New Sharing</a>
   </div>
+  
   </div>
   <br />
   <br />
@@ -141,18 +143,178 @@
             <section style="background-color: #FFF5EE;">
                 <div class="container py-5">
                 <!-- <p style="text-align: center;">Group Details</p> -->
-                <img src="../media/{{group.Media}}" class="card-img-top"
-                      alt="Responsive image" style="width: 650px;margin-left: 30px;">
-                    <table style="border: 0; width: 650px;">
-                        <th style="padding-bottom: 0; text-align: center;">
-                            <p style="padding-top: 15px;" value="{{ group.About }}">{{ group.About }}</p>
-                            <p style="padding-top: 15px;" value="{{ group.Username.Username }}">Created by: {{ group.Username.Username }}</p>
+                {% for groupSharing in groupSharing reversed %}
+                <div class="timeline-2 left-2">
+                  
+                  <div class="card" style="width: 650px;">
+                    <!-- <div class=profileIcon>
+                        <img src="media/{{ allfeed.Creator.Photo }}" alt class="d-block ui-w-100 rounded-circle" style="width: 45px; height: 45px; margin: 10px;">
+                        <b>{{ allfeed.Creator.Username }}</b>
+                    </div> -->
+                    
+                    <table style="border: 0; margin-right:550px ;">
+
+                {% if groupSharing.CreatorFK.Email == request.session.Email %}
+                        <th>
+                            <div class="user-image">
+                              
+                                <img class="rounded-circle" src="../media/{{ groupSharing.CreatorFK.Photo }}" style="width: 45px; height: 45px; margin: 10px;">
+                              
+                            </div>
+                        </th>
+                        <th>
+                                <div class="title">
+                                    <span class="username">{{ groupSharing.CreatorFK.Username }}</span>
+                                </div>
+
+                                
+                        </th>
+                        <th> 
+                          <a href="#" style="margin-left: 50px;">
+                            
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                              <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                              <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                            </svg></a>
+                        </th>
+                        <th>
+                            <a href="#" onclick="return confirm('Are you sure you want to delete the post?');">
+                              
+                              
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                                <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z"/>
+                              </svg>
+                            </a>
+                        </th>
+                        
+                    </table>
+                    {%else%}
+                    <th>
+                      <div class="user-image">
+                        
+                          <img class="rounded-circle" src="../media/{{ groupSharing.CreatorFK.Photo }}" style="width: 45px; height: 45px; margin: 10px;">
+                        
+                      </div>
+                  </th>
+                  <th>
+                          <div class="title">
+                              <span class="username">{{ groupSharing.CreatorFK.Username }}</span>
+                          </div>
+
+                          
+                  </th>
+                  
+                  
+              </table>
+                    {%endif%}
+                    
+                    
+                    <img src="../media/{{groupSharing.GroupPhoto}}" class="card-img-top"
+                       style="width: 550px;margin-left: 45px;">
+                      
+                      <table style="border: none;  margin-bottom: 0; padding-bottom: 0%; text-align: center;">
+                        <th style="padding-bottom: 0; align-items: center;">
+                            <h4 style="padding-top: 15px;" value="{{ groupSharing.GroupTitle }}">{{ groupSharing.GroupTitle }}</h4>
+                            <p class="text-muted mb-4" style="font-size: x-small; padding: 0;" value="{{ groupSharing.Groupcreated_at }}"><i class="far fa-clock" aria-hidden="true"></i>{{ groupSharing.Groupcreated_at }}</p>
                         </th>
                         
                         <th>
                           
-                      </th>
-                    </table>
+                        </th>
+                      </table>
+                      
+                    
+                    <div class="card-body">
+                      <p class="mb-0" value="{{ groupSharing.GroupMessage }}" style="margin-left: 15px;">{{ groupSharing.GroupMessage }}</p>
+                    </div>
+
+                    
+                    
+
+                    {% for groupComment in groupComment %}
+                    {% if groupComment.GrpFeedFK.id == groupSharing.id %}
+                    <table style="border: 0; background-color: #F9E79F ; width: 550px;">
+                      <tr>
+                        <td style="text-align: left;"  colspan="2">
+                          <div class="user-image">
+                            
+                              <img class="rounded-circle" src="../media/{{ groupComment.GrpCommenterFK.Photo }}"  style="width: 45px; height: 45px; margin: 10px;">
+                            
+                            <span class="username">{{ groupComment.GrpCommenterFK.Username }}</span>
+                        </div>
+                        </td>
+                        {% if groupComment.GrpCommenterFK.Email == request.session.Email %}
+                        <td>
+                          <a href="#" onclick="return confirm('Are you sure you want to delete the comment?');" style="margin-right: 30px;">
+                              
+                              
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                              <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z"/>
+                            </svg>
+                          </a>
+                        </td>
+                        {% endif %}
+                      </tr>
+                      
+                      <tr>
+                        <td  colspan="2" style="text-align: center;">
+                         {% if groupComment.GrpPictures != "" %}
+                    <img src="../media/{{groupComment.GrpPictures}}" class="card-img-top"
+                       style="width: 100px;margin-left: 45px;">
+                      {% endif %}
+                        </td>
+                        <td>
+
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="width: 500px;"  colspan="2">
+                          <div class="card-body">
+                            <p class="mb-0" value="{{ groupComment.GrpMessage }}">Message: {{ groupComment.GrpMessage }}</p>
+                          </div>
+                        </td>
+                        
+                      </tr>
+                      
+                  </table>
+                  {% endif %}
+                  {%endfor%}
+
+                  <br>
+                  <br>
+                    <form action="{% url 'group:GroupSharingComment' groupSharing.id %}" method="POST" enctype="multipart/form-data" class="panel-activity__status" style="align-items: center;">
+                      {% csrf_token %}
+                      <textarea name="Message" placeholder="Share your comments here..." class="form-control"  style="width: 550px; margin-left: 30px; height: 50px;"></textarea>
+                      
+                      
+                      <div class="panel-activity__status" style="width: 550px; margin-left: 30px;">
+                        <div class="container row g-3">
+                          <div class="col-md-6">
+                            <label for="inputImage" class="form-label">Picture</label>
+                            <input type="file" class="form-control" id="inputImage" name="Pictures" placeholder="Enter image" value="Enter image">
+                            <br />
+                          </div>
+  
+                          <div class="col-md-6">
+                            <label for="inputVideo" class="form-label">Video</label>
+                            <input type="file" class="form-control" id="inputVideo" name="Video" placeholder="Enter video">
+                            <br />
+                          </div>
+                        </div>
+                      </div>
+                      
+                     
+                      <button type="submit" class="btn btn-sm btn-rounded btn-info" style="margin-left: 30px; width: 550px; margin-bottom: 10px;">
+                        Post
+                      </button>
+                  </form>
+                      
+                  </div>
+                  
+                  
+                </div>
+
+                {% endfor %}
                 </div>
             </section>
         </div>
