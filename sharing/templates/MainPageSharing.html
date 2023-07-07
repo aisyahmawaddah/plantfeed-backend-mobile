@@ -118,6 +118,50 @@
     </div>
     <br/>
 
+    {% if context_SoilTags %}
+    
+    <div class="container">
+     <a ></a>
+     <form method="POST" class="container row g-3" action="{% url 'sharing:Sharing_SoilTag' %}">
+       {% csrf_token %}
+       <div class="container">
+         <label for="inputSoil" class="form-label">Soil Tag : </label><br>
+         {% for soilTag in context_SoilTags.SoilTags %}
+         <input type="radio" name="SoilTag" value="{{ soilTag.id }}">{{ soilTag.SoilTagName }} <br>
+         {% endfor %}
+       </div>
+       <div class="col-12">
+         <button type="submit" class="btn btn-success " value="Filter">Filter</button>
+       </div>
+     </form>
+   </div>
+   <br/>
+   {% elif context_PlantTags %}
+
+   <div class="container">
+     <form method="POST" class="container row g-3" action="{% url 'sharing:Sharing_PlantTag' %}" attribute>
+       {% csrf_token %}
+       <div class="container">
+         <label for="inputPlant" class="form-label">Plant Tag : </label><br>
+         {% for plantTag in context_PlantTags.PlantTags %}
+         <input type="radio" name="PlantTag" value="{{ plantTag.id }}">{{ plantTag.PlantTagName }} <br>
+         {% endfor %}
+       </div>
+       <div class="col-12">
+         <button type="submit" class="btn btn-success " value="Filter">Filter</button>
+       </div>
+     </form>
+   </div>
+   <br />
+   {% else %}
+   <div class="container">
+     <h5>Filter Sharing By Tags: </h5>
+     <a href="{% url 'sharing:Sharing_SoilTag' %}" class="link-primary" target="_blank">Enable Soil Tags</a> ||
+     <a href="{% url 'sharing:Sharing_PlantTag' %}" class="link-primary" target="_blank">Enable Plant Tags</a>
+     {%endif%}
+     <br>
+     <br>
+
     {% endblock content %}
      {% block body %}
 
@@ -171,22 +215,6 @@
                         </th>
                         
                         <th>
-                          <!-- {% for likes in likes %}
-                          {% if likes.Liker.Email == request.session.Email %}
-                         
-                          <a href="#" style="margin-left: 100px;">
-                          {% else %}
-                          <a href="{% url 'AddLikes' allfeed.id %}" style="margin-left: 100px;"></a>
-                          {% endif %}
-                          
-                          {%endfor%}
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
-                              <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
-                            </svg>
-                            {% if allfeed.id == likes.Feed.id %}
-                            {{likes.count}}
-                            {% endif %}
-                          </a> -->
                           
                       </th>
                         
@@ -333,22 +361,7 @@
                         </th>
                         
                         <th>
-                          <!-- {% for likes in likes %}
-                          {% if likes.Liker.Email == request.session.Email %}
-                         
-                          <a href="#" style="margin-left: 100px;">
-                          {% else %}
-                          <a href="{% url 'AddLikes' allfeed.id %}" style="margin-left: 100px;"></a>
-                          {% endif %}
                           
-                          {%endfor%}
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
-                              <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
-                            </svg>
-                            {% if allfeed.id == likes.Feed.id %}
-                            {{likes.count}}
-                            {% endif %}
-                          </a> -->
                         </th>
                       </table>
                       
@@ -437,44 +450,7 @@
                         Post
                       </button>
                   </form>
-                      <!-- <div class="actions"> -->
-                          <!-- <div class="btn-group">
-                              <button type="button" class="btn-link" title="" data-toggle="tooltip" data-original-title="Post an Image">
-                                  <i class="fa fa-image"></i>
-                              </button>
-                              <button type="button" class="btn-link" title="" data-toggle="tooltip" data-original-title="Post an Video">
-                                  <i class="fa fa-video-camera"></i>
-                              </button>
-                              <button type="button" class="btn-link" title="" data-toggle="tooltip" data-original-title="Post an Idea">
-                                  <i class="fa fa-lightbulb-o"></i>
-                              </button>
-                              <button type="button" class="btn-link" title="" data-toggle="tooltip" data-original-title="Post an Question">
-                                  <i class="fa fa-question-circle-o"></i>
-                              </button>
-                          </div> -->
-                          
-                      <!-- </div> -->
-
-                      <!-- <div class="container">
-                        <form method="POST" class="container row g-3" enctype="multipart/form-data">
-                          {% csrf_token %}
-                          <div class="col-md-6">
-                            <label for="inputComment" class="form-label">Message</label>
-                            <input type="text" class="form-control" id="inputComment" name="Message" rows="10" cols="10"
-                              placeholder="Enter comment" value="{{ comment.Message }}" required></textarea>
-                            <br />
-                          </div>
-                    
-                          
-                          <div class="col-md-6">
-                            <label for="inputVideo" class="form-label">Video</label>
-                            <input type="file" class="form-control" id="inputVideo" name="Video" placeholder="Enter video">
-                            <br />
-                          </div>
-                          <br /><br />
-                          
-                        </form>
-                      </div> -->
+                      
                   </div>
                   
                   {% endif %}

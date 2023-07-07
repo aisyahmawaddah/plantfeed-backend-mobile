@@ -54,11 +54,6 @@ def login_user(request):
         user = Token.objects.get(key=token).user
         print(user.Name)
         Res = {
-            #"Name": Account.Name,
-            #"Age": Account.Age,
-            #"DateOfBirth": Account.DateOfBirth,
-            #"email": Account.Email,
-            #"Username": Account.username,
             "Email": Account.Email,
             "Password": Account.password,
             "ID":Account.id,

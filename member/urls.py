@@ -8,7 +8,7 @@ from django.urls import path
 #from member.views import LoginView
 from .import api
 #from member.api import PersonCreateView, UserAuthentication, UserList
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+#from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
     path('', views.index, name='index'),

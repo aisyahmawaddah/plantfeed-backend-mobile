@@ -27,7 +27,7 @@ def workshop(request):
        person=Person.objects.get(Email=request.session['Email'])
        Gender=request.POST.get('Gender')
        State=request.POST.get('State')
-       searchobj=Workshop.objects.raw('select * from Workshop where Gender="'+Gender+'" and State="'+State+'"')
+       searchobj=Workshop.objects.raw('select * from Workshop where State="'+State+'"')
        return render(request,'MainPageWorkshop.html', {'person':person,'data':searchobj})
     
     try:
@@ -386,7 +386,7 @@ def Workshop_SoilTag(request):
             'SoilTags': SoilTag.objects.all(), 
         }
 
-        return render(request,'workshop.html', {'person':person,'data':data, 'context_SoilTags':context})
+        return render(request,'MainPageWorkshop.html', {'person':person,'data':data, 'context_SoilTags':context})
 
 
 def Workshop_PlantTag(request):
@@ -409,7 +409,7 @@ def Workshop_PlantTag(request):
             'PlantTags' : PlantTag.objects.all(),
         }
 
-        return render(request,'workshop.html', {'person':person,'data':data, 'context_PlantTags':context})
+        return render(request,'MainPageWorkshop.html', {'person':person,'data':data, 'context_PlantTags':context})
     
 def viewInbox(request):
     try:

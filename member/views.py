@@ -10,8 +10,8 @@ from django.contrib import auth
 #from plantfeed import encryption_util
 from django.core.files.storage import FileSystemStorage
 from django.db import IntegrityError
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.authtoken.models import Token
+#from rest_framework.authtoken.views import ObtainAuthToken
+#from rest_framework.authtoken.models import Token
 
 def index(request):
   template = loader.get_template('index.html')
@@ -56,10 +56,10 @@ def login(request):
             request.session['Email'] = Userdetails.Email
             person = Person.objects.filter(Email = request.POST['Email'])
             request.session['UserLevel'] = Userdetails.UserLevel
-            if request.session['UserLevel'] == 'user':
-                return render(request,'homepage.html',{'person' : person})
+            if Userdetails.UserLevel == 'User':
+                return redirect(homepage)
             else:
-                return render(request,'homepageAdmin.html',{'person' : person})
+                return redirect(homepageAdmin)
         except Person.DoesNotExist as e:
             messages.success(request,'Username/Password Invalid..!')
     return render(request,'login.html')

@@ -115,10 +115,7 @@ class FeedSoilTagging(models.Model):
 
     def save(self):
         super().save()
-        super().save(using='farming')
-   
-    def deleteRecordFarming(self):
-        super().delete(using='farming')
+        
         
     def deleteRecordIgrow(self):
         super().delete()
@@ -134,10 +131,7 @@ class FeedPlantTagging(models.Model):
 
     def save(self):
         super().save()
-        super().save(using='farming')
-   
-    def deleteRecordFarming(self):
-        super().delete(using='farming')
+
         
     def deleteRecordIgrow(self):
         super().delete()

@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.core.files.storage import FileSystemStorage
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from cryptography.fernet import Fernet
+
 from django.db import IntegrityError
 from .models import Group_tbl, GroupMembership, GroupPlantTagging, GroupSoilTagging
 from .forms import GroupForm
@@ -23,15 +23,27 @@ from sharing.models import GroupTimeline, GroupTimelineComment, FeedPlantTagging
 def mainGroup(request):
     if request.method=='POST':
         person=Person.objects.get(Email=request.session['Email'])
-        Age = request.POST.get('Age')
+        #Age = request.POST.get('Age')
+        #soiltag=request.POST.get('soiltag')
+        #soilTagID = SoilTag.objects.filter(SoilTagName=soiltag)
+        #plantTagID = PlantTag.objects.filter(PlantTagName=planttag)
+        #groupPlantTag=GroupPlantTagging.objects.filter(plantTag=plantTagID)
+        #groupSoilTag=GroupSoilTagging.objects.filter(soilTag=soilTagID)
+
+        #soiltag=SoilTag.objects.all()
+        #planttag=PlantTag.objects.all()
+        
         State = request.POST.get('State')
-        searchgp=Group_tbl.objects.raw('select * from Group_tbl where Age="'+Age+'" and State="'+State+'"')
+        #searchgp=Group_tbl.objects.all()
+        searchgp=Group_tbl.objects.filter(State=State)
         return render(request,'MainPageGroup.html', {'person':person,'group':searchgp})
     
     try:
         
         person=Person.objects.get(Email=request.session['Email'])
         group=Group_tbl.objects.all()
+        #soiltag=SoilTag.objects.all()
+        #planttag=PlantTag.objects.all()
         groupMember=GroupMembership.objects.filter(GroupMember=person)
         searchgp=Group_tbl.objects.raw('select * from Group_tbl')
         fss =FileSystemStorage()
@@ -254,7 +266,7 @@ def Group_SoilTag(request):
         }
 
         # return render(request, 'MainGroup.html', {'data':groupData, 'context_SoilTags':context})   
-        return render(request,'MainGroup.html',{'group':group, 'uploaded_file':uploaded_file, 'person':person, 'context_SoilTags':context}) 
+        return render(request,'MainPageGroup.html',{'group':group, 'uploaded_file':uploaded_file, 'person':person, 'context_SoilTags':context}) 
 
 
 def Group_PlantTag(request):
@@ -279,7 +291,7 @@ def Group_PlantTag(request):
             'PlantTags' : PlantTag.objects.all(),
         }
         
-        return render(request,'MainGroup.html',{'group':group, 'uploaded_file':uploaded_file, 'person':person, 'context_PlantTags':context}) 
+        return render(request,'MainPageGroup.html',{'group':group, 'uploaded_file':uploaded_file, 'person':person, 'context_PlantTags':context}) 
 
 def AddGroupSharing(request, pk):
     
@@ -349,5 +361,5 @@ def addGSComment(request, pk):
         #return redirect(request, 'MainPageSharing.html',{'feed':feed, 'allfeed':allfeed, 'commenter':commenter, 'comment':comment, 'likes':likes})
         return redirect('group:MainGroup')
     else :
-        return render(request,'MainPageGroup.html', {'feed':feed, 'allfeed':allfeed})   
+        return render(request,'MainPageGroup.html', {'feed':groupFeed, 'allfeed':allfeed})   
 

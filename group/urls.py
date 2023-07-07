@@ -23,8 +23,8 @@ urlpatterns = [
     path('DeleteGroup/<str:pk>',views.deleteGroup, name="DeleteGroup"),
     path('UpdateGroup/<str:pk>',views.updateGroup, name="UpdateGroup"),
     path('AddGroupSharing/<str:pk>',views.AddGroupSharing, name="AddGroupSharing"),
-    path('MainGroup/Filter_SoilTag',views.Group_SoilTag, name="Group_SoilTag"),
-    path('MainGroup/Filter_PlantTag',views.Group_PlantTag, name="Group_PlantTag"),
+    path('Filter_SoilTag',views.Group_SoilTag, name="Group_SoilTag"),
+    path('Filter_PlantTag',views.Group_PlantTag, name="Group_PlantTag"),
     path('GroupSharingComment/<str:pk>',views.addGSComment, name="GroupSharingComment"),
  
 

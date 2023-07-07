@@ -3,6 +3,7 @@
 
 <head>
   <style>
+    * {box-sizing: border-box;}
     .content {
       max-width: 500px;
       margin: auto;
@@ -131,6 +132,8 @@
 {% block content %}
 
   <body>
+
+    
     <div class="container">
     {% csrf_token %}
     <div class="container bg-light" style="text-align: center;">
@@ -140,11 +143,6 @@
         <!-- <button id="search-btn" class="btn bg-primary" type="submit" style="margin-top: 30px; margin-bottom: 30px;">Search</button> -->
         
       </form>
-      <!-- <ul id="myUL">
-        {% for user3 in user3 reversed %}
-          <li><a href="#">{{user3.Username}}</a></li>
-        {% endfor %}
-      </ul> -->
 
       <ul id="myUL">
         {% for userList in userList reversed %}
@@ -328,6 +326,9 @@
         </div>
         
   </div>
+
+
+
 </body>
 
 {% endblock body %}

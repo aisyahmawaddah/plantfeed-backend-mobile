@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,12 +44,13 @@ INSTALLED_APPS = [
     'workshop.apps.WorkshopConfig',
     'marketplace.apps.MarketplaceConfig',
     'basket.apps.BasketConfig',
+    'suggestion.apps.SuggestionConfig',
     'django.contrib.sites',
     'rest_framework',
     'rest_framework.authtoken',
     #'rest_framework_simplejwt.token_blacklist',
     'rest_framework_simplejwt',
-    'chatterbot',
+    
 ]
 
 SITE_ID = 1
@@ -167,6 +169,7 @@ STATICFILES_DIRS = (
 )
 
 AUTH_USER_MODEL = 'member.Person'
+OPENAI_API_KEY = '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'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 

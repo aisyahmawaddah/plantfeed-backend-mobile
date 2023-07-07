@@ -13,7 +13,6 @@ from django.urls import reverse
 from django.core.files.storage import FileSystemStorage
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from cryptography.fernet import Fernet
 from .models import Feed, Comment, GroupTimeline, GroupTimelineComment,Likes
 from group.models import Group_tbl, GroupMembership
 from member.models import Person, SoilTag, PlantTag, Memberlist
@@ -274,54 +273,55 @@ def deleteComment(request,pk):
 
 
 
-def Sharing_GeneralSoilTag(request, pk):
+def Sharing_SoilTag(request):
 
-    data = Group_tbl.objects.get(id=pk)
-    feed = Feed.objects.filter(Group = data)
+    person=Person.objects.get(Email=request.session['Email'])
+    feed=Feed.objects.all()
+    fss =FileSystemStorage()
+    uploaded_file = fss.url(feed)
+        
 
     if request.method=='POST':
         
         soilTagsID = request.POST.get('SoilTag')
         soilTagging = SoilTag.objects.get(id=soilTagsID)
 
-        filtered_Soiltag = FeedSoilTagging.objects.filter(soilTag=soilTagging)
+        filteredSharing = FeedSoilTagging.objects.filter(soilTag=soilTagging)
+        # filteredGroup = filtered_Soiltag.filter(GroupSoilTag__in=feed)
 
-        filtered_feed = filtered_Soiltag.filter(FeedSoilTag__in=feed)
-
-        return render(request,'FilteredForum.html', {'data':data, 'filtered_feed':filtered_feed, 'chosen_soilTag':soilTagging, 'ori_feed':feed})
+        return render(request,'SoilFilteredFeed.html', {'filteredSharing':filteredSharing, 'chosen_soilTag':soilTagging, 'ori_feed':feed})
 
     else:
 
         context = {
             'SoilTags': SoilTag.objects.all(), 
-            # 'PlantTags' : PlantTag.objects.all(),
         }
 
-        return render(request, 'Forum.html', {'feed': feed, 'data':data, 'context_SoilTags':context})    
+        # return render(request, 'MainGroup.html', {'data':groupData, 'context_SoilTags':context})   
+        return render(request,'MainPageSharing.html',{'feed':feed, 'uploaded_file':uploaded_file, 'person':person, 'context_SoilTags':context}) 
 
 
-def Sharing_PlantTag(request, pk):
+def Sharing_PlantTag(request):
 
-    data = Group_tbl.objects.get(id=pk)
-    feed = Feed.objects.filter(Group = data)
+    person=Person.objects.get(Email=request.session['Email'])
+    feed=Feed.objects.all()
+    fss =FileSystemStorage()
+    uploaded_file = fss.url(feed)
 
     if request.method=='POST':
         
         plantTagsID = request.POST.get('PlantTag')
         plantTagging = PlantTag.objects.get(id=plantTagsID)
-        
-        filtered_Planttag = FeedPlantTagging.objects.filter(plantTag=plantTagging)
-        filtered_feed = filtered_Planttag.filter(FeedPlantTag__in=feed)
 
-        return render(request,'PlantFilteredForum.html', {'data':data, 'filtered_feed':filtered_feed, 'chosen_plantTag':plantTagging, 'ori_feed':feed})
+        filteredSharing = FeedPlantTagging.objects.filter(plantTag=plantTagging)
+
+        return render(request,'PlantFilteredFeed.html', {'filteredSharing':filteredSharing, 'chosen_plantTag':plantTagging, 'ori_feed':feed})
 
     else:
+
         context = {
-            # 'SoilTags': SoilTag.objects.all(), 
             'PlantTags' : PlantTag.objects.all(),
         }
-
-        return render(request, 'Forum.html', {'feed': feed, 'data':data, 'context_PlantTags':context})   
-
-
+        
+        return render(request,'MainPageSharing.html',{'feed':feed, 'uploaded_file':uploaded_file, 'person':person, 'context_PlantTags':context}) 
 

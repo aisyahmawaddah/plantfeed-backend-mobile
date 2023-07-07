@@ -32,8 +32,6 @@ class Person(models.Model):
    
         return False
     
-    
-    
     def upload_photo(self, filename):
         path = 'media/uploads/{}'.format(filename)
         return path

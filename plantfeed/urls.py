@@ -14,6 +14,7 @@ urlpatterns = [
     path('group/', include('group.urls')),
     path('workshop/', include('workshop.urls')),
     path('marketplace/', include('marketplace.urls')),
+    path('suggestion/', include('suggestion.urls')),
     path('basket/', include('basket.urls')),
     #path('api-auth/', include('rest_framework.urls')),
     path('api-auth/', include('rest_framework.urls')),

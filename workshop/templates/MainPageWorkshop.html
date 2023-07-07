@@ -140,7 +140,7 @@
 
   {% if context_SoilTags %}
   <div class="container">
-    <form method="POST" class="container row g-3" action="{% url '#' %}">
+    <form method="POST" class="container row g-3" action="{% url 'workshop:Workshop_SoilTag' %}">
       {% csrf_token %}
       <div class="container">
         <label for="inputSoil" class="form-label">Soil Tag : </label><br>
@@ -159,7 +159,7 @@
   {% elif context_PlantTags %}
 
   <div class="container">
-    <form method="POST" class="container row g-3" action="{% url '#' %}">
+    <form method="POST" class="container row g-3" action="{% url 'workshop:Workshop_PlantTag' %}">
       {% csrf_token %}
       <div class="container">
         <label for="inputPlant" class="form-label">Plant Tag : </label><br>
@@ -180,8 +180,8 @@
   <div class="container">
 
     <h5>Filter Workshop By Tags: </h5>
-    <a href="#" class="link-primary">Enable Soil Tags</a> ||
-    <a href="#" class="link-primary">Enable Plant Tags</a>
+    <a href="{% url 'workshop:Workshop_SoilTag' %}" class="link-primary">Enable Soil Tags</a> ||
+    <a href="{% url 'workshop:Workshop_PlantTag' %}" class="link-primary">Enable Plant Tags</a>
 
     <form method="POST" class="center">
       {% csrf_token %}
@@ -191,9 +191,7 @@
         <div class="container">
           <div class="row">
             <table border="1" class="table">
-              <input type="radio" name="Gender" value="M">&nbsp; Male &nbsp;
-              <input type="radio" name="Gender" value="F"> &nbsp;Female &nbsp;
-              &nbsp;
+              
               <select id="inputLocation" name="State" required>
                 <option selected disabled=true>--select state --</option>
                 <option>Johor</option>
@@ -293,42 +291,40 @@
             <th scope="row" value="{{ data.RegistrationDue }}">Closed</th>
             <th><a class="btn btn-secondary" href="" role="button">Edit</a></th>
             <th><a class="btn btn-secondary" href="{% url 'workshop:DeleteWorkshop' data.id %}" role="button">Delete</a></th>
+
             {% elif person.Email == data.PIC.Email and data.RegistrationDue != dateTime.now %}
             <th scope="row" value="{{ data.RegistrationDue }}">{{ data.RegistrationDue }}</th>
             <th><a class="btn btn-primary" href="" role="button">Edit</a></th>
             <th><a class="btn btn-danger" href="{% url 'workshop:DeleteWorkshop' data.id %}" role="button">Delete</a></th>
-            {% elif person.UserLevel == 'user' and data.RegistrationDue > dateTime.now %}
+
+            {% elif person.UserLevel == 'user' and data.RegistrationDue == dateTime.now %}
             <th scope="row" value="{{ data.RegistrationDue }}">Closed</th>
             <th><a href="" class="btn btn-secondary" role="button">Closed</a></th>
-            {% for booking in booking %}
-              {% if booking.BookWorkshop.id == data.id %}
-                <th><a href="#" class="btn btn-primary" role="button">Booked</a></th>
-              {% elif booking.BookWorkshop.id != data.id or forloop.last %}
-                <th><a href="{% url 'workshop:Booking' data.id %}" class="btn btn-primary" role="button">Book</a></th>
-              {% else %}
-              <th><a href="{% url 'workshop:Booking' data.id %}" class="btn btn-primary" role="button">Book</a></th>
-              {% endif %}
-            {% endfor %}
+            <th><a href="#" class="btn btn-primary" role="button">Unapplicable</a></th>
 
-            {% else %}
+            
+
+            {% elif person.UserLevel == 'user' and data.RegistrationDue != dateTime.now %}
             <th scope="row" value="{{ data.RegistrationDue }}">{{ data.RegistrationDue }}</th>
 
-            {% if bookingCount == 0 %}
-              <th><a href="{% url 'workshop:Booking' data.id %}" class="btn btn-primary" role="button" onclick="return ConfirmBooking()">Book</a></th>
             
-            {% else %}
             {% for booking in booking %}
-            {% if booking.BookWorkshop.id == data.id %}
+            {% if  data.id == booking.BookWorkshop.id and booking.Participant.Email == request.session.Email %}
               <th><a href="{% url 'workshop:MainWorkshop' %}" class="btn btn-primary" role="button" onclick="return DuplicationWarning()">Booked</a></th>
-            {% elif booking.BookWorkshop.id != data.id and forloop.last %}
-              <th><a href="{% url 'workshop:Booking' data.id %}" class="btn btn-primary" role="button" onclick="return ConfirmBooking()">Book</a></th>
-            {% else %}
+            {% elif forloop.last %}
+            <th><a href="{% url 'workshop:Booking' data.id %}" class="btn btn-primary" role="button" onclick="return ConfirmBooking()">Book</a></th>
+              {% endif %}
+            {%endfor%}
+
+            {% if not booking %}
+            <th><a href="{% url 'workshop:Booking' data.id %}" class="btn btn-primary" role="button" onclick="return ConfirmBooking()">Book</a></th>
             {% endif %}
-            {% endfor %}
+
+            
 
             {% endif %}
 
-            {% endif %} 
+             
             
             
             

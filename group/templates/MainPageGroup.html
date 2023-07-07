@@ -77,10 +77,10 @@
         <a class="nav-link " href="{% url 'Home' %}">Home</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link active" href="{% url 'sharing:MainSharing' %}">Sharing</a>
+        <a class="nav-link" href="{% url 'sharing:MainSharing' %}">Sharing</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href=" {% url 'group:MainGroup' %}">Group</a>
+        <a class="nav-link active" href=" {% url 'group:MainGroup' %}">Group</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="{% url 'MemberMainPage' %}">Member</a>
@@ -128,9 +128,10 @@
      {% block body %}
 
     
-
-    {% if context_SoilTags %}
-    <div class="container">
+     {% if context_SoilTags %}
+    
+     <div class="container">
+      <a ></a>
       <form method="POST" class="container row g-3" action="{% url 'group:Group_SoilTag' %}">
         {% csrf_token %}
         <div class="container">
@@ -175,19 +176,10 @@
         <center>
           <div class="container">
             <div class="row">
-              <table class="table">
-                <div class="col-md-6">
-  
-                  <select id="inputAge" name="Age" required>
-                    <option selected disabled=true>--select age class --</option>
-                    <option value="Teenagers">Teenagers</option>
-                    <option value="Young Adults">Young Adults</option>
-                    <option value="Adults">Adults</option>
-                    <option value="Senior">Senior</option>
-                    <option value="No Age Restriction">No Age Restriction</option>
-                  </select>
+              <table border="1" class="table">
                 
-                &nbsp;
+                
+                <div class=".col-sm-6">
                 <select id="inputLocation" name="State" required>
                   <option selected disabled=true>--select state --</option>
                   <option>Johor</option>
@@ -205,11 +197,14 @@
                   <option>Terengganu</option>
                   <option>W.P. Kuala Lumpur</option>
                 </select>
+                </div>
                 &nbsp;&nbsp;
+                <div class=".col-sm-3">
                 <button type="submit" class="btn btn-success " value="Filter">Filter</button>
+                
                 <br>
                 <br>
-            </div>
+              </div>
             </div>
           </div>
         </center>
@@ -241,6 +236,73 @@
               </tr>
             </thead>
             <tbody>
+
+              {% if groupPlantTag or groupSoilTag%}
+
+
+              {% for group in group %}
+              {% if group.id == groupSoilTag.GroupSoilTag or group.id == groupPlantTag.GroupPlantTag %}
+
+              <tr>
+                <!-- <th scope="row" value="{{ group.Name }}">{{ group.Name }}</th>
+                <th scope="row" value="{{ group.About }}">{{ group.About }}</th> -->
+                <th><img src="media/{{group.Media}}" width="240" /></th>
+                <!-- <th scope="row" value="{{ group.Username.Name }}">{{ group.Username.Name }}</a></th>
+                <th scope="row" value="{{ group.Age }}">{{ group.Age }}</th>
+                <th scope="row" value="{{ group.State }}">{{ group.State }}</th> -->
+                <th>
+                    <h3 style="text-align: center;">Details</h3>
+                    Name      : {{ group.Name }} <br>
+                    About     : {{ group.About }} <br>
+                    Admin     : {{ group.Username.Name }} <br>
+                    Age Class : {{ group.Age }} <br>
+                    State     : {{ group.State }} <br>
+                </th>
+
+                <th>
+                  {% if group.soilTagging.all %}
+                  <!-- <i>Soil Tagging:</i> -->
+                  <i>
+                    {% for soilTags in group.soilTagging.all %}
+                    {{soilTags.soilTag.SoilTagName}} {% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                  </i>
+                  {% endif %}
+
+                  {% if group.plantTagging.all %}
+                  <!-- <i>Plant Tagging:</i> -->
+                  <i>
+                    {% for plantTags in group.plantTagging.all %}
+                    {{plantTags.plantTag.PlantTagName}} {% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                  </i>
+                  {% endif %}
+                </th>
+                {% if group.Username.Email != request.session.Email and groupMember.GroupMember.Email != request.session.Email %}
+                <th>
+                  <a href="{% url 'group:JoinGroup' group.id %}" class="btn btn-block">Join</a><br>
+                  <a href="{% url 'group:ViewGroup' group.id %}" class="btn btn-primary">View</a><br>
+                </th>
+                {% else %}
+                <th style="text-align:center;">
+                    <br>
+                    <a href="#" class="btn btn-block">Joined</a><br>
+                    <br>
+                    <a href="{% url 'group:ViewGroup' group.id %}" class="btn btn-primary">View</a><br>
+                </th>
+                {% endif %}
+                <!-- <td>
+                    <button type="submit" class="btn btn-success " value="Add">Add</button>
+                  </td> -->
+              </tr>
+             
+              
+
+              {% endif %}
+              {% endfor %}
+
+              {% else %}
+
               {% for group in group %}
               <tr>
                 <!-- <th scope="row" value="{{ group.Name }}">{{ group.Name }}</th>
@@ -294,7 +356,9 @@
                     <button type="submit" class="btn btn-success " value="Add">Add</button>
                   </td> -->
               </tr>
+             
               {% endfor %}
+              {% endif %}
             </tbody>
           </table>
         </div>
