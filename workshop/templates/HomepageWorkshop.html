@@ -76,15 +76,20 @@
         <a class="nav-link " href="{% url 'HomeAdmin' %}">Home</a>
       </li>
       
+      {% if person.UserLevel == 'user' %}
       <li class="nav-item">
-        <a class="nav-link" href=" {% url 'group:MainGroup' %}">Group</a>
+        <a class="nav-link" href="{% url 'sharing:MainSharing' %}">Sharing</a>
       </li>
+      {% endif %}
+      </li>
+            <li class="nav-item">
+        <a class="nav-link " href=" {% url 'group:MainGroup' %}">Group</a>
+      </li>
+      {% if person.UserLevel == 'user' %}
       <li class="nav-item">
         <a class="nav-link" href="{% url 'MemberMainPage' %}">Member</a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link active" href="{% url 'workshop:MainWorkshop' %}">Workshop</a>
-      </li>
+      {% endif %}
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           Profile
@@ -122,10 +127,6 @@
 <br />
 
 <div class="container" style="position: relative;">
-<div class="col-12">
-    <a class="btn btn-primary" href="#" role="button">Wokrshop Details & Update</a>
-  </div>
-  <br/>
   <div class="col-12">
     <a class="btn btn-primary" href="{% url 'workshop:AddWorkshopSharing' data.id %}" role="button">Add Post to Workshop</a>
   </div>

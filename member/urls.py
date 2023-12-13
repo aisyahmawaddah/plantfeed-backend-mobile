@@ -30,7 +30,8 @@ urlpatterns = [
     path('ChatRoom/<str:room>', views.chatRoom, name='ChatRoom'),
     path('send', views.send, name='send'),
     path('getMessages/<str:room>/', views.getMessages, name='getMessages'),
-    
+    path("check_username_availability", views.check_username_availability, name="check_username_availability"),
+    path("check_email_availability", views.check_email_availability, name="check_email_availability"),
     #url(r'^api/users_lists/$', UserList.as_view(), name='user_list'),
     #url(r'^api/users_list/(?P<id>\d+)/$', UserDetail.as_view(), name='user_list'),
     #url(r'^api/auth/$', UserAuthentication.as_view(), name='User Authentication API'),

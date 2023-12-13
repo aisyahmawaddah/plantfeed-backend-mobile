@@ -45,7 +45,22 @@ def UserReg(request):
     else :
         return render(request,'registration.html')
 
-    
+def check_username_availability(request):
+    username = request.GET.get("username")
+    if Person.objects.filter(Username=username).exists():
+        response = {"available": False}
+    else:
+        response = {"available": True}
+    return JsonResponse(response)
+
+def check_email_availability(request):
+    email = request.GET.get("email")
+    if Person.objects.filter(Email=email).exists():
+        response = {"available": False}
+    else:
+        response = {"available": True}
+    return JsonResponse(response)
+
     #user login
 def login(request):
     if request.method == "POST":
@@ -56,7 +71,7 @@ def login(request):
             request.session['Email'] = Userdetails.Email
             person = Person.objects.filter(Email = request.POST['Email'])
             request.session['UserLevel'] = Userdetails.UserLevel
-            if Userdetails.UserLevel == 'User':
+            if Userdetails.UserLevel == 'user':
                 return redirect(homepage)
             else:
                 return redirect(homepageAdmin)
@@ -86,13 +101,13 @@ def logout(request):
 
 #profile edit button
 def Profile(request):
-    person = Person.objects.filter(Email=request.session['Email'])
+    person = Person.objects.get(Email=request.session['Email'])
     return render(request, 'profile2.html',{'person': person })
     
 
 #profile edit form
 def EditProfile(request):
-    person = Person.objects.filter(Email=request.session['Email'])
+    person = Person.objects.get(Email=request.session['Email'])
     #p = Person.objects.get(pk=fk1)
     if request.method=='POST':
         t = Person.objects.get(Email=request.session['Email'])
@@ -132,7 +147,7 @@ def MainMember(request):
     
     user=Person.objects.get(Email=request.session['Email'])
     user3 = Person.objects.all()[:3]
-    userList = Person.objects.all()
+    userList = Person.objects.exclude(id=user.id)
 
     
     try:
@@ -262,8 +277,13 @@ def chatRoom(request, room):
 
     room = Room.objects.get(id = room)
     user=Person.objects.get(Email=request.session['Email'])
-
-    return render(request, 'ChatRoom.html', {'room':room, 'user':user})
+    if user == room.member1:
+        user1 = room.member1
+        user2 = room.member2
+    else:
+        user1 = room.member2
+        user2 = room.member1
+    return render(request, 'ChatRoom.html', {'room':room, 'user':user, 'user1': user1, 'user2':user2})
 
 def send(request):
     message = request.POST['message']

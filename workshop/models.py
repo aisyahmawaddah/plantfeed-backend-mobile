@@ -44,7 +44,7 @@ class WorkshopSharing(models.Model):
     #Skill = models.CharField(max_length=20,default="")
     #State = models.CharField(max_length=100,default="")
     Photo = models.ImageField(upload_to ='uploads/', blank=True,null=True, default="")
-    Video = models.FileField(upload_to='uploads/', blank=True, null=True, default="")
+    #Video = models.FileField(upload_to='uploads/', blank=True, null=True, default="")
     #created_at = models.DateTimeField(default=datetime.now, blank=True)
     #Creator_id = models.IntegerField()
     #Group = models.ForeignKey(Group_tbl, on_delete=models.CASCADE)

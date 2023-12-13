@@ -155,8 +155,7 @@ def updateWorkshop(request, pk):
 
             try:
                 if soilTag:
-                    for currentSoilTag in currentSoilTag:
-                        currentSoilTag.deleteRecordFarming()
+                    
                     for farmingSoilTag2 in farmingSoilTag2:
                         farmingSoilTag2.deleteRecordIgrow()
 
@@ -166,8 +165,7 @@ def updateWorkshop(request, pk):
 
                 
                 if plantTag:
-                    for currentPlantTag in currentPlantTag:
-                        currentPlantTag.deleteRecordFarming()
+                    
                     for farmingPlantTag2 in farmingPlantTag2:
                         farmingPlantTag2.deleteRecordIgrow()
 
@@ -370,6 +368,7 @@ def Workshop_SoilTag(request):
     
     data=Workshop.objects.all()
     person=Person.objects.get(Email=request.session['Email'])
+    booking = Booking.objects.all()
 
     if request.method=='POST':
         
@@ -378,7 +377,7 @@ def Workshop_SoilTag(request):
 
         filteredWorkshop = WorkshopSoilTagging.objects.filter(soilTag=soilTagging)
 
-        return render(request,'SoilFilteredWorkshop.html', {'person':person, 'filteredWorkshop':filteredWorkshop, 'chosen_soilTag':soilTagging, 'ori_workshop':data})
+        return render(request,'SoilFilteredWorkshop.html', {'person':person, 'filteredWorkshop':filteredWorkshop, 'chosen_soilTag':soilTagging, 'ori_workshop':data, 'booking':booking})
 
     else:
         
@@ -386,13 +385,14 @@ def Workshop_SoilTag(request):
             'SoilTags': SoilTag.objects.all(), 
         }
 
-        return render(request,'MainPageWorkshop.html', {'person':person,'data':data, 'context_SoilTags':context})
+        return render(request,'MainPageWorkshop.html', {'person':person,'data':data, 'context_SoilTags':context, 'booking':booking})
 
 
 def Workshop_PlantTag(request):
     
     data=Workshop.objects.all()
     person=Person.objects.get(Email=request.session['Email'])
+    booking = Booking.objects.all()
 
     if request.method=='POST':
         
@@ -401,7 +401,7 @@ def Workshop_PlantTag(request):
 
         filteredWorkshop = WorkshopPlantTagging.objects.filter(plantTag=plantTagging)
 
-        return render(request,'PlantFilteredWorkshop.html', {'person':person,'filteredWorkshop':filteredWorkshop, 'chosen_PlantTag':plantTagging, 'ori_workshop':data})
+        return render(request,'PlantFilteredWorkshop.html', {'person':person,'filteredWorkshop':filteredWorkshop, 'chosen_PlantTag':plantTagging, 'ori_workshop':data, 'booking':booking})
 
     else:
         
@@ -409,7 +409,7 @@ def Workshop_PlantTag(request):
             'PlantTags' : PlantTag.objects.all(),
         }
 
-        return render(request,'MainPageWorkshop.html', {'person':person,'data':data, 'context_PlantTags':context})
+        return render(request,'MainPageWorkshop.html', {'person':person,'data':data, 'context_PlantTags':context, 'booking':booking})
     
 def viewInbox(request):
     try:

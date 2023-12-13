@@ -3,57 +3,6 @@
 <head>
   <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<style>
-/* body {
-  margin: 0 auto;
-  max-width: 800px;
-  padding: 0 20px;
-} */
-
-#chatContainer {
-  border: 2px solid #dedede;
-  background-color: #f1f1f1;
-  border-radius: 5px;
-  padding: 10px;
-  margin: 10px 0;
-}
-
-.darker {
-  border-color: #ccc;
-  background-color: #ddd;
-}
-
-#chatContainer::after {
-  content: "";
-  clear: both;
-  display: table;
-}
-
-#chatContainer img {
-  float: left;
-  max-width: 60px;
-  width: 100%;
-  margin-right: 20px;
-  border-radius: 50%;
-}
-
-#chatContainer img.right {
-  float: right;
-  margin-left: 20px;
-  margin-right:0;
-}
-
-.time-right {
-  float: right;
-  color: #aaa;
-}
-
-.time-left {
-  float: left;
-  color: #999;
-}
-
-</style>
 <script   src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous"0>
 </head>
@@ -118,6 +67,7 @@
       </li>
 
     </ul>
+    
 
     
 
@@ -127,94 +77,129 @@
   </div>
 </nav>
 
-<br/>
-
 <body>
 
+  
+  <div class="outsideContainer">
   <div class="container" id="chatContainer">
     <h2>{{room.id}} - Room Message</h2>
+    <br>
+  
+
+  
+    <div class="chat-display" id="display"></div>
   </div>
 
 
+<style>
+.outsideContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    /* height: 80vh; */
+    margin-top: 10px;
+    overflow-y: hidden;
+  }
 
-<div class="container"id="display">
+  .container {
+    width: 600px;
+    padding: 20px;
+    text-align: center;
+    background-color: #f1f0f0;
+    border-radius: 5px;
+    flex: 1;
+    overflow-y: auto;
+    height: 75vh;
+    max-height: 75vh;
+  }
 
-       
+  .chat-display {
+    margin-bottom: 20px;
+  }
 
-</div>
+  .chat-container {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
 
-<script>
-$(document).ready(function(){
+  .chat-container.user1 {
+    flex-direction: row-reverse;
+    align-items: flex-end;
+  }
 
-setInterval(function(){
-    $.ajax({
-        type: 'GET',
-        url : "/getMessages/{{room.id}}/",
-        success: function(response){
-            console.log(response);
-            $("#display").empty();
-            for (var key in response.messages)
-            {
-                var temp="</b><div class='col-md-6 col-lg-7 col-xl-8' id='chatContainer'><div class='pt-3 pe-3' data-mdb-perfect-scrollbar='true' style='position: relative; height: 100px'><div class='d-flex flex-row justify-content-start'><img src='/media/{{user.Username}}' style='width: 45px; height: 100%;'><b>"+response.messages[key].sender+"</b><div><p class='small p-2 ms-3 mb-1 rounded-3' style='background-color: #f5f6f7;'><p>"+
-                  response.messages[key].value+"</p><p class='small ms-3 mb-3 rounded-3 text-muted float-end'>"+response.messages[key].date+"</div></div>";
-                $("#display").append(temp);
-            }
-        },
-        error: function(response, textStatus, errorThrown){
-            alert(response)
-        }
-    });
-},1000);
-})
-</script>
+  .chat-container img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
 
+  .chat-content {
+    background-color: #f1f0f0;
+    padding: 10px;
+    border-radius: 5px;
+    max-width: 70%;
+  }
 
-<div id="chat" class="container">
-    <style>
-    input[type=text], select {
-    width: 100%;
-    padding: 12px 20px;
-    margin: 8px 0;
-    display: inline-block;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-    }
+  .chat-content.user1 {
+    background-color: #dcf8c6;
+  }
 
-    input[type=submit] {
-    width: 100%;
+  .chat-content.user2 {
+    background-color: white;
+  }
+
+  .chat-sender {
+    font-weight: bold;
+  }
+
+  .chat-date {
+    margin-top: 5px;
+    font-size: 12px;
+    color: #888;
+  }
+
+  .chat-form {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    /* margin-bottom: 130px; */
+  }
+
+  .chat-form input[type="text"] {
+    flex: 1;
+    height: 40px;
+    width: 450px;
+    padding: 5px;
+    border-radius: 5px;
+  }
+
+  .chat-form input[type="submit"] {
+    height: 40px;
+    padding: 5px 15px;
+    border: none;
     background-color: #4CAF50;
     color: white;
-    padding: 14px 20px;
-    margin: 8px 0;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    }
-
-    input[type=submit]:hover {
-    background-color: #45a049;
-    }
-
-    #chatContainer, #display, #chat {
     border-radius: 5px;
-    background-color: #f2f2f2;
-    padding: 20px;
-    margin: 10px 50px;
-    }
-    </style>
+    cursor: pointer;
+    margin-left: 10px;
+    
+  }
+</style>
 
-    <form id="post-form">
-        {% csrf_token %}
-        <input type="hidden" name="sender" id="sender" value="{{user.Username}}"/>
-        <input type="hidden" name="room" id="room" value="{{room.id}}"/>
-        <input type="text" name="message" id="message" width="100px" required/>
-        <input type="submit" value="Send">
-    </form>
+<div class="chat-form">
+  <form id="post-form" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="hidden" name="sender" id="sender" value="{{user.Username}}" />
+    <input type="hidden" name="Photo" id="Photo" value="{{user.Photo}}" />
+    <input type="hidden" name="room" id="room" value="{{room.id}}" />
+    <input type="text" name="message" id="message" width="100px" required />
+    <input type="submit" value="Send">
+  </form>
 </div>
-
-
-</body>
 
 <script type="text/javascript">
   $(document).on('submit','#post-form',function(e){
@@ -235,6 +220,50 @@ setInterval(function(){
     });
     document.getElementById('message').value = ''
   });
+
+  </script>
+       
+  <script>
+    $(document).ready(function(){
+
+    setInterval(function() {
+      $.ajax({
+        type: 'GET',
+        url: "/getMessages/{{room.id}}/",
+        success: function(response) {
+          console.log(response);
+          $("#display").empty();
+          for (var key in response.messages) {
+            var message = response.messages[key];
+            var isUser1 = message.sender === "{{user1.Username}}"; // Replace with actual username
+            var chatContainerClass = isUser1 ? "user1" : "user2";
+            var chatContentClass = isUser1 ? "user1" : "user2";
+
+            var temp = `
+              <div class="chat-container ${chatContainerClass}">
+                <img src="/media/${isUser1 ? "{{user1.Photo}}" : "{{user2.Photo}}"}" alt="User Photo">
+                <div class="chat-content ${chatContentClass}">
+                  <p class="chat-sender">${message.sender}</p>
+                  <p>${message.value}</p>
+                  <p class="chat-date">${message.date}</p>
+                </div>
+              </div>
+              <hr>
+            `;
+            $("#display").append(temp);
+          }
+        },
+        error: function(response, textStatus, errorThrown) {
+          alert(response);
+        }
+      });
+    }, 1000);
+  })
 </script>
+
+</div>
+
+
+</body>
 
 </html>

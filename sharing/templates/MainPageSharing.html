@@ -85,7 +85,7 @@
         <a class="nav-link" href="{% url 'MemberMainPage' %}">Member</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#">Workshop</a>
+        <a class="nav-link" href="{% url 'workshop:MainWorkshop' %}">Workshop</a>
       </li>
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -104,7 +104,7 @@
   </div>
 </nav>
 <br />
-{% block content %}
+
 
   <body>
     <div class="container">
@@ -162,8 +162,7 @@
      <br>
      <br>
 
-    {% endblock content %}
-     {% block body %}
+   
 
     
 
@@ -294,11 +293,7 @@
                             <br />
                           </div>
   
-                          <div class="col-md-6">
-                            <label for="inputVideo" class="form-label">Video</label>
-                            <input type="file" class="form-control" id="inputVideo" name="Video" placeholder="Enter video">
-                            <br />
-                          </div>
+                          
                         </div>
                       </div>
                       
@@ -387,7 +382,7 @@
                         </td>
                         {% if comment.Commenter.Email == request.session.Email %}
                         <td>
-                          <a href="{% url 'sharing:DeleteComment' allfeed.id %}" onclick="return confirm('Are you sure you want to delete the comment?');" style="margin-right: 30px;">
+                          <a href="{% url 'sharing:DeleteComment' comment.id %}" onclick="return confirm('Are you sure you want to delete the comment?');" style="margin-right: 30px;">
                               
                               
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
@@ -437,11 +432,7 @@
                             <br />
                           </div>
   
-                          <div class="col-md-6">
-                            <label for="inputVideo" class="form-label">Video</label>
-                            <input type="file" class="form-control" id="inputVideo" name="Video" placeholder="Enter video">
-                            <br />
-                          </div>
+                          
                         </div>
                       </div>
                       
@@ -463,7 +454,7 @@
   </div>
 </body>
 
-{% endblock body %}
+
 
 </html>
 

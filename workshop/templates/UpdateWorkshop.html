@@ -75,15 +75,20 @@
       <li class="nav-item">
         <a class="nav-link " href="{% url 'Home' %}">Home</a>
       </li>
+      {% if person.UserLevel == 'user' %}
       <li class="nav-item">
         <a class="nav-link" href="{% url 'sharing:MainSharing' %}">Sharing</a>
       </li>
-      <li class="nav-item">
+      {% endif %}
+      </li>
+            <li class="nav-item">
         <a class="nav-link " href=" {% url 'group:MainGroup' %}">Group</a>
       </li>
+      {% if person.UserLevel == 'user' %}
       <li class="nav-item">
         <a class="nav-link" href="{% url 'MemberMainPage' %}">Member</a>
       </li>
+      {% endif %}
       <li class="nav-item">
         <a class="nav-link active" href="{% url 'workshop:MainWorkshop' %}">Workshop</a>
       </li>

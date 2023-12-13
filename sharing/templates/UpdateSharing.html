@@ -110,7 +110,7 @@
         
         <div class="col-12">
           <label for="inputNewSharing" class="form-label">Message</label>
-          <textarea class="form-control" id="inputSharing" name="Message" rows="5" cols="10" placeholder="Enter feed" value="{{ feed.Message }}" required></textarea>
+          <input type="textarea" class="form-control" id="inputSharing" name="Message" rows="5" cols="10" placeholder="Enter feed" value="{{ feed.Message }}" required>
           <br/>
         </div>
        
@@ -147,14 +147,16 @@
           <br />
           <div class="col-12">
             <label for="inputImage" class="form-label">Photo</label>
-            <input type="file" class="form-control" id="inputImage" name="Photo" placeholder="Enter image">
-            <br/>
+            <img src="../media/{{feed.Photo}}" name="Photo" value="{{ feed.Photo }}" id="Photo" width="200" /><br><br>
+            <!-- <input type="file" class="form-control" id="inputImage" name="Photo" placeholder="Enter image"> -->
+            <input id="file" type="file" name="Photo" value="{{ feed.Photo }}" onchange="loadFile(event)"/>
+            <br/><br>
           </div>
-          <div class="col-12">
+          <!-- <div class="col-12">
             <label for="inputVideo" class="form-label">Video</label>
             <input type="file" class="form-control" id="inputVideo" name="Video" placeholder="Enter video">
           </div>
-          <br />
+          <br /> -->
           <div class="col-md-6">
             <label for="inputSoil" class="form-label">Soil Tag : </label><br>
             {% for soilTag in SoilTag %}
@@ -193,5 +195,11 @@
 
 {% endblock %}
 
+<script>
+  var loadFile = function (event) {
+  var image = document.getElementById("Photo");
+  image.src = URL.createObjectURL(event.target.files[0]);
+  }
+</script>
 
 </html>

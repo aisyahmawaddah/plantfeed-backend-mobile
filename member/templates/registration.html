@@ -1,6 +1,49 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-
+<style>
+  .profile-pic {
+  color: transparent;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  transition: all 0.3s ease;
+}
+.profile-pic input {
+  display: none;
+}
+.profile-pic img {
+  position: absolute;
+  object-fit: cover;
+  width: 165px;
+  height: 165px;
+  box-shadow: 0 0 10px 0 rgba(255, 255, 255, 0.35);
+  border-radius: 100px;
+  z-index: 0;
+}
+.profile-pic .-label {
+  cursor: pointer;
+  height: 165px;
+  width: 165px;
+}
+.profile-pic:hover .-label {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 10000;
+  color: #fafafa;
+  transition: background-color 0.2s ease-in-out;
+  border-radius: 100px;
+  margin-bottom: 0;
+}
+.profile-pic span {
+  display: inline-flex;
+  padding: 0.2em;
+  height: 2em;
+}
+</style>
 <head>
   <!-- Required meta tags -->
   <meta charset="utf-8">
@@ -15,20 +58,6 @@
 
 <body>
 
-  <script type="text/javascript">
-
-    function formValidate() {
-      var age = document.getElementById("age").value;
-      if (isNaN(age) || age < 1) {
-        alert("Please provide your age in correct format!");
-        //  age.focus();
-        document.getElementById("age").focus()
-        return false;
-      }
-      return true;
-    }
-
-  </script>
 
   <div class="p-3 mb-2 bg-success text-white text-center">
     <h1 class="p-3 mb-2 bg-success text-white text-center">PlantFeed Web Application</h1>
@@ -37,22 +66,34 @@
   <p class="h3 text-center align-content: center;">Registration Form</p>
   <hr />
   <br />
-  <form method="POST" class="container text-center" id="post-form" action="{% url 'Register' %}" enctype="multipart/form-data">
+  <form method="POST" class="container text-center" id="post-form" action="{% url 'Register' %}" enctype="multipart/form-data" onsubmit="return formValidate();">
     {% csrf_token %}
 
+    <div class="profile-pic">
+      <label class="-label" for="file">
+        <span class="glyphicon glyphicon-camera"></span>
+        <span>Choose Profile Picture</span>
+      </label>
+      <input id="file" type="file" name="Photo" onchange="loadFile(event)"/>
+      <img src="https://as2.ftcdn.net/v2/jpg/03/42/99/71/1000_F_342997143_wz7x1yR7KWhmhSKF9OHwuQ2W4W7IUDvH.jpg" name="Photo" id="Photo" width="200" />
+    </div>
+    <br>
     <!-- Email and Password -->
     <div class="form-row">
-      <div class="form-group col-md-6">
+      <!-- <div class="form-group col-md-6">
         <div class="col-12">
           <label for="inputImage" class="form-label">Profile Photo : </label>
           <input type="file" class="form-control" id="inputMedia" name="Photo" placeholder="Enter Media">
         </div>
-      </div>
+      </div> -->
+      
       <div class="form-group col-md-6">
         <label for="inputEmail" class="container text-left">Email</label>
         <input type="email" class="form-control" id="email" placeholder="Enter email" name="email" required>
-        </div>
+        <small id="emailError" class="text-danger"></small>
+        <small id="emailAvailability" class="text-success"></small>
       </div>
+      
 
       <div class="form-group col-md-6">
         <label for="inputPassword" class="container text-left">Password</label>
@@ -67,6 +108,8 @@
       <div class="form-group col-md-6">
         <label for="inputUsername" class="container text-left">Username</label>
         <input type="text" class="form-control" id="username" placeholder="Enter username" name="username" required>
+        <small id="usernameError" class="text-danger"></small>
+        <small id="usernameAvailability" class="text-success"></small>
       </div>
       <div class="form-group col-md-6">
         <label for="inputName" class="container text-left">Name</label>
@@ -112,8 +155,8 @@
       <div class="form-group col-md-4">
         <label for="inputUserLevel" class="container text-left" name="userlevel">User Level</label>
         <select id="UserLevel" class="form-control" name="userlevel" required>
-          <option value="User" name="userlevel" selected>User</option>
-          <option value="Admin" name="userlevel">Admin</option>
+          <option value="user" name="userlevel" selected>User</option>
+          <option value="admin" name="userlevel">Admin</option>
         </select>
       </div>
     </div>
@@ -162,25 +205,145 @@
 
 </body>
 
+
+
 <script>
-
-function calculateAge() {
-  var dobField = document.getElementById("dateofbirth");
-  var ageField = document.getElementById("age");
-
-  var selectedDate = new Date(dobField.value);
-  var today = new Date();
-  
-  var age = today.getFullYear() - selectedDate.getFullYear();
-  var monthDiff = today.getMonth() - selectedDate.getMonth();
-
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < selectedDate.getDate())) {
-    age--;
+  var loadFile = function (event) {
+    var image = document.getElementById("Photo");
+    image.src = URL.createObjectURL(event.target.files[0]);
   }
 
-  ageField.value = age;
-}
+  function formValidate() {
+    var age = document.getElementById("age").value;
+    if (isNaN(age) || age < 1) {
+      alert("Please provide your age in the correct format!");
+      document.getElementById("age").focus();
+      return false;
+    }
 
+    var password = document.getElementById("Password").value;
+    var passwordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,20}$/;
+    if (!password.match(passwordRegex)) {
+      alert("Password must be 8-20 characters long and contain symbols and numbers!");
+      document.getElementById("Password").focus();
+      return false;
+    }
+
+    var username = document.getElementById("username").value;
+    // Perform an asynchronous request to check if the username exists in the database
+    // Implement your own logic here
+
+    return true;
+  }
+
+  function calculateAge() {
+    var dobField = document.getElementById("dateofbirth");
+    var ageField = document.getElementById("age");
+
+    var selectedDate = new Date(dobField.value);
+    var today = new Date();
+
+    var age = today.getFullYear() - selectedDate.getFullYear();
+    var monthDiff = today.getMonth() - selectedDate.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < selectedDate.getDate())) {
+      age--;
+    }
+
+    ageField.value = age;
+  }
 </script>
+
+<script>
+  var usernameInput = document.getElementById("username");
+  var usernameAvailability = document.getElementById("usernameAvailability");
+
+  usernameInput.addEventListener("input", function() {
+    var username = usernameInput.value;
+    if (username) {
+      checkUsernameAvailability(username);
+    } else {
+      clearUsernameAvailability();
+    }
+  });
+
+  function checkUsernameAvailability(username) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === XMLHttpRequest.DONE) {
+        if (xhr.status === 200) {
+          var response = JSON.parse(xhr.responseText);
+          if (response.available) {
+            showUsernameAvailability("Username is available!", "text-success");
+          } else {
+            showUsernameAvailability("Username is already taken!", "text-danger");
+          }
+        } else {
+          console.error("Error occurred while checking username availability.");
+        }
+      }
+    };
+    xhr.open("GET", "/check_username_availability?username=" + encodeURIComponent(username), true);
+    xhr.send();
+  }
+
+  function clearUsernameAvailability() {
+    usernameAvailability.innerText = "";
+    usernameAvailability.classList.remove("text-success", "text-danger");
+  }
+
+  function showUsernameAvailability(message, className) {
+    usernameAvailability.innerText = message;
+    usernameAvailability.classList.add(className);
+    usernameAvailability.classList.remove("text-success", "text-danger");
+  }
+</script>
+
+<script>
+  var emailInput = document.getElementById("email");
+  var emailAvailability = document.getElementById("emailAvailability");
+
+  emailInput.addEventListener("input", function() {
+    var email = emailInput.value;
+    if (email) {
+      checkEmailAvailability(email);
+    } else {
+      clearEmailAvailability();
+    }
+  });
+
+  function checkEmailAvailability(email) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === XMLHttpRequest.DONE) {
+        if (xhr.status === 200) {
+          var response = JSON.parse(xhr.responseText);
+          if (response.available) {
+            showEmailAvailability("Email is available!", "text-success");
+          } else {
+            showEmailAvailability("Email is already taken!", "text-danger");
+          }
+        } else {
+          console.error("Error occurred while checking email availability.");
+        }
+      }
+    };
+    xhr.open("GET", "/check_email_availability?email=" + encodeURIComponent(email), true);
+    xhr.send();
+  }
+
+  function clearEmailAvailability() {
+    emailAvailability.innerText = "";
+    emailAvailability.classList.remove("text-success", "text-danger");
+  }
+
+  function showEmailAvailability(message, className) {
+    emailAvailability.innerText = message;
+    emailAvailability.classList.add(className);
+    emailAvailability.classList.remove("text-success", "text-danger");
+  }
+</script>
+
+
 
 </html>

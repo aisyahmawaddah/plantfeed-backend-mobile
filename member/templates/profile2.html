@@ -141,17 +141,22 @@ input[type=text],input[type=number]{
         <li class="nav-item">
           <a class="nav-link" href="{% url 'Home' %}">Home</a>
         </li>
+        {% if person.UserLevel == 'user' %}
         <li class="nav-item">
           <a class="nav-link" href="{% url 'sharing:MainSharing' %}">Sharing</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href=" {% url 'group:MainGroup' %}">Group</a>
+       {%endif%}
         </li>
+        <li class="nav-item">
+          <a class="nav-link " href=" {% url 'group:MainGroup' %}">Group</a>
+        </li>
+       {% if person.UserLevel == 'user' %}
         <li class="nav-item">
           <a class="nav-link" href="{% url 'MemberMainPage' %}">Member</a>
         </li>
+      {%endif%}
         <li class="nav-item">
-          <a class="nav-link" href="#">Workshop</a>
+          <a class="nav-link" href="{% url 'workshop:MainWorkshop' %}">Workshop</a>
         </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -173,7 +178,7 @@ input[type=text],input[type=number]{
 <form class="form-horizontal" method="POST" ><input type="hidden" name="csrfmiddlewaretoken" value="LUo8yACYeqTzOUYPx81ouuqmkcDTGHdxJkRjbmc5wCVtI7LYrhK5sUxWg2LWIEWX">
   
         {% csrf_token %}
-  {% for person in person %}
+  
 
 <div class="container p-3 mb-2 bg-success mt-4 mb-4 p-3 d-flex justify-content-center" style="background-image: url('https://static.vecteezy.com/system/resources/previews/002/008/838/original/retro-styled-wavy-wallpaper-design-free-vector.jpg');"> 
     <div class="card p-4"> <div class=" image d-flex flex-column justify-content-center align-items-center"> 
@@ -204,7 +209,7 @@ input[type=text],input[type=number]{
     <div class=" px-2 rounded mt-4 date "> 
         <span class="join">Joined May,2021</span> 
     </div> 
-    {%endfor%}
+   
 
 </div> 
 </div>

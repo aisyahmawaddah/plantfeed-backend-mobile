@@ -158,6 +158,7 @@ button:hover, a:hover {
 
     {% if userRequestList %}
         {% for userRequestList in userRequestList reversed%}
+            
             {% if userRequestList.from_user.Username == person.Username %} 
                 <p><a href="{% url 'acceptMemberRequest' userRequestList.id %}"class="button1">Accept Member Request</a></p>
                 <p><a href="{% url 'DeleteMemberRequest' userRequestList.id %}"class="button1">Delete Member Request</a></p>
@@ -167,18 +168,20 @@ button:hover, a:hover {
             {% endif %}
         {% endfor %}
     {% else %}
-    <p><a href="{% url 'sendMemberRequest' person.id %}" class="button1" onclick="ConfirmSend()">Send Member Request</a></p>
-    {% endif %}
-
     {% if memberList %}
         {% for memberList in memberList %}
+            
             {% if memberList.from_person.Username == person.Username %}
                 <p><a href="{% url 'ChatRoom' memberList.chatRoom.id %}" class="button1">Send Message</a></p>
             {% else %}
+                <p><a href="{% url 'sendMemberRequest' person.id %}" class="button1" onclick="ConfirmSend()">Send Member Request</a></p>
             {% endif %}
         {% endfor %}
     {% else %}
     {% endif %}
+    {% endif %}
+
+    
         
         
   </div>
@@ -191,20 +194,6 @@ button:hover, a:hover {
     <hr>
   </div>
   {% endif %}
-
-  <button style="background-color: #555; color: white; padding: 16px 20px; border: none; cursor: pointer; opacity: 0.8; position: fixed; bottom: 23px; right: 28px; width: 280px;" onclick="openForm()">Chat</button>
-
-<div style="display: none; position: fixed; bottom: 0; right: 15px; border: 3px solid #f1f1f1; z-index: 9;" id="myForm">
-  <form action="/action_page.php" style="max-width: 300px; padding: 10px; background-color: white;" class="form-container">
-    <h1>Chat</h1>
-
-    <label for="msg"><b>Message</b></label>
-    <textarea placeholder="Type message.." name="msg" required style="width: 100%; padding: 15px; margin: 5px 0 22px 0; border: none; background: #f1f1f1; resize: none; min-height: 200px;"></textarea>
-
-    <button type="submit" style="background-color: #04AA6D; color: white; padding: 16px 20px; border: none; cursor: pointer; width: 100%; margin-bottom: 10px; opacity: 0.8;" class="btn">Send</button>
-    <button type="button" style="background-color: red; color: white; padding: 16px 20px; border: none; cursor: pointer; width: 100%; margin-bottom: 10px; opacity: 0.8;" class="btn cancel" onclick="closeForm()">Close</button>
-  </form>
-</div>
 
 <script>
 function openForm() {

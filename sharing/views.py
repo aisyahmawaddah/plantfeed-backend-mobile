@@ -55,10 +55,10 @@ def AddSharing(request):
         Photo=request.FILES['Photo']
         # Video=request.FILES['Video']
         #Photo=request.FILES.get('Photo',None)
-        Video=request.FILES.get('Video', None)
+        #Video=request.FILES.get('Video', None)
         
         
-        feed_id = Feed(Title=Title,Message=Message,Photo=Photo,Video=Video,Creator=creator,Skill=Skill,State=State).save()
+        feed_id = Feed(Title=Title,Message=Message,Photo=Photo,Creator=creator,Skill=Skill,State=State).save()
         feed = Feed.objects.get(id=feed_id)
         allfeed = Feed.objects.all()
 
@@ -99,7 +99,7 @@ def updateSharing(request, pk):
         feed.State=request.POST.get('State')
         feed.Skill=request.POST.get('Skill')
         feed.Photo=request.FILES.get('Photo',None)
-        feed.Video=request.FILES.get('Video', None)
+        #feed.Video=request.FILES.get('Video', None)
         fss =FileSystemStorage()
 
         newSoilTags = request.POST.getlist('SoilTag')
@@ -111,9 +111,7 @@ def updateSharing(request, pk):
         farmingPlantTag2=FeedPlantTagging.objects.filter(FeedPlantTag=feed)
         
 
-        if soilTag:
-            for currentSoilTag in currentSoilTag:
-                currentSoilTag.deleteRecordFarming()
+        if soilTag:    
             for farmingSoilTag2 in farmingSoilTag2:
                 farmingSoilTag2.deleteRecordIgrow()
 
@@ -122,8 +120,6 @@ def updateSharing(request, pk):
             FeedSoilTagging(FeedSoilTag = feed, soilTag=new_soilTag).save()
 
         if plantTag:
-            for currentPlantTag in currentPlantTag:
-                currentPlantTag.deleteRecordFarming()
             for farmingPlantTag2 in farmingPlantTag2:
                 farmingPlantTag2.deleteRecordIgrow()
 
@@ -223,10 +219,10 @@ def addComment(request, pk):
         
         Message=request.POST.get('Message')
         Picture=request.FILES.get('Pictures',None)
-        Video=request.FILES.get('Video',None)
+        #Video=request.FILES.get('Video',None)
         fss =FileSystemStorage()
         
-        Comment(Message=Message,Pictures=Picture,Video=Video,Commenter=commenter,Feed=feed).save(),
+        Comment(Message=Message,Pictures=Picture,Commenter=commenter,Feed=feed).save(),
         # messages.success(request,'The comment is save succesfully..!')
         # return render(request,'addComment.html')
         #return redirect('sharing:Forum', group_id)
@@ -245,7 +241,7 @@ def updateComment(request, pk):
        
        comment.Message=request.POST.get('Message')
        comment.Photo=request.FILES.get('Picture',None)
-       comment.Video=request.FILES.get('Video',None)
+       #comment.Video=request.FILES.get('Video',None)
        fss =FileSystemStorage()
        comment.save()
     #    messages.success(request,"The comment of is updated succesfully..!")

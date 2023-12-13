@@ -16,7 +16,7 @@ from django.db import IntegrityError
 from .models import Group_tbl, GroupMembership, GroupPlantTagging, GroupSoilTagging
 from .forms import GroupForm
 from member.models import Person, SoilTag, PlantTag, Memberlist
-from sharing.models import GroupTimeline, GroupTimelineComment, FeedPlantTagging, FeedSoilTagging
+from sharing.models import GFeedPlantTagging, GFeedSoilTagging, GroupTimeline, GroupTimelineComment, FeedPlantTagging, FeedSoilTagging
 
 
 #group
@@ -314,10 +314,10 @@ def AddGroupSharing(request, pk):
         # Photo=request.FILES['Photo']
         # Video=request.FILES['Video']
         GroupPhoto=request.FILES.get('Photo',None)
-        GroupVideo=request.FILES.get('Video', None)
+        #GroupVideo=request.FILES.get('Video', None)
         fss =FileSystemStorage()
         
-        Gfeed_id = GroupTimeline(GroupTitle=GroupTitle,GroupMessage=GroupMessage,GroupPhoto=GroupPhoto,GroupVideo=GroupVideo,GroupFK=group,CreatorFK=user,GroupSkill=GroupSkill,GroupState=GroupState).save()
+        Gfeed_id = GroupTimeline(GroupTitle=GroupTitle,GroupMessage=GroupMessage,GroupPhoto=GroupPhoto,GroupFK=group,CreatorFK=user,GroupSkill=GroupSkill,GroupState=GroupState).save()
         Gfeed = GroupTimeline.objects.get(id=Gfeed_id)
         groupComment = GroupTimelineComment.objects.filter(GrpFeedFK=Gfeed)
         soilTagsID = request.POST.getlist('SoilTag')
@@ -325,11 +325,11 @@ def AddGroupSharing(request, pk):
 
         for soilTagsID in soilTagsID:
             soilTag = SoilTag.objects.get(id=soilTagsID)
-            FeedSoilTagging(FeedSoilTag = Gfeed, soilTag=soilTag).save()
+            GFeedSoilTagging(FeedSoilTag = Gfeed, soilTag=soilTag).save()
 
         for plantTagsID in plantTagsID:
             plantTag = PlantTag.objects.get(id=plantTagsID)
-            FeedPlantTagging(FeedPlantTag = Gfeed, plantTag=plantTag).save()
+            GFeedPlantTagging(FeedPlantTag = Gfeed, plantTag=plantTag).save()
 
         messages.success(request,'The new feed is save succesfully..!')
         return render(request,'ViewGroup.html',{'group':group,'groupMembership':groupMembership, 'memberList':memberList, 'groupSharing':groupSharing, 'user':user, 'groupComment':groupComment})
@@ -351,10 +351,10 @@ def addGSComment(request, pk):
         
         Message=request.POST.get('Message')
         Picture=request.FILES.get('Pictures',None)
-        Video=request.FILES.get('Video',None)
+        #Video=request.FILES.get('Video',None)
         fss =FileSystemStorage()
         
-        GroupTimelineComment(GrpMessage=Message,GrpPictures=Picture,GrpVideo=Video,GrpFeedFK=groupFeed,GrpCommenterFK=commenter).save(),
+        GroupTimelineComment(GrpMessage=Message,GrpPictures=Picture,GrpFeedFK=groupFeed,GrpCommenterFK=commenter).save(),
         # messages.success(request,'The comment is save succesfully..!')
         # return render(request,'addComment.html')
         #return redirect('sharing:Forum', group_id)

@@ -18,7 +18,7 @@ class Feed(models.Model):
     Skill = models.CharField(max_length=20,default="")
     State = models.CharField(max_length=100,default="")
     Photo = models.ImageField(upload_to ='uploads/', blank=True,null=True, default="")
-    Video = models.FileField(upload_to='uploads/', blank=True, null=True, default="")
+    #Video = models.FileField(upload_to='uploads/', blank=True, null=True, default="")
     created_at = models.DateTimeField(default=datetime.now, blank=True)
     #Creator_id = models.IntegerField()
     #Group = models.ForeignKey(Group_tbl, on_delete=models.CASCADE)
@@ -42,7 +42,7 @@ class GroupTimeline(models.Model):
     GroupSkill = models.CharField(max_length=20,default="")
     GroupState = models.CharField(max_length=100,default="")
     GroupPhoto = models.ImageField(upload_to ='uploads/', blank=True,null=True, default="")
-    GroupVideo = models.FileField(upload_to='uploads/', blank=True, null=True, default="")
+    #GroupVideo = models.FileField(upload_to='uploads/', blank=True, null=True, default="")
     Groupcreated_at = models.DateTimeField(default=datetime.now, blank=True)
     GroupFK = models.ForeignKey(Group_tbl, on_delete=models.CASCADE)
     CreatorFK = models.ForeignKey(Person, on_delete=models.CASCADE)
@@ -61,7 +61,7 @@ class Comment(models.Model):
         db_table = 'Comment'    
     Message = models.TextField()
     Pictures = models.ImageField(upload_to='uploads/', null=True)
-    Video = models.FileField(upload_to='uploads/', null=True)
+    #Video = models.FileField(upload_to='uploads/', null=True)
     Feed = models.ForeignKey(Feed, related_name="comments", on_delete=models.CASCADE)
     Commenter = models.ForeignKey(Person, on_delete=models.CASCADE)
 
@@ -93,7 +93,7 @@ class GroupTimelineComment(models.Model):
         db_table = 'GroupTimelineComment'    
     GrpMessage = models.TextField()
     GrpPictures = models.ImageField(upload_to='uploads/', null=True)
-    GrpVideo = models.FileField(upload_to='uploads/', null=True)
+    #GrpVideo = models.FileField(upload_to='uploads/', null=True)
     GrpFeedFK = models.ForeignKey(GroupTimeline, related_name="groupcomments", on_delete=models.CASCADE)
     GrpCommenterFK = models.ForeignKey(Person, on_delete=models.CASCADE)
 
@@ -124,6 +124,37 @@ class FeedSoilTagging(models.Model):
 class FeedPlantTagging(models.Model):
 
     FeedPlantTag = models.ForeignKey(Feed, related_name="plantTagging", on_delete=models.CASCADE)    
+    plantTag = models.ForeignKey(PlantTag, on_delete=models.CASCADE)
+   
+    class Meta:  
+        unique_together = [['FeedPlantTag', 'plantTag']]
+
+    def save(self):
+        super().save()
+
+        
+    def deleteRecordIgrow(self):
+        super().delete()
+
+class GFeedSoilTagging(models.Model):
+
+    FeedSoilTag = models.ForeignKey(GroupTimeline, related_name="soilTagging", on_delete=models.CASCADE)    
+    soilTag = models.ForeignKey(SoilTag, on_delete=models.CASCADE)
+    
+    class Meta:  
+        unique_together = [['FeedSoilTag', 'soilTag']]
+
+    def save(self):
+        super().save()
+        
+        
+    def deleteRecordIgrow(self):
+        super().delete()
+
+
+class GFeedPlantTagging(models.Model):
+
+    FeedPlantTag = models.ForeignKey(GroupTimeline, related_name="plantTagging", on_delete=models.CASCADE)    
     plantTag = models.ForeignKey(PlantTag, on_delete=models.CASCADE)
    
     class Meta:  

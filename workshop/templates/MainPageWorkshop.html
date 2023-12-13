@@ -83,10 +83,11 @@
             <li class="nav-item">
         <a class="nav-link " href=" {% url 'group:MainGroup' %}">Group</a>
       </li>
+      {% if person.UserLevel == 'user' %}
       <li class="nav-item">
         <a class="nav-link" href="{% url 'MemberMainPage' %}">Member</a>
       </li>
-      
+      {% endif %}
       <li class="nav-item">
         <a class="nav-link active" href="{% url 'workshop:MainWorkshop' %}">Workshop</a>
       </li>
@@ -289,12 +290,12 @@
 
             {% if person.Email == data.PIC.Email and data.RegistrationDue == dateTime.now %}
             <th scope="row" value="{{ data.RegistrationDue }}">Closed</th>
-            <th><a class="btn btn-secondary" href="" role="button">Edit</a></th>
+            <th><a class="btn btn-secondary" href="{% url 'workshop:UpdateWorkshop' data.id %}" role="button">Edit</a></th>
             <th><a class="btn btn-secondary" href="{% url 'workshop:DeleteWorkshop' data.id %}" role="button">Delete</a></th>
 
             {% elif person.Email == data.PIC.Email and data.RegistrationDue != dateTime.now %}
             <th scope="row" value="{{ data.RegistrationDue }}">{{ data.RegistrationDue }}</th>
-            <th><a class="btn btn-primary" href="" role="button">Edit</a></th>
+            <th><a class="btn btn-primary" href="{% url 'workshop:UpdateWorkshop' data.id %}" role="button">Edit</a></th>
             <th><a class="btn btn-danger" href="{% url 'workshop:DeleteWorkshop' data.id %}" role="button">Delete</a></th>
 
             {% elif person.UserLevel == 'user' and data.RegistrationDue == dateTime.now %}

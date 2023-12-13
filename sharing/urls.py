@@ -31,8 +31,8 @@ urlpatterns = [
     path('AddLikes/<str:pk>', views.AddLikes, name="AddLikes"),
     
 
-    path('Sharing_SoilTag',views.Sharing_SoilTag, name="Sharing_SoilTag"),
-    path('Sharing_PlantTag',views.Sharing_PlantTag, name="Sharing_PlantTag"),
+    path('MainSharing/Sharing_SoilTag',views.Sharing_SoilTag, name="Sharing_SoilTag"),
+    path('MainSharing/Sharing_PlantTag',views.Sharing_PlantTag, name="Sharing_PlantTag"),
     # path('Sharing_PlantTag',views.Sharing_GeneralPlantTag, name="Sharing_GeneralPlantTag"),
     # path('Sharing_PlantTag/<str:plantTag>',views.Sharing_PlantTag, name="Sharing_PlantTag"),
     path('users/post-feed/', api.postFeed),

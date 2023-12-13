@@ -198,12 +198,17 @@
               <th scope="row"> &nbsp; </th>
               {% endif %}
 
-              {% if person.UserLevel == 'User' %}
-              <th>
-                <!-- <a href="{% url 'workshop:Booking' data.WorkshopSoilTag.id %}" class="card-link">Book</a> -->
-                <a class="btn btn-primary" href="{% url 'workshop:Booking' data.WorkshopSoilTag.id %}" role="button">Book</a>
-              </th>
+              {% for booking in booking %}
+            {% if  data.id == booking.BookWorkshop.id and booking.Participant.Email == request.session.Email %}
+              <th><a href="{% url 'workshop:MainWorkshop' %}" class="btn btn-primary" role="button" onclick="return DuplicationWarning()">Booked</a></th>
+            {% elif forloop.last %}
+            <th><a href="{% url 'workshop:Booking' data.id %}" class="btn btn-primary" role="button" onclick="return ConfirmBooking()">Book</a></th>
               {% endif %}
+            {%endfor%}
+
+            {% if not booking %}
+            <th><a href="{% url 'workshop:Booking' data.id %}" class="btn btn-primary" role="button" onclick="return ConfirmBooking()">Book</a></th>
+            {% endif %}
             </tr>
             {% endfor %}
           </tbody>
