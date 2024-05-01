@@ -89,6 +89,15 @@
       </li>
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Marketplace
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="{% url 'marketplace:MainMarketplace' %}">Browse Marketplace<span class="sr-only">(current)</span></a>
+          <a class="dropdown-item" href="{% url 'marketplace:MyMarketplace' %}">My Marketplace</a>
+        </div>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           Profile
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
