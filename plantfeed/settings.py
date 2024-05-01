@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'topic.apps.TopicConfig',
     'payment.apps.PaymentConfig',
     'orders.apps.OrdersConfig',
+    'paymentAPI.apps.PaymentapiConfig',
     'django.contrib.sites',
     'rest_framework',
     'rest_framework.authtoken',
