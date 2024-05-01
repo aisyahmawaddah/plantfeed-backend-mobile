@@ -27,3 +27,4 @@ django-rest-auth
 djoser
 gunicorn
 django-heroku
+stripe
