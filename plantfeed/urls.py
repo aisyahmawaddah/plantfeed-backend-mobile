@@ -17,6 +17,7 @@ urlpatterns = [
     path('marketplace/', include('marketplace.urls')),
     path('suggestion/', include('suggestion.urls')),
     path('basket/', include('basket.urls')),
+    path('topic/', include('topic.urls')),
     #path('api-auth/', include('rest_framework.urls')),
     path('api-auth/', include('rest_framework.urls')),
     path('plantlink/Login/', views.authenticate_user, name='authenticate_user'),

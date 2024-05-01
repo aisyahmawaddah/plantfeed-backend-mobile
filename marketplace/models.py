@@ -30,6 +30,7 @@ class prodProduct(models.Model):
     timePosted = models.DateTimeField(default=datetime.now, blank=True)
     Person_fk = models.ForeignKey(Person, on_delete=models.CASCADE)
     
+    
     def save(self):
         super().save()
         return self.productid

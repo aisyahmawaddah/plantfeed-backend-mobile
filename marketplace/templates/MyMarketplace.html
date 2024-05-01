@@ -104,7 +104,7 @@
             <body>  
               {% csrf_token %}
                 <div class="container my-3 bg-light">
-                  <label for="exampleFormControlTextarea1" style="font-size: 2em;" >Browse Marketplace</label>
+                  <label for="exampleFormControlTextarea1" style="font-size: 2em;" >My Marketplace</label>
                     <div class="row" style="float: right; padding: 5px">
                       <table style="border:none;margin: 0 auto;padding: 40px;width: fit-content;border-collapse: collapse; border-spacing: 0;">
                         <tr>
@@ -135,7 +135,7 @@
                 {% csrf_token %}
                 {% if marketplace %}
                 {% for item in marketplace reversed %}
-                {% if item.productStock > 0 %}
+                {% if item.Person_fk.Email == request.session.Email %}
                 <div class="timeline-2 left-2">
                   <div class="card" style="width: 650px;">
                     <table style="border: 0; margin-right:550px">
@@ -231,7 +231,7 @@
                 {% endfor %}
                 {% else %}
                   <div class="container text-center">
-                    <h3 style="color: #6c757d;">Markeplace is empty right now. Start selling!</h3>
+                    <h3 style="color: #6c757d;">You haven't listed any products yet. Let's get started!</h3>
                   </div>
                 {% endif %}
                 
