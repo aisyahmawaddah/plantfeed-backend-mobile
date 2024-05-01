@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+    <div class="pos-f-t">
+        <div class="collapse" id="navbarToggleExternalContent">
+          <div class="p-4" style="background-color: #8FBC8F;">
+            <h4 class="text-white">What are you looking for?</h4>
+            <span class="text-muted">Search here...</span>
+            <form class="form-inline my-2">
+              <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+              <button class="btn btn-primary" type="submit">Search</button>
+            </form>
+          </div>
+          
+        </div>
+        <nav class="navbar navbar-dark bg-success">
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+        </nav>
+      </div>
+    
+      <nav class="navbar navbar-expand navbar-dark bg-success">
+        <a class="navbar-brand" href="#">P  L  A  N  T  F  E  E  D</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'HomeAdmin' %}">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'sharing:MainSharing' %}">Sharing</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href=" {% url 'group:MainGroup' %}">Group</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'MemberMainPage' %}">Member</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Workshop</a>
+            </li>
+            {% comment %} <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Marketplace
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item" href="{% url 'marketplace:MainMarketplace' %}">Browse Marketplace<span class="sr-only">(current)</span></a>
+                <a class="dropdown-item" href="{% url 'marketplace:MyMarketplace' %}">My Marketplace</a>
+              </div>
+            </li> {% endcomment %}
+            {% comment %} <li class="nav-item">
+              <a class="nav-link" href="{% url 'marketplace:MainMarketplace' %}">Marketplace</a>
+            </li> {% endcomment %}
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'topic:Managetopic' %}">Manage Topic</a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Profile
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item" href="{% url 'ViewProfile' %}">View Profile<span class="sr-only">(current)</span></a>
+                <a class="dropdown-item" href="{% url 'EditProfile' %}">Edit Profile</a>
+              </div>
+            </li>
+    
+          </ul>
+          <a class="btn bg-light" href="{% url 'Logout' %}">
+            <img class="bi bi-arrow-bar-right">LOGOUT</img>
+          </a>
+        </div>
+      </nav>
+</html>

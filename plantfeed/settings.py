@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-p0%y%2(0)#++cz1_tjtn)4j8m#r6)r&%*1$w0*nuqmnx9xsly_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', '10.206.96.95', '127.0.0.1', '172.20.10.2']
 
 
 # Application definition
@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'marketplace.apps.MarketplaceConfig',
     'basket.apps.BasketConfig',
     'suggestion.apps.SuggestionConfig',
+    'topic.apps.TopicConfig',
     'django.contrib.sites',
     'rest_framework',
     'rest_framework.authtoken',
@@ -177,5 +178,13 @@ AUTH_USER_MODEL = 'member.Person'
 OPENAI_API_KEY = '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'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
+
+# STRIPE Implementation Try 1
+STRIPE_SECRET_KEY = 'sk_test_51P92VjP2bkNoORSJV1jEr04CyrRqrLjvZvgLaJLn2bEskMrsnetSGnl42CLiLWy2EBm1HDL8ewVUU23W0aRUbUdo00upycA0Ov'
+STRIPE_PUBLIC_KEY = 'pk_test_51P92VjP2bkNoORSJVJqlxX22bENpjRnhqQorIT5odR9NYH0VNEkorrHg428woeFtz9sqQcp0Z7UmaJhrNQOCCVkg00VvIx5USi'
+STRIPE_WEBHOOK_SECRET = 'whsec_ed69bdb1c587e7ad90e273e3daabd483c5421d8d192b8d22a91114aacf387675'
+
+EMAIL_HOST_USER = 'hafiyhakimi@graduate.utm.my'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
