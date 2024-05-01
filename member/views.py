@@ -12,6 +12,7 @@ from django.core.files.storage import FileSystemStorage
 from django.db import IntegrityError
 #from rest_framework.authtoken.views import ObtainAuthToken
 #from rest_framework.authtoken.models import Token
+from topic.models import ApprovedTopic
 
 def index(request):
   template = loader.get_template('index.html')
@@ -40,8 +41,12 @@ def UserReg(request):
         #user = Person.objects.create_user(username=Username, email=Email, password=password)
         #user.save(),
 
+        approvedTopic = ApprovedTopic.objects.all()
+        person = Person.objects.filter(Email = request.POST.get('email')).first()
         messages.success(request,'The new user ' + Username + " is save succesfully..!")
-        return render(request,'registration.html')
+        if(UserLevel == 'admin'):
+            return render(request,'login.html')
+        return render(request,'Topic.html', {'approvedTopic': approvedTopic, 'person' : person})
     else :
         return render(request,'registration.html')
 
