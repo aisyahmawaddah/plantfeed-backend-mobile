@@ -28,6 +28,7 @@ from basket.models import Basket
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.views.generic.base import TemplateView
+from decimal import Decimal
 
 import json
 import os
@@ -94,6 +95,148 @@ import os
 #         return render(request, 'summary.html', context)
 #     except Person.DoesNotExist:
 #         raise Http404('User does not exist')
+
+#09/05/2024
+# def checkout(request):
+#     product=prodProduct.objects.all()
+#     person=Person.objects.get(Email=request.session['Email'])
+#     basket = Basket.objects.all().filter(Person_fk_id=person.id,is_checkout=0)
+#     selected_product_ids = request.POST.getlist('selected_products')
+#     selected_products = prodProduct.objects.filter(productid__in=selected_product_ids)
+#     subtotal = sum(product.productPrice * basket.filter(productid=product).first().productqty for product in selected_products)
+#     total_price = sum(product.productPrice for product in selected_products)
+#     # print(selected_products)
+#     return render(request, 'checkout.html', {'selected_products': selected_products, 'total_price': total_price, 'subtotal': subtotal, 'basket': basket, 'person': person, 'product': product})
+#09/05/2024
+
+#09/05/2024
+def checkout(request):
+    product=prodProduct.objects.all()
+    person=Person.objects.get(Email=request.session['Email'])
+    basket = Basket.objects.all().filter(Person_fk_id=person.id,is_checkout=0)
+    selected_product_ids = request.POST.getlist('selected_products')
+    selected_products = Basket.objects.all().filter(id__in=selected_product_ids)
+    
+    # for x in selected_products:
+    #     subtotal = x.productid.productPrice * x.productqty
+    #     print(subtotal)
+        
+    # Initialize an empty dictionary to store subtotals
+    subtotals = {}
+    sellers = {}
+    uniqueSellers = set()
+    sellerTotal = {}
+
+    # Calculate the subtotal for each product and store it in the dictionary
+    for bas in selected_products:
+        seller = bas.productid.Person_fk_id
+        if seller not in uniqueSellers:
+            uniqueSellers.add(seller)
+            sellers[bas.id] = seller
+            print(sellers[bas.id])
+            
+            # Initialize the total for the seller
+            sellerTotal[seller] = 5
+        
+        # Calculate subtotal for the product
+        subtotal = bas.productid.productPrice * bas.productqty
+        
+        # Accumulate subtotal for the seller
+        sellerTotal[seller] += subtotal
+        
+        subtotals[bas.id] = subtotal
+        print(subtotals[bas.id])
+        
+        totalCheckout = sum(sellerTotal[seller] for seller in uniqueSellers)
+        print(totalCheckout)
+        
+    # subtotal = sum(selected_products.productid.productPrice * basket.filter(productid=product).first().productqty for product in selected_products)
+    # total_price = sum(product.productPrice for product in selected_products)
+    # subtotal = "Test"
+    # print(selected_products)
+    return render(request, 'checkout.html', {'totalCheckout': totalCheckout, 'selected_products': selected_products, 'basket': basket, 'person': person, 'product': product, 'subtotals': subtotals, 'sellers': sellers, 'sellerTotal': sellerTotal})
+
+def checkoutAll(request):
+    product=prodProduct.objects.all()
+    person=Person.objects.get(Email=request.session['Email'])
+    selected_products = Basket.objects.all().filter(Person_fk_id=person.id,is_checkout=0)
+    basket = selected_products
+    
+    # Initialize an empty dictionary to store subtotals
+    subtotals = {}
+    sellers = {}
+    uniqueSellers = set()
+    sellerTotal = {}
+
+    # Calculate the subtotal for each product and store it in the dictionary
+    for bas in selected_products:
+        seller = bas.productid.Person_fk_id
+        if seller not in uniqueSellers:
+            uniqueSellers.add(seller)
+            sellers[bas.id] = seller
+            print(sellers[bas.id])
+            
+            # Initialize the total for the seller
+            sellerTotal[seller] = 5
+        
+        # Calculate subtotal for the product
+        subtotal = bas.productid.productPrice * bas.productqty
+        
+        # Accumulate subtotal for the seller
+        sellerTotal[seller] += subtotal
+        
+        subtotals[bas.id] = subtotal
+        print(subtotals[bas.id])
+        
+        print(sellerTotal[seller])
+        
+        totalCheckout = sum(sellerTotal[seller] for seller in uniqueSellers)
+        print(totalCheckout)
+        
+    # subtotal = sum(product.productPrice * selected_products.productqty)
+    # total_price = sum(product.productPrice)
+    # subtotal = "Test"
+    print(selected_products)
+    return render(request, 'checkout.html', {'totalCheckout': totalCheckout, 'subtotals': subtotals, 'basket': basket, 'selected_products':selected_products, 'person': person, 'product': product, 'sellers': sellers, 'sellerTotal': sellerTotal})
+
+#09/05/2024
+
+
+
+#10/05/2024
+# from collections import defaultdict
+
+# def checkout(request):
+#     person = Person.objects.get(Email=request.session['Email'])
+#     basket = Basket.objects.filter(Person_fk=person, is_checkout=0)
+    
+#     selected_product_ids = request.POST.getlist('selected_products')
+#     selected_products = prodProduct.objects.filter(productid__in=selected_product_ids)
+    
+#     # Create a dictionary to organize products by seller
+#     products_by_seller = defaultdict(list)
+#     for product in selected_products:
+#         seller = product.Person_fk
+#         products_by_seller[seller].append(product)
+    
+#     # Calculate subtotal for each product and total price for each seller
+#     for seller, products in products_by_seller.items():
+#         seller.total_price = sum(product.productPrice * basket.filter(productid=product).first().productqty for product in products)
+#         for product in products:
+#             product.subtotal = product.productPrice * basket.filter(productid=product).first().productqty
+    
+#     # Calculate total price including shipping for each seller
+#     shipping_fee = Decimal('5.00')
+#     for seller, products in products_by_seller.items():
+#         seller.total_price_with_shipping = seller.total_price + shipping_fee
+    
+#     return render(request, 'checkout.html', {
+#         'products_by_seller': products_by_seller,
+#         'person': person,
+#         'basket': basket,
+#         'selected_products': selected_products
+#     })
+#10/05/2024
 
 def summary(request):
     try:
