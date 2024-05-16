@@ -23,6 +23,26 @@ from django.http import JsonResponse
 from django.views.generic.base import TemplateView
 from django.utils import timezone
 from orders.models import Order
+from django.shortcuts import render
+
+# Create your views here.
+# STRIPE Implementation Try 1
+from django.http import JsonResponse
+import stripe
+from django.shortcuts import redirect
+from django.views import View
+from django.core.mail import send_mail
+from django.conf import settings
+from django.views.generic import TemplateView
+from marketplace.models import prodProduct
+from orders.models import Order
+from member.models import Person
+from django.http.response import Http404
+from basket.models import Basket
+# Set your secret key. Remember to switch to your live secret key in production.
+# See your keys here: https://dashboard.stripe.com/apikeys
+stripe.api_key = settings.STRIPE_SECRET_KEY
+from django.views.decorators.csrf import csrf_exempt
 
 import json
 import os
@@ -107,3 +127,103 @@ def pay(request):
     ord.save()
     Basket.objects.all().filter(Person_fk_id=person.id,is_checkout=0).update(is_checkout=1,transaction_code=tcode, status = orderStatus)
     return redirect('orders:history')
+
+def checkoutSession(request):
+    if request.method == 'POST':
+        person=Person.objects.get(Email=request.session['Email'])
+        selected_product_ids = request.POST.getlist('selected_products')
+        selected_products = Basket.objects.all().filter(id__in=selected_product_ids)
+        YOUR_DOMAIN = "http://127.0.0.1:8000/payment"     
+        
+        line_items = []
+        
+        for product in selected_products:
+            description = product.productid.productDesc if product.productid.productDesc else "No description available"
+            line_items.append({
+                'price_data': {
+                    'currency': 'myr',
+                    'unit_amount': int((product.productid.productPrice + 2) * 100),
+                    'product_data': {
+                        'name': product.productid.productName,
+                        'description': description,
+                    },
+                },
+                'quantity': product.productqty,
+            })
+        
+        checkout_session = stripe.checkout.Session.create(
+            customer_email=person.Email,
+            submit_type='pay',
+            shipping_address_collection={
+              'allowed_countries': ['MY', 'SG', 'ID', 'TH', 'BN'],
+            },
+            payment_method_types=['card'],
+            line_items=line_items,
+            # metadata={'selected_products': str(selected_product_ids)},  # convert to string if needed
+            mode='payment',
+            success_url=YOUR_DOMAIN + '/success/',
+            cancel_url=YOUR_DOMAIN + '/cancel/',
+        )
+        return JsonResponse({
+            'id': checkout_session.id,
+        })
+        
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+        
+# def create_checkout_session(request):
+#     if request.method == 'POST':
+#         product_ids = request.POST.getlist('selected_products')
+#         products = Basket.objects.all().filter(id__in=product_ids)
+#         YOUR_DOMAIN = "http://127.0.0.1:8000/paymentAPI"
+
+#         line_items = []
+#         for product in products:
+#             line_items.append({
+#                 'price_data': {
+#                     'currency': 'myr',
+#                     'unit_amount': int(product.productid.productPrice * 100),
+#                     'product_data': {
+#                         'name': product.productid.productName,
+#                     },
+#                 },
+#                 'quantity': 1,
+#             })
+
+#         checkout_session = stripe.checkout.Session.create(
+#             payment_method_types=['card'],
+#             line_items=line_items,
+#             mode='payment',
+#             success_url=YOUR_DOMAIN + '/success/',
+#             cancel_url=YOUR_DOMAIN + '/cancel/',
+#         )
+
+#         return JsonResponse({
+#             'id': checkout_session.id
+#         })
+
+#     return JsonResponse({'error': 'Invalid request'}, status=400)
+        
+def successCheckout(request):
+    return render(request,'success.html')  
+   
+def cancelCheckout(request):
+    try:
+        product=prodProduct.objects.all()
+        person=Person.objects.get(Email=request.session['Email'])
+        user=Person.objects.all()
+        allBasket = Basket.objects.all().filter(Person_fk_id=person.id,is_checkout=0)
+            
+        total = 0
+            
+        for x in allBasket:
+            total += x.productid.productPrice * x.productqty
+        context = {
+            'allBasket': allBasket,
+            'product': product,
+            'person': person,
+            'user': user,
+            'total':total
+        }
+        return render(request,'summary.html', context)
+    except prodProduct.DoesNotExist:
+        raise Http404('Data does not exist')

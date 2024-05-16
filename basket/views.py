@@ -29,6 +29,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.views.generic.base import TemplateView
 from decimal import Decimal
+from django.conf import settings
 
 import json
 import os
@@ -154,7 +155,7 @@ def checkout(request):
     # total_price = sum(product.productPrice for product in selected_products)
     # subtotal = "Test"
     # print(selected_products)
-    return render(request, 'checkout.html', {'totalCheckout': totalCheckout, 'selected_products': selected_products, 'basket': basket, 'person': person, 'product': product, 'subtotals': subtotals, 'sellers': sellers, 'sellerTotal': sellerTotal})
+    return render(request, 'checkout.html', {'totalCheckout': totalCheckout, 'selected_products': selected_products, 'basket': basket, 'person': person, 'product': product, 'subtotals': subtotals, 'sellers': sellers, 'sellerTotal': sellerTotal, 'STRIPE_PUBLIC_KEY': settings.STRIPE_PUBLIC_KEY})
 
 def checkoutAll(request):
     product=prodProduct.objects.all()
@@ -197,7 +198,7 @@ def checkoutAll(request):
     # total_price = sum(product.productPrice)
     # subtotal = "Test"
     print(selected_products)
-    return render(request, 'checkout.html', {'totalCheckout': totalCheckout, 'subtotals': subtotals, 'basket': basket, 'selected_products':selected_products, 'person': person, 'product': product, 'sellers': sellers, 'sellerTotal': sellerTotal})
+    return render(request, 'checkout.html', {'totalCheckout': totalCheckout, 'subtotals': subtotals, 'basket': basket, 'selected_products':selected_products, 'person': person, 'product': product, 'sellers': sellers, 'sellerTotal': sellerTotal, 'STRIPE_PUBLIC_KEY': settings.STRIPE_PUBLIC_KEY})
 
 #09/05/2024
 
