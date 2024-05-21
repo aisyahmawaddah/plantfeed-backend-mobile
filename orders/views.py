@@ -5,7 +5,7 @@ from marketplace.models import prodProduct
 from django.core.cache import cache
 from basket.models import Basket
 from .models import Person
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http.response import Http404
 from django.shortcuts import render, redirect, get_object_or_404
 # from LOGIN.models import Person as FarmingPerson
@@ -29,6 +29,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.views.generic.base import TemplateView
 from orders.models import Order
+from decimal import Decimal
+from collections import defaultdict
 
 import json
     
@@ -56,7 +58,8 @@ def history(request):
         person=Person.objects.get(Email=request.session['Email'])
         user=Person.objects.all()
         allBasket = Basket.objects.all().filter(Person_fk_id=person.id,is_checkout=1)
-        basketCount = Basket.objects.all().filter(Person_fk_id=person.id,is_checkout=0)
+        basketCount = Basket.objects.all().filter(Person_fk_id=person.id,is_checkout=0)    
+        
         context = {
             'allBasket': allBasket,
             'basketCount': basketCount,
@@ -68,32 +71,55 @@ def history(request):
     except prodProduct.DoesNotExist:
         raise Http404('Data does not exist')
 
-def cancel_order(request):
-    transaction_code = request.POST.get('transaction_code')
+# def cancel_order(request):
+#     transaction_code = request.POST.get('transaction_code')
 
-    order_obj = Order.objects.get(transaction_code=transaction_code)
-    order_obj.status = "Cancel"
-    order_obj.save()
+#     order_obj = Order.objects.get(transaction_code=transaction_code)
+#     order_obj.status = "Cancel"
+#     order_obj.save()
     
-    basket_obj = Basket.objects.filter(transaction_code=transaction_code)
-    basket_obj.update(status="Cancel")
+#     basket_obj = Basket.objects.filter(transaction_code=transaction_code)
+#     basket_obj.update(status="Cancel")
 
-    return JsonResponse({'status': 1, 'message': 'status updated to Cancelled'})
+#     return JsonResponse({'status': 1, 'message': 'status updated to Cancelled'})
 
-def complete_order(request):
-    transaction_code = request.POST.get('transaction_code')
-    # product=prodProduct.objects.all()
-    # product.productStock -= product.productqty
-    # product.save()
-    order_obj = Order.objects.get(transaction_code=transaction_code)
-    order_obj.status = "Order Received"
-    order_obj.save()
+def cancel_order(request, fk1, seller_id):
+    ids = get_object_or_404(Basket, id=fk1)
+    basket = Basket.objects.filter(transaction_code=ids.transaction_code, productid__Person_fk_id=seller_id)
+    order = get_object_or_404(Order, transaction_code=ids.transaction_code)
     
-    basket_obj = Basket.objects.filter(transaction_code=transaction_code)
-    basket_obj.update(status="Order Received")
+    order.status = "Cancel"
+    order.save()
+    
+    basket.update(status="Cancel")
+    
+    return redirect('orders:history')
 
-    return JsonResponse({'status': 1, 'message': 'status updated to Completed'})
+def complete_order(request, fk1, seller_id):
+    ids = get_object_or_404(Basket, id=fk1)
+    basket = Basket.objects.filter(transaction_code=ids.transaction_code, productid__Person_fk_id=seller_id)
+    order = get_object_or_404(Order, transaction_code=ids.transaction_code)
+    
+    order.status = "Order Received"
+    order.save()
+    
+    basket.update(status="Order Received")
+    
+    return redirect('orders:history')
 
+# def complete_order(request):
+#     transaction_code = request.POST.get('transaction_code')
+#     # product=prodProduct.objects.all()
+#     # product.productStock -= product.productqty
+#     # product.save()
+#     order_obj = Order.objects.get(transaction_code=transaction_code)
+#     order_obj.status = "Order Received"
+#     order_obj.save()
+    
+#     basket_obj = Basket.objects.filter(transaction_code=transaction_code)
+#     basket_obj.update(status="Order Received")
+
+#     return JsonResponse({'status': 1, 'message': 'status updated to Completed'})
 
 # def invoice(request,fk1):
 #     ids = Basket.objects.get(id=fk1)
@@ -102,11 +128,17 @@ def complete_order(request):
 #     order = Order.objects.get(transaction_code=ids.transaction_code)
 #     return render(request,'invoice.html',{'basket':basket,'order':order, 'product':product})
 
-def invoice(request,fk1):
-    ids = Basket.objects.get(id=fk1)
-    basket = Basket.objects.all().filter(transaction_code=ids.transaction_code)
-    order = Order.objects.get(transaction_code=ids.transaction_code)
-    return render(request,'invoice.html',{'basket':basket,'order':order})
+def invoice(request,fk1, seller_id):
+    ids = get_object_or_404(Basket, id=fk1)
+    basket = Basket.objects.filter(transaction_code=ids.transaction_code, productid__Person_fk_id=seller_id)
+    order = get_object_or_404(Order, transaction_code=ids.transaction_code)
+    
+    total = sum((bas.productid.productPrice * bas.productqty for bas in basket))
+    shipping = sum((bas.productqty * Decimal('5.00') for bas in basket))  # Shipping is RM5.00 per item
+    
+    final_total = total + shipping
+    
+    return render(request,'invoice.html',{'basket':basket,'order':order, 'shipping':shipping, 'final_total':final_total})
 
 # def invoice(request, fk1):
 #     try:
@@ -124,32 +156,33 @@ def invoice(request,fk1):
 #     except Basket.DoesNotExist:
 #         raise Http404('Basket does not exist')
 
-def order_again(request, transaction_code):
-    basket = Basket.objects.filter(transaction_code=transaction_code, is_checkout=1)
+def order_again(request, fk1, seller_id):
+    ids = get_object_or_404(Basket, id=fk1)
+    basket = Basket.objects.filter(transaction_code=ids.transaction_code, productid__Person_fk_id=seller_id)
     for item in basket:
         product = item.productid
         user = item.Person_fk
         productqty = item.productqty
 
-    if product.productStock < productqty:
-        messages.error(request, f'{product.productName}(s) exceeds the stock limit in your basket')
-        return redirect('../../../MainMarketplace.html')
-
-    basket = Basket.objects.filter(productid=product, Person_fk=user, is_checkout=0)
-
-    if len(basket) > 0:
-        basket = Basket.objects.get(Person_fk=user, productid=product, is_checkout=0)
-        if basket.productqty + productqty > product.productStock:
+        if product.productStock < productqty:
             messages.error(request, f'{product.productName}(s) exceeds the stock limit in your basket')
             return redirect('../../../MainMarketplace.html')
-        basket.productqty += productqty
-        basket.save()
 
-        messages.success(request, 'Previous order successfully added to your basket')
-        return redirect('basket:summary',)
-    else:
-        basket = Basket(productqty=productqty, productid=product, Person_fk=user, is_checkout=0,
-                        transaction_code='').save()
+        basket = Basket.objects.filter(productid=product, Person_fk=user, is_checkout=0)
+
+        if len(basket) > 0:
+            basket = Basket.objects.get(Person_fk=user, productid=product, is_checkout=0)
+            if basket.productqty + productqty > product.productStock:
+                messages.error(request, f'{product.productName}(s) exceeds the stock limit in your basket')
+                return redirect('../../../MainMarketplace.html')
+            basket.productqty += productqty
+            basket.save()
+
+            messages.success(request, 'Previous order successfully added to your basket')
+            return redirect('basket:summary',)
+        else:
+            basket = Basket(productqty=productqty, productid=product, Person_fk=user, is_checkout=0,
+                            transaction_code='').save()
 
     return redirect('basket:summary',)
 

@@ -236,24 +236,24 @@
 
 
 
-
-
-
+{% load ordersfilter %}
     <table class="table" style="border:none;margin: 0 auto;padding: 40px;width: fit-content;border-collapse: collapse; border-spacing: 0;">
       <thead>
         <tr>
           <th scope="col" style="text-align: center">#</th>
-          <th scope="col" style="width: 300px; text-align: center">Transaction Code</th>
-          <th scope="col" style="width: 300px; text-align: center">Status</th>
+          <th scope="col" style="width: 150px; text-align: center">Transaction Code</th>
+          <th scope="col" style="width: 150px; text-align: center">Seller</th>
+          <th scope="col" style="width: 200px; text-align: center">Status</th>
           <th scope="col" style="width: 120px; text-align: center">Details</th>
           <th style="width: 300px; text-align: center" scope="col">&nbsp</th>
         </tr>
       </thead>
       <tbody>
-          {% for bas in allBasket|dictsortreversed:"transaction_code" %}
+        {% for bas in allBasket|unique_combinations reversed %}
         <tr>
           <th style="width: 80px; text-align: center" scope="row">{{forloop.counter}}</th>
           <td style="width: 150px; text-align: center">{{ bas.transaction_code }}</td>
+          <td style="width: 200px; text-align: center">{{ bas.productid.Person_fk.Name }}</td>
           <td style="width: 200px; text-align: center">
             {% if bas.status == "Cancel" %}
               <button style="width: 160px; text-align: center" class="btn btn-danger" disabled>{{ bas.status }}</button>
@@ -263,17 +263,17 @@
               <button style="width: 160px; text-align: center" class="btn btn-info" disabled>{{ bas.status }}</button>
             {% endif %}
           </td>
-          <td><a href="{% url 'orders:invoice' bas.id %}" class="btn btn-secondary" style="width: 120px; text-align: center">View</a></td>
+          <td><a href="{% url 'orders:invoice' bas.id bas.productid.Person_fk_id %}" class="btn btn-secondary" style="width: 120px; text-align: center">View</a></td>
           <td style="vertical-align: middle; text-align: center">
             {% if bas.status == "Cancel" or bas.status == "Order Received"%}
-            <a href="{% url 'orders:order_again' bas.transaction_code %}" style="width: 120px; text-align: center" 
-            class="btn btn-warning"><i class="fa-solid fa-repeat"></i></i> Re-Order</a>
+            <a href="{% url 'orders:order_again' bas.id bas.productid.Person_fk_id %}" style="width: 120px; text-align: center" 
+            class="btn btn-warning"><i class="fa-solid fa-repeat"></i></i> Re-Order </a>
             {% elif bas.status == "Ship Order" %}
-            <button style="width: 120px; text-align: center" 
-            class="btn btn-info" id="{{ bas.transaction_code }}" onclick="confirmCompleteOrder('{{ bas.transaction_code }}')"><i class="fa-solid fa-check"></i> Complete</button>
+              <a href="{% url 'orders:complete_order' bas.id bas.productid.Person_fk_id %}" style="width: 120px; text-align: center" 
+              class="btn btn-info"><i class="fa-solid fa-repeat"></i></i> Complete </a>
             {% else %}
-              <button style="width: 120px; text-align: center" 
-              class="btn btn-danger" id="{{ bas.transaction_code }}" onclick="confirmCancelOrder('{{ bas.transaction_code }}')"><i class="fa fa-trash"></i> Cancel </button>
+              <a href="{% url 'orders:cancel_order' bas.id bas.productid.Person_fk_id %}" style="width: 120px; text-align: center" 
+              class="btn btn-danger"><i class="fa-solid fa-repeat"></i></i> Cancel </a>
             {% endif %}
           </td>
         </tr>

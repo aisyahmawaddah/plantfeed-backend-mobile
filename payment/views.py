@@ -44,6 +44,7 @@ from basket.models import Basket
 stripe.api_key = settings.STRIPE_SECRET_KEY
 from django.views.decorators.csrf import csrf_exempt
 from urllib.parse import urlencode
+from decimal import Decimal
 
 import json
 import os
@@ -98,106 +99,18 @@ import os
 #     except Person.DoesNotExist:
 #         raise Http404('User does not exist')
 
-def pay(request):
-    tcode = 'TRANS#'+str(timezone.now())
-    orderStatus = "Payment Made"
-    person=Person.objects.get(Email=request.session['Email'])
-    
-    for bas in Basket.objects.all().filter(Person_fk_id=person.id,is_checkout=0) :
-        prod = prodProduct.objects.all().get(productid=bas.productid.productid)
-        prod.productStock -= bas.productqty
-        if prod.productStock < 0 :
-            return HttpResponse('Stock is not enough', content_type='application/json')
-        else :
-            prod.save()
-    ord = Order()
-    ord.name = request.POST['name']
-    ord.email = request.POST['email']
-    ord.address = request.POST['address']
-    ord.payment = request.POST['payment']
-    ord.creditnumber = request.POST['creditnumber']
-    ord.expiration = request.POST['expiration']
-    ord.cvv = request.POST['cvv']
-    ord.transaction_code = tcode
-    ord.user_id = person.id
-    ord.namecard = request.POST['namecard']
-    ord.shipping = request.POST['shipping']
-    ord.total = request.POST['total']
-    ord.status = orderStatus
-
-    ord.save()
-    Basket.objects.all().filter(Person_fk_id=person.id,is_checkout=0).update(is_checkout=1,transaction_code=tcode, status = orderStatus)
-    return redirect('orders:history')
-
-def checkoutSession(request):
-    if request.method == 'POST':
-        person=Person.objects.get(Email=request.session['Email'])
-        selected_product_ids = request.POST.getlist('selected_products')
-        selected_products = Basket.objects.all().filter(id__in=selected_product_ids)
-        YOUR_DOMAIN = "http://127.0.0.1:8000/payment"     
-        
-        line_items = []
-        
-        for product in selected_products:
-            description = product.productid.productDesc if product.productid.productDesc else "No description available"
-            line_items.append({
-                'price_data': {
-                    'currency': 'myr',
-                    'unit_amount': int((product.productid.productPrice + 2) * 100),
-                    'product_data': {
-                        'name': product.productid.productName,
-                        'description': description,
-                    },
-                },
-                'quantity': product.productqty,
-            })
-            
-        success_url = YOUR_DOMAIN + '/pay/' + urlencode({'selected_products': ','.join(selected_product_ids)})
-        
-        checkout_session = stripe.checkout.Session.create(
-            customer_email=person.Email,
-            submit_type='pay',
-            shipping_address_collection={
-              'allowed_countries': ['MY', 'SG', 'ID', 'TH', 'BN'],
-            },
-            payment_method_types=['card'],
-            line_items=line_items,
-            # metadata={'selected_products': str(selected_product_ids)},  # convert to string if needed
-            mode='payment',
-            success_url=YOUR_DOMAIN + '/success/',
-            cancel_url=YOUR_DOMAIN + '/cancel/',
-        )
-        return JsonResponse({
-            'id': checkout_session.id,
-        })
-        
-    return JsonResponse({'error': 'Invalid request'}, status=400)
-
 # def pay(request):
 #     tcode = 'TRANS#'+str(timezone.now())
 #     orderStatus = "Payment Made"
 #     person=Person.objects.get(Email=request.session['Email'])
-#     selected_product_ids = request.GET.get('selected_products')
-#     if selected_product_ids:
-#         selected_product_ids = selected_product_ids.split(',')
-#         selected_products = Basket.objects.filter(id__in=selected_product_ids)
     
-#     sellers = {}
-#     uniqueSellers = set()
-    
-#     for bas in selected_products :
+#     for bas in Basket.objects.all().filter(Person_fk_id=person.id,is_checkout=0) :
 #         prod = prodProduct.objects.all().get(productid=bas.productid.productid)
 #         prod.productStock -= bas.productqty
 #         if prod.productStock < 0 :
 #             return HttpResponse('Stock is not enough', content_type='application/json')
 #         else :
 #             prod.save()
-            
-#         seller = bas.productid.Person_fk_id
-#         if seller not in uniqueSellers:
-#             uniqueSellers.add(seller)
-#             sellers[bas.id] = seller
-        
 #     ord = Order()
 #     ord.name = request.POST['name']
 #     ord.email = request.POST['email']
@@ -216,6 +129,88 @@ def checkoutSession(request):
 #     ord.save()
 #     Basket.objects.all().filter(Person_fk_id=person.id,is_checkout=0).update(is_checkout=1,transaction_code=tcode, status = orderStatus)
 #     return redirect('orders:history')
+
+def checkoutSession(request):
+    if request.method == 'POST':
+        person=Person.objects.get(Email=request.session['Email'])
+        selected_product_ids = request.POST.getlist('selected_products')
+        selected_products = Basket.objects.all().filter(id__in=selected_product_ids)
+        YOUR_DOMAIN = "http://127.0.0.1:8000/payment"     
+        
+        line_items = []
+        
+        for product in selected_products:
+            description = product.productid.productDesc if product.productid.productDesc else "No description available"
+            line_items.append({
+                'price_data': {
+                    'currency': 'myr',
+                    'unit_amount': int((product.productid.productPrice + 5) * 100),
+                    'product_data': {
+                        'name': product.productid.productName,
+                        'description': description,
+                    },
+                },
+                'quantity': product.productqty,
+            })
+            
+        success_url = f"{YOUR_DOMAIN}/pay/?{urlencode({'selected_products': ','.join(selected_product_ids)})}"
+        
+        checkout_session = stripe.checkout.Session.create(
+            customer_email=person.Email,
+            submit_type='pay',
+            shipping_address_collection={
+              'allowed_countries': ['MY', 'SG', 'ID', 'TH', 'BN'],
+            },
+            payment_method_types=['card'],
+            line_items=line_items,
+            # metadata={'selected_products': str(selected_product_ids)},  # convert to string if needed
+            mode='payment',
+            success_url=success_url,
+            # success_url=YOUR_DOMAIN + '/success/',
+            cancel_url=YOUR_DOMAIN + '/cancel/',
+        )
+        return JsonResponse({
+            'id': checkout_session.id,
+        })
+        
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def pay(request):
+    tcode = 'TRANS#'+str(timezone.now())
+    orderStatus = "Payment Made"
+    person=Person.objects.get(Email=request.session['Email'])
+    selected_product_ids = request.GET.get('selected_products')
+    if selected_product_ids:
+        selected_product_ids = selected_product_ids.split(',')
+        selected_products = Basket.objects.filter(id__in=selected_product_ids)
+    
+    totalPrice = Decimal('0.00')
+    
+    for bas in selected_products :
+        prod = prodProduct.objects.all().get(productid=bas.productid.productid)
+        prod.productStock -= bas.productqty
+        if prod.productStock < 0 :
+            return HttpResponse('Stock is not enough', content_type='application/json')
+        else :
+            prod.save()
+            
+        # Calculate subtotal for the product
+        subtotal = (bas.productid.productPrice * bas.productqty) + Decimal('5.00')
+        
+        totalPrice += subtotal
+        print(subtotal)
+        
+    ord = Order()
+    ord.name = person.Name
+    ord.email = person.Email
+    ord.transaction_code = tcode
+    ord.user_id = person.id
+    ord.total = totalPrice
+    ord.status = orderStatus
+
+    ord.save()
+    selected_products.update(is_checkout=1,transaction_code=tcode, status = orderStatus)
+    return redirect('orders:history')
         
 # def create_checkout_session(request):
 #     if request.method == 'POST':

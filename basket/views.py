@@ -137,10 +137,10 @@ def checkout(request):
             print(sellers[bas.id])
             
             # Initialize the total for the seller
-            sellerTotal[seller] = 5
+            sellerTotal[seller] = 0
         
         # Calculate subtotal for the product
-        subtotal = bas.productid.productPrice * bas.productqty
+        subtotal = bas.productid.productPrice * bas.productqty + 5
         
         # Accumulate subtotal for the seller
         sellerTotal[seller] += subtotal
@@ -178,10 +178,10 @@ def checkoutAll(request):
             print(sellers[bas.id])
             
             # Initialize the total for the seller
-            sellerTotal[seller] = 5
+            sellerTotal[seller] = 0
         
         # Calculate subtotal for the product
-        subtotal = bas.productid.productPrice * bas.productqty
+        subtotal = bas.productid.productPrice * bas.productqty + 5
         
         # Accumulate subtotal for the seller
         sellerTotal[seller] += subtotal
