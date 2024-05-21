@@ -118,7 +118,7 @@ AUTHENTICATION_BACKENDS = (
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'newplantfeed',
+        'NAME': 'newplantfeed2',
         'USER':'root',
         'PASSWORD':'',
         'HOST':'localhost',

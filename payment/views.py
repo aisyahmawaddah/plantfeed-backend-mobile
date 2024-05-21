@@ -43,6 +43,7 @@ from basket.models import Basket
 # See your keys here: https://dashboard.stripe.com/apikeys
 stripe.api_key = settings.STRIPE_SECRET_KEY
 from django.views.decorators.csrf import csrf_exempt
+from urllib.parse import urlencode
 
 import json
 import os
@@ -150,6 +151,8 @@ def checkoutSession(request):
                 },
                 'quantity': product.productqty,
             })
+            
+        success_url = YOUR_DOMAIN + '/pay/' + urlencode({'selected_products': ','.join(selected_product_ids)})
         
         checkout_session = stripe.checkout.Session.create(
             customer_email=person.Email,
@@ -169,6 +172,50 @@ def checkoutSession(request):
         })
         
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
+# def pay(request):
+#     tcode = 'TRANS#'+str(timezone.now())
+#     orderStatus = "Payment Made"
+#     person=Person.objects.get(Email=request.session['Email'])
+#     selected_product_ids = request.GET.get('selected_products')
+#     if selected_product_ids:
+#         selected_product_ids = selected_product_ids.split(',')
+#         selected_products = Basket.objects.filter(id__in=selected_product_ids)
+    
+#     sellers = {}
+#     uniqueSellers = set()
+    
+#     for bas in selected_products :
+#         prod = prodProduct.objects.all().get(productid=bas.productid.productid)
+#         prod.productStock -= bas.productqty
+#         if prod.productStock < 0 :
+#             return HttpResponse('Stock is not enough', content_type='application/json')
+#         else :
+#             prod.save()
+            
+#         seller = bas.productid.Person_fk_id
+#         if seller not in uniqueSellers:
+#             uniqueSellers.add(seller)
+#             sellers[bas.id] = seller
+        
+#     ord = Order()
+#     ord.name = request.POST['name']
+#     ord.email = request.POST['email']
+#     ord.address = request.POST['address']
+#     ord.payment = request.POST['payment']
+#     ord.creditnumber = request.POST['creditnumber']
+#     ord.expiration = request.POST['expiration']
+#     ord.cvv = request.POST['cvv']
+#     ord.transaction_code = tcode
+#     ord.user_id = person.id
+#     ord.namecard = request.POST['namecard']
+#     ord.shipping = request.POST['shipping']
+#     ord.total = request.POST['total']
+#     ord.status = orderStatus
+
+#     ord.save()
+#     Basket.objects.all().filter(Person_fk_id=person.id,is_checkout=0).update(is_checkout=1,transaction_code=tcode, status = orderStatus)
+#     return redirect('orders:history')
         
 # def create_checkout_session(request):
 #     if request.method == 'POST':
