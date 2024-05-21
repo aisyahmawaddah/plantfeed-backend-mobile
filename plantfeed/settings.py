@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 import os
+import environ
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -116,14 +117,18 @@ AUTHENTICATION_BACKENDS = (
 #    }
 #}
 
+env = environ.Env()
+# reading .env file
+environ.Env.read_env()
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'newplantfeed2',
-        'USER':'root',
-        'PASSWORD':'',
-        'HOST':'localhost',
-        'PORT':'3306',
+        'NAME': env("DATABASE_NAME"),
+        'USER': env("DATABASE_USER"),
+        'PASSWORD':env("DATABASE_PASSWORD"),
+        'HOST': env("DATABASE_HOST"),
+        'PORT': env("DATABASE_PORT"),
         'OPTIONS':{
             'init_command':"SET sql_mode='STRICT_TRANS_TABLES'",
         }
@@ -184,9 +189,9 @@ OPENAI_API_KEY = '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'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 # STRIPE Implementation Try 1
-STRIPE_SECRET_KEY = 'sk_test_51P92VjP2bkNoORSJV1jEr04CyrRqrLjvZvgLaJLn2bEskMrsnetSGnl42CLiLWy2EBm1HDL8ewVUU23W0aRUbUdo00upycA0Ov'
-STRIPE_PUBLIC_KEY = 'pk_test_51P92VjP2bkNoORSJVJqlxX22bENpjRnhqQorIT5odR9NYH0VNEkorrHg428woeFtz9sqQcp0Z7UmaJhrNQOCCVkg00VvIx5USi'
-STRIPE_WEBHOOK_SECRET = 'whsec_ed69bdb1c587e7ad90e273e3daabd483c5421d8d192b8d22a91114aacf387675'
+STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
+STRIPE_PUBLIC_KEY = env("STRIPE_PUBLIC_KEY")
+STRIPE_WEBHOOK_SECRET = env("STRIPE_WEBHOOK_SECRET")
 
 EMAIL_HOST_USER = 'hafiyhakimi@graduate.utm.my'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

@@ -91,6 +91,12 @@ def cancel_order(request, fk1, seller_id):
     order.status = "Cancel"
     order.save()
     
+    for basket_item in basket:
+        # Update the product stock for each item in the basket
+        product = basket_item.productid  # Access the prodProduct instance
+        product.productStock += basket_item.productqty  # Update the stock
+        product.save()  # Save the changes
+    
     basket.update(status="Cancel")
     
     return redirect('orders:history')
