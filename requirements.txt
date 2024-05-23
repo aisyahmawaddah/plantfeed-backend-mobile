@@ -28,3 +28,4 @@ djoser
 gunicorn
 django-heroku
 stripe
+django-environ
