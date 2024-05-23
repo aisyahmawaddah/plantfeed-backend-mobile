@@ -36,4 +36,4 @@ EXPOSE 8000
 ENV DJANGO_SETTINGS_MODULE=plantfeed.settings
 
 # Run the application
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "plantfeed.wsgi:application"]
+# CMD ["gunicorn", "--bind", "0.0.0.0:8000", "plantfeed.wsgi:application"]
