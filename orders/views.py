@@ -195,20 +195,20 @@ def order_again(request, fk1, seller_id):
 #SELLER's HISTORY
 def SellHistory(request, fk1):
     seller = Person.objects.get(pk=fk1)
-    products = prodProduct.objects.all().filter(Person_fk=seller)
+    products = prodProduct.objects.filter(Person_fk=seller)
     product_ids = [product.productid for product in products]
-    baskets = Basket.objects.all().filter(productid__in=product_ids, is_checkout=1)
-    transactions = [basket.transaction_code for basket in baskets]
-    orders = Order.objects.all().filter(transaction_code__in=transactions)
+    baskets = Basket.objects.filter(productid__in=product_ids, is_checkout=1)
+    transactions = baskets.values_list('transaction_code', flat=True).distinct()
+    orders = Order.objects.filter(transaction_code__in=transactions)
+
     products_by_order = {}
-    unique_transactions = set()
     for order in orders:
-        if order.transaction_code in unique_transactions:
-            continue
-        unique_transactions.add(order.transaction_code)
-        product_baskets = Basket.objects.all().filter(transaction_code__in=[o.transaction_code for o in orders.filter(transaction_code=order.transaction_code)])
+        product_baskets = Basket.objects.filter(transaction_code=order.transaction_code, productid__in=product_ids)
         products = []
+        total_price_for_seller = Decimal('0.00')
         for product_basket in product_baskets:
+            subtotal = product_basket.productid.productPrice * product_basket.productqty
+            total_price_for_seller += subtotal
             products.append({
                 "address": order.address,
                 "total": order.total,
@@ -220,14 +220,17 @@ def SellHistory(request, fk1):
                 "productCategory": product_basket.productid.productCategory,
                 "orderStatus": order.status,
             })
-        products_by_order[order.transaction_code] = {
-            "transaction_code": product_basket.transaction_code,
-            "buyer_email": order.email,
-            "buyer_name": order.name,
-            "products": products,
-            "orderStatus": order.status
-        }
-    if len(products_by_order) > 0:
+        if products:  # Only add to the dictionary if there are products for this seller
+            products_by_order[order.transaction_code] = {
+                "transaction_code": order.transaction_code,
+                "buyer_email": order.email,
+                "buyer_name": order.name,
+                "products": products,
+                "total_price_for_seller": total_price_for_seller,
+                "orderStatus": order.status
+            }
+
+    if products_by_order:
         return render(request, 'SellHistory.html', {'products_by_order': products_by_order})
     else:
         return render(request, 'SellHistory.html', {'message': 'No orders found. Start selling your items!'})

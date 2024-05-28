@@ -140,7 +140,7 @@ def checkout(request):
             sellerTotal[seller] = 0
         
         # Calculate subtotal for the product
-        subtotal = bas.productid.productPrice * bas.productqty + 5
+        subtotal = bas.productid.productPrice * bas.productqty + (5*bas.productqty)
         
         # Accumulate subtotal for the seller
         sellerTotal[seller] += subtotal
@@ -181,7 +181,7 @@ def checkoutAll(request):
             sellerTotal[seller] = 0
         
         # Calculate subtotal for the product
-        subtotal = bas.productid.productPrice * bas.productqty + 5
+        subtotal = bas.productid.productPrice * bas.productqty + (5*bas.productqty)
         
         # Accumulate subtotal for the seller
         sellerTotal[seller] += subtotal
