@@ -54,6 +54,27 @@ def myMarketplace(request):
     except prodProduct.DoesNotExist:
         raise Http404('Data does not exist')
     
+def viewProduct(request,pk):
+    try:
+        person=Person.objects.get(Email=request.session['Email'])
+        product = prodProduct.objects.get(productid=pk)
+        allBasket = Basket.objects.filter(Person_fk_id=person.id,is_checkout=0)
+        return render(request,'ViewProduct.html',{'product':product, 'person':person, 'allBasket':allBasket})
+    except prodProduct.DoesNotExist:
+        raise Http404('Data does not exist')
+    
+def viewSeller(request,pk):
+    try:
+        person=Person.objects.get(Email=request.session['Email'])
+        seller = Person.objects.get(id=pk)
+        products = prodProduct.objects.filter(Person_fk=seller)
+        allBasket = Basket.objects.filter(Person_fk_id=person.id,is_checkout=0)
+        return render(request,'ViewSeller.html',{'products':products, 'person':person, 'seller':seller, 'allBasket':allBasket})
+    except Person.DoesNotExist:
+        raise Http404('Seller does not exist')
+    except prodProduct.DoesNotExist:
+        raise Http404('Product does not exist')
+    
 # def sellProduct(request, fk1):
 #     person = Person.objects.get(pk=fk1)
 #     if request.method=='POST':

@@ -32,7 +32,16 @@ class Group_tbl(models.Model):
     
     class Meta:
         db_table = 'group_tbl'
-
+        
+class channel_sharing(models.Model):
+    
+    channel_id = models.IntegerField(primary_key=True)
+    embed_link = models.CharField(max_length=255)
+    Person_fk = models.ForeignKey(Person, on_delete=models.CASCADE)
+    
+    def save(self):
+        super().save()
+        return self.channel_id
 
 class GroupMembership(models.Model):
     

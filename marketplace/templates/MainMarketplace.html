@@ -146,13 +146,15 @@
                         </th>
                         <th>
                             <div class="username">
-                                <span class="username">{{ item.Person_fk.Username }}</span>
+                                {% comment %} <span class="username">{{ item.Person_fk.Username }}</span> {% endcomment %}
+                                <a href="{% url 'marketplace:viewSeller' item.Person_fk.id %}" style="color: black;">{{item.Person_fk.Username}}</a><br>
                             </div>               
                         </th>
                     </table>
                     
                     <div class="card-body p-4">
-                      <b>{{item.productName}}</b>
+                      <a href="{% url 'marketplace:viewProduct' item.productid %}" style="color: black;"><b>{{item.productName}}</b></a><br>
+                      {% comment %} <b>{{item.productName}}</b> {% endcomment %}
                       
                     </div>
                     

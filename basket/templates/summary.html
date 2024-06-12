@@ -116,8 +116,10 @@
                 </div>
                 <div class="col-md-8 ps-md-3">
                     <div class="card-body p-1">
-                        <p class="card-text pb-3">Seller: {{ bas.productid.Person_fk.Username }}</p>
-                        <p class="card-text pb-3">{{ bas.productid.productName }}</p>
+                        {% comment %} <p class="card-text pb-3">Seller: {{ bas.productid.Person_fk.Username }}</p> {% endcomment %}
+                        <a href="{% url 'marketplace:viewSeller' bas.productid.Person_fk.id %}" style="color: black;">{{ bas.productid.Person_fk.Username }}</a><br><br>
+                        {% comment %} <p class="card-text pb-3">{{ bas.productid.productName }}</p> {% endcomment %}
+                        <a href="{% url 'marketplace:viewProduct' bas.productid.productid %}" style="color: black;">{{ bas.productid.productName }}</a><br><br>
                         <p class="card-text pb-3">RM {{ bas.productid.productPrice }}</p>
                         <label for="select">Qty</label>
                         <div class="mb-3">

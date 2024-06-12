@@ -45,8 +45,16 @@
       background-color: #d4edda;
       border-color: #c3e6cb;
   }
+
+  .back-button {
+    margin: 20px;
+  }
 </style>
 {% include 'header-marketplace.html' %}
+<!-- Back Button -->
+<div class="container back-button">
+  <button onclick="goBack()" class="btn btn-secondary">Back</button>
+</div>
 <br/>
 
 {% block content %}
@@ -150,6 +158,10 @@
           customCategoryInput.required = false;
           customCategoryInput.value = ""; // Clear the input field if not needed
       }
+  }
+
+  function goBack() {
+    window.history.back();
   }
 </script>
 </html>
