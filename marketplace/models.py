@@ -29,7 +29,7 @@ class prodProduct(models.Model):
     productRating = models.IntegerField(default=0)
     timePosted = models.DateTimeField(default=datetime.now, blank=True)
     Person_fk = models.ForeignKey(Person, on_delete=models.CASCADE)
-    
+    restricted = models.BooleanField(default=False)
     
     def save(self):
         super().save()

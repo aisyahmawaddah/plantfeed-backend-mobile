@@ -194,6 +194,24 @@ def deleteProduct(request, fk1):
     except prodProduct.DoesNotExist:
         messages.error(request, 'The product does not exist.')
     return redirect('marketplace:MainMarketplace')
+
+def restrictProduct(request, fk1):
+    try:
+        product = prodProduct.objects.get(pk=fk1)
+        product.restricted = True
+        product.save()
+    except prodProduct.DoesNotExist:
+        messages.error(request, 'The product does not exist.')
+    return redirect('marketplace:MainMarketplace')
+
+def unrestrictProduct(request, fk1):
+    try:
+        product = prodProduct.objects.get(pk=fk1)
+        product.restricted = False
+        product.save()
+    except prodProduct.DoesNotExist:
+        messages.error(request, 'The product does not exist.')
+    return redirect('marketplace:MainMarketplace')
     
 # def updateProduct(request,fk1):
 #     product = prodProduct.objects.get(pk=fk1) 
