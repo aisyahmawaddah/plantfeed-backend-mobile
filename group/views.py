@@ -88,7 +88,6 @@ def AddGroup(request):
     else :
         return render(request,'AddNewGroup.html', {'SoilTag':soilTagList, 'PlantTag':plantTagList})
 
-
 def myGroup(request):
     try:
         Username=Person.objects.get(Email=request.session['Email'])
@@ -112,7 +111,6 @@ def viewGroup(request,pk):
         return render(request,'ViewGroup.html',{'group':group,'groupMembership':groupMembership, 'memberList':memberList, 'groupSharing':groupSharing, 'user':user, 'groupComment':groupComment})
     except Group_tbl.DoesNotExist:
         raise Http404('Data does not exist')
-
 
 # cuba
 def showGroup(request):

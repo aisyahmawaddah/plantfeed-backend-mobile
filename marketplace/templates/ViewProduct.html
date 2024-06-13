@@ -34,9 +34,42 @@
             font-size: 1.2em;
             color: #888;
         }
-
         .back-button {
           margin: 20px;
+        }
+        .review-section {
+          margin-top: 50px;
+          text-align: center;
+        }
+        .review {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            max-width: 800px;
+            margin: 20px auto;
+            display: flex;
+            align-items: flex-start;
+        }
+        .review img {
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            margin-right: 15px;
+        }
+        .review-content-container {
+            flex: 1;
+        }
+        .review-author {
+            font-weight: bold;
+        }
+        .review-date {
+            color: #888;
+            float: right;
+        }
+        .review-content {
+            margin-top: 10px;
+            text-align: left;
         }
     </style>
 </head>
@@ -106,6 +139,24 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Customer Reviews Section -->
+    <div class="container review-section">
+      <h3>Customer Reviews</h3>
+      {% for review in reviews %}
+          <div class="review">
+              <img src="/media/{{ review.Person_fk.Photo }}" alt="{{ review.Person_fk.Name }}'s profile picture">
+              <div class="review-content-container">
+                  <p class="review-author">{{ review.Person_fk.Name }}</p>
+                  <p class="review-date">{{ review.date|date:"F j, Y" }}</p>
+                  <div class="clearfix"></div>
+                  <p class="review-content">{{ review.content }}</p>
+              </div>
+          </div>
+      {% empty %}
+          <p>No reviews yet. Buy this product and be the first to review this product!</p>
+      {% endfor %}
     </div>
     
     <!-- Bootstrap JS -->

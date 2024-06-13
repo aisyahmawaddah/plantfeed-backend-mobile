@@ -24,7 +24,7 @@ from django.conf import settings
 from member.models import Person
 # from sharing.models import Feed
 from .models import prodProduct
-from basket.models import Basket
+from basket.models import Basket, prodReview
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.views.generic.base import TemplateView
@@ -113,6 +113,31 @@ def complete_order(request, fk1, seller_id):
     
     return redirect('orders:history')
 
+def review_product(request, fk1, seller_id):
+    person = Person.objects.get(Email=request.session['Email'])
+    ids = get_object_or_404(Basket, id=fk1)
+    products = Basket.objects.filter(transaction_code=ids.transaction_code, productid__Person_fk_id=seller_id)
+    # product = get_object_or_404(prodProduct, pk=ids.productid.productid)
+    print(products)
+    
+    if request.method == "POST":   
+        for product in products:
+            content = request.POST.get(f'review_{product.productid.productid}')
+            print(content)
+            if content:
+                review = prodReview()
+                review.content = content
+                review.restricted = False
+                review.Person_fk = Person.objects.get(Email=request.session['Email'])
+                review.basketid = product
+                review.productid = product.productid
+                review.save()
+
+        products.update(status="Product Reviewed")
+        return redirect('orders:history')
+    else:
+        return render(request,'ReviewProduct.html', {'products':products, 'person':person, 'bas':ids})
+
 # def complete_order(request):
 #     transaction_code = request.POST.get('transaction_code')
 #     # product=prodProduct.objects.all()
@@ -194,6 +219,7 @@ def order_again(request, fk1, seller_id):
 
 #SELLER's HISTORY
 def SellHistory(request, fk1):
+    person = Person.objects.get(Email=request.session['Email'])
     seller = Person.objects.get(pk=fk1)
     products = prodProduct.objects.filter(Person_fk=seller)
     product_ids = [product.productid for product in products]
@@ -231,9 +257,9 @@ def SellHistory(request, fk1):
             }
 
     if products_by_order:
-        return render(request, 'SellHistory.html', {'products_by_order': products_by_order})
+        return render(request, 'SellHistory.html', {'products_by_order': products_by_order, 'person':person})
     else:
-        return render(request, 'SellHistory.html', {'message': 'No orders found. Start selling your items!'})
+        return render(request, 'SellHistory.html', {'message': 'No orders found. Start selling your items!', 'person':person})
 
 def update_order_status(request):
     order_id = request.POST.get('order_id')

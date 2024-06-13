@@ -16,7 +16,7 @@ from cryptography.fernet import Fernet
 from member.models import Person
 # from sharing.models import Feed
 from .models import prodProduct
-from basket.models import Basket
+from basket.models import Basket, prodReview
 import re
 # from .models import Person
 
@@ -58,8 +58,9 @@ def viewProduct(request,pk):
     try:
         person=Person.objects.get(Email=request.session['Email'])
         product = prodProduct.objects.get(productid=pk)
+        reviews = prodReview.objects.filter(productid=product)
         allBasket = Basket.objects.filter(Person_fk_id=person.id,is_checkout=0)
-        return render(request,'ViewProduct.html',{'product':product, 'person':person, 'allBasket':allBasket})
+        return render(request,'ViewProduct.html',{'product':product, 'person':person, 'allBasket':allBasket, 'reviews':reviews})
     except prodProduct.DoesNotExist:
         raise Http404('Data does not exist')
     

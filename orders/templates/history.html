@@ -258,14 +258,16 @@
             {% if bas.status == "Cancel" %}
               <button style="width: 160px; text-align: center" class="btn btn-danger" disabled>{{ bas.status }}</button>
             {% elif bas.status == "Order Received" %}
-            <button style="width: 160px; text-align: center" class="btn btn-success" disabled>{{ bas.status }}</button>
+              <a href="{% url 'orders:review_product' bas.id bas.productid.Person_fk_id %}"style="width: 160px; text-align: center" class="btn btn-success">Review Product</a>
+            {% elif bas.status == "Product Reviewed" %}
+              <button style="width: 160px; text-align: center" class="btn btn-primary" disabled>{{ bas.status }}</button>
             {% else %}
               <button style="width: 160px; text-align: center" class="btn btn-info" disabled>{{ bas.status }}</button>
             {% endif %}
           </td>
           <td><a href="{% url 'orders:invoice' bas.id bas.productid.Person_fk_id %}" class="btn btn-secondary" style="width: 120px; text-align: center">View</a></td>
           <td style="vertical-align: middle; text-align: center">
-            {% if bas.status == "Cancel" or bas.status == "Order Received"%}
+            {% if bas.status == "Cancel" or bas.status == "Order Received" or bas.status == "Product Reviewed" %}
             <a href="{% url 'orders:order_again' bas.id bas.productid.Person_fk_id %}" style="width: 120px; text-align: center" 
             class="btn btn-warning"><i class="fa-solid fa-repeat"></i></i> Re-Order </a>
             {% elif bas.status == "Ship Order" %}
