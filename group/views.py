@@ -4,20 +4,19 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django import forms
-# from .forms import CreateInDiscussion, PersonForm, UserUpdateForm
 from django.urls import reverse
 from django.core.files.storage import FileSystemStorage
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
 from django.db import IntegrityError
-from .models import Group_tbl, GroupMembership, GroupPlantTagging, GroupSoilTagging
+from .models import Group_tbl, GroupMembership, GroupPlantTagging, GroupSoilTagging, pl_graph_sharing, pl_graph_api
 from .forms import GroupForm
 from member.models import Person, SoilTag, PlantTag, Memberlist
 from sharing.models import GFeedPlantTagging, GFeedSoilTagging, GroupTimeline, GroupTimelineComment, FeedPlantTagging, FeedSoilTagging
-
+import json
+from django.views.decorators.csrf import csrf_exempt
 
 #group
 def mainGroup(request):
@@ -104,11 +103,12 @@ def viewGroup(request,pk):
         user=Person.objects.get(Email=request.session['Email'])
         group = Group_tbl.objects.get(id=pk)
         groupSharing = GroupTimeline.objects.filter(GroupFK=group)
+        chartSharing = pl_graph_sharing.objects.filter(Group_fk=group)
         groupComment = GroupTimelineComment.objects.all()
         groupMembership=GroupMembership.objects.filter(GroupName=group)
         memberList = Memberlist.objects.all().filter(to_person=user,from_person=user)
         #memberList2 = Memberlist.objects.all().filter(to_person=user)
-        return render(request,'ViewGroup.html',{'group':group,'groupMembership':groupMembership, 'memberList':memberList, 'groupSharing':groupSharing, 'user':user, 'groupComment':groupComment})
+        return render(request,'ViewGroup.html',{'group':group,'groupMembership':groupMembership, 'memberList':memberList, 'groupSharing':groupSharing, 'user':user, 'groupComment':groupComment, 'chartSharing':chartSharing})
     except Group_tbl.DoesNotExist:
         raise Http404('Data does not exist')
 
@@ -290,6 +290,87 @@ def Group_PlantTag(request):
         }
         
         return render(request,'MainPageGroup.html',{'group':group, 'uploaded_file':uploaded_file, 'person':person, 'context_PlantTags':context}) 
+
+def PLSharing(request, pk):
+    
+    user=Person.objects.get(Email=request.session['Email'])
+    group = Group_tbl.objects.get(id=pk)   
+    user_charts = pl_graph_api.objects.filter(Person_fk=user)
+
+    if request.method == "POST":
+        selected_id = request.POST.get('chart')
+        
+        # Ensure selected_id is a string and handle custom link case
+        if selected_id == 'Others':
+            plGraph = pl_graph_sharing()
+            plGraph.title = request.POST.get('title')
+            
+            if len(plGraph.title) > 100:
+                messages.error(request, 'Sharing title name cannot be more than 100 characters.')
+                return redirect(request.META.get('HTTP_REFERER'))
+            
+            plGraph.description = request.POST.get('description')
+            if len(plGraph.description) > 500:
+                messages.error(request, 'Sharing description name cannot be more than 500 characters.')
+                return redirect(request.META.get('HTTP_REFERER'))
+            
+            plGraph.link = request.POST.get('customLink')
+            plGraph.Group_fk = group
+            plGraph.Person_fk = user
+            
+            plGraph.save()
+        elif selected_id.isdigit():
+            graph = get_object_or_404(pl_graph_api, id=selected_id)
+            plGraph = pl_graph_sharing()
+            plGraph.title = request.POST.get('title')
+            
+            if len(plGraph.title) > 100:
+                messages.error(request, 'Sharing title name cannot be more than 100 characters.')
+                return redirect(request.META.get('HTTP_REFERER'))
+            
+            plGraph.description = request.POST.get('description')
+            if len(plGraph.description) > 500:
+                messages.error(request, 'Sharing description name cannot be more than 500 characters.')
+                return redirect(request.META.get('HTTP_REFERER'))
+            
+            plGraph.link = graph.embed_link
+            plGraph.chart_type = graph.chart_type
+            plGraph.Group_fk = group
+            plGraph.Person_fk = user
+            
+            plGraph.save()
+        else:
+            messages.error(request, 'Invalid selection.')
+            return redirect(request.META.get('HTTP_REFERER'))
+        
+        return redirect('group:ViewGroup', pk)
+    else :
+        return render(request,'AddPLSharing.html', {'charts':user_charts})
+
+@csrf_exempt
+def PLGraphAPI(request):
+    if request.method == "POST":
+        try:
+            graph = pl_graph_api()
+            data = json.loads(request.body)
+            userid = data.get('userid')
+            user = get_object_or_404(Person, id=userid)
+            graph.name = data.get('chart_name')
+            graph.embed_link = data.get('embed_link')
+            graph.chart_type = data.get('chart_type')
+            graph.start_date = data.get('start_date')
+            graph.end_date = data.get('end_date')
+            graph.Person_fk = user
+            
+            graph.save()     
+            
+            return JsonResponse({'success': 'Chart has been saved'}, status=200)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    else:
+        return JsonResponse({'error': 'No data detected'}, status=404)
 
 def AddGroupSharing(request, pk):
     

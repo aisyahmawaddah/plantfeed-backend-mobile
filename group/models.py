@@ -33,15 +33,29 @@ class Group_tbl(models.Model):
     class Meta:
         db_table = 'group_tbl'
         
-class channel_sharing(models.Model):
+class pl_graph_api(models.Model):
     
-    channel_id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=255)
     embed_link = models.CharField(max_length=255)
+    chart_type = models.CharField(max_length=255)
+    start_date = models.DateTimeField(default=timezone.now)
+    end_date = models.DateTimeField(default=timezone.now)
     Person_fk = models.ForeignKey(Person, on_delete=models.CASCADE)
     
     def save(self):
         super().save()
-        return self.channel_id
+        
+class pl_graph_sharing(models.Model):
+    
+    title = models.CharField(max_length=255)
+    description = models.CharField(max_length=1500)
+    link = models.CharField(max_length=255)
+    chart_type = models.CharField(max_length=255, null=True)
+    Group_fk = models.ForeignKey(Group_tbl, on_delete=models.CASCADE)
+    Person_fk = models.ForeignKey(Person, on_delete=models.CASCADE)
+    
+    def save(self):
+        super().save()
 
 class GroupMembership(models.Model):
     
