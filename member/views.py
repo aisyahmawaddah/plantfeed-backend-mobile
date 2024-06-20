@@ -86,13 +86,13 @@ def login(request):
 
 #homepage for user
 def homepage(request):
-    person = Person.objects.filter(Email=request.session['Email'])
+    person = Person.objects.get(Email=request.session['Email'])
     
     return render(request, 'homepage.html',{'person': person })
 
 #homepage for admin
 def homepageAdmin(request):
-    person = Person.objects.filter(Email=request.session['Email'])
+    person = Person.objects.get(Email=request.session['Email'])
 
     return render(request, 'homepageAdmin.html',{'person': person })
 

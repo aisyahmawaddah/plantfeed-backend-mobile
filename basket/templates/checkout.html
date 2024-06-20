@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <style>
+        .content {
+          max-width: 500px;
+          margin: auto;
+          overflow-x: hidden;
+          width: 200px;
+        }
+  
+        table {
+          border:4px solid black;
+          margin: 0 auto;
+          padding: 40px;
+          width: fit-content;
+        }
+  
+        img {
+          max-width: 100%;
+          height: auto;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          padding: 5px;
+  
+          }
+        .profileIcon{
+          border-radius: 50%;
+  
+        }
+        .m
+        {
+          margin-left:550px;
+        }
+  
+        .account-form input
+        {
+          border: 2px solid #ccc; height: calc(2em + .75rem + 2px);
+        }
+  
+        .form-control {
+          border: 2px solid #ccc;
+        }
+  
+        .account-form input:focus {
+          border-color: #1497ff;
+          box-shadow: inset 0 0px 0px rgba(0, 0, 0, 0.075), 0 0 0px rgba(255, 0, 0, 0.6);
+        }
+        
+        .img-container {
+          position: relative;
+          overflow:hidden;
+          height: 300px;
+        }
+  
+        .img-container img {
+          position: absolute;
+          top:0;
+          left:0;
+          width: 100%;
+          height:100%;
+          object-fit: cover
+        }
+      </style>
+
+      <title>PlantFeed - Checkout</title>
+  
+  </head>
+
+  <body>
+  
+    {% if messages %}
+    {% for message in messages %}
+      <div id="message" class="alert alert-success">
+        {{ message }}
+      </div>
+    {% endfor %}
+    {% endif %}
+    
+    <div class="pos-f-t">
+      <div class="collapse" id="navbarToggleExternalContent">
+        <div class="p-4" style="background-color: #8FBC8F;">
+          <h4 class="text-white">What are you looking for?</h4>
+          <span class="text-muted">Search here...</span>
+          <form class="form-inline my-2">
+            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+            <button class="btn btn-primary" type="submit">Search</button>
+          </form>
+        </div>
+      </div>
+      <nav class="navbar navbar-dark bg-success">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      </nav>
+  </div>
+
+    <nav class="navbar navbar-expand navbar-dark bg-success">
+      <a class="navbar-brand" href="#">P  L  A  N  T  F  E  E  D</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'Home' %}">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'sharing:MainSharing' %}">Sharing</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href=" {% url 'group:MainGroup' %}">Group</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'MemberMainPage' %}">Member</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Workshop</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Marketplace
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="{% url 'marketplace:MainMarketplace' %}">Browse Marketplace<span class="sr-only">(current)</span></a>
+              <a class="dropdown-item" href="{% url 'marketplace:MyMarketplace' %}">My Marketplace</a>
+            </div>
+          </li>
+          {% comment %} <li class="nav-item">
+            <a class="nav-link active" href="{% url 'marketplace:MainMarketplace' %}">Marketplace</a>
+          </li> {% endcomment %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Profile
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="{% url 'ViewProfile' %}">View Profile<span class="sr-only">(current)</span></a>
+              <a class="dropdown-item" href="{% url 'EditProfile' %}">Edit Profile</a>
+            </div>
+          </li>
+        </ul>
+          <a type="button" role="button" href="{% url 'basket:summary' %}"
+            class="btn bg-light border-0 basket-btn">
+
+            <div id="basket-qty" class="basket-qty">
+              
+              {% if basket.count > 0 %}
+                {{ basket.count }}
+              {% else %}
+              0
+              {% endif %}
+            </div>
+            <div>
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-cart3"
+                viewBox="0 0 16 16">
+                <path
+                  d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .49.598l-1 5a.5.5 0 0 1-.465.401l-9.397.472L4.415 11H13a.5.5 0 0 1 0 1H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l.84 4.479 9.144-.459L13.89 4H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+              </svg>
+            </div>
+            <span class="fs15 fw500">Basket</span>
+          </a>
+        </div>
+        &nbsp;
+          <a type="button" role="button" href="{% url 'orders:history' %}" padding="20"
+              class="btn bg-light border-0 basket-btn">
+              <br>
+              <div>
+                <svg id="svg" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="22" height="22" viewBox="0, 0, 400, 400" fill="currentColor" class="bi bi-cart3"><g id="svgg">
+                  <path id="path0" d="M46.292 13.641 C 38.544 16.061,31.466 22.395,27.513 30.445 L 25.391 34.766 25.391 200.000 L 25.391 365.234 27.689 369.922 C 30.622 375.904,36.596 381.878,42.578 384.811 L 47.266 387.109 174.609 387.109 L 301.953 387.109 308.685 385.391 C 384.768 365.969,399.386 264.131,331.836 224.107 L 325.000 220.057 325.000 155.154 L 325.000 90.252 286.124 51.376 L 247.248 12.500 148.429 12.552 C 68.635 12.594,48.971 12.804,46.292 13.641 M237.657 51.367 L 237.891 77.734 240.189 82.422 C 243.124 88.408,249.100 94.386,255.078 97.314 L 259.766 99.609 286.133 99.843 L 312.500 100.077 312.500 157.904 C 312.500 213.785,312.451 215.715,311.057 215.272 C 296.192 210.554,271.460 211.793,255.629 218.047 C 189.318 244.247,179.909 332.699,239.081 373.603 C 242.447 375.929,54.240 375.309,49.219 372.977 C 44.968 371.003,40.418 366.141,38.961 362.016 C 37.364 357.494,37.364 42.506,38.961 37.984 C 41.078 31.991,46.871 27.103,53.380 25.816 C 55.173 25.461,97.317 25.133,147.032 25.086 L 237.423 25.000 237.657 51.367 M299.819 87.375 C 291.912 88.196,265.115 86.981,262.109 85.665 C 252.090 81.276,250.483 76.953,250.158 53.516 L 249.898 34.766 276.135 60.938 C 301.837 86.575,302.321 87.115,299.819 87.375 M64.063 89.063 C 63.021 90.104,62.500 91.667,62.500 93.750 C 62.500 100.337,60.139 100.000,106.250 100.000 C 152.361 100.000,150.000 100.337,150.000 93.750 C 150.000 87.163,152.361 87.500,106.250 87.500 C 66.667 87.500,65.585 87.540,64.063 89.063 M64.063 126.563 C 63.021 127.604,62.500 129.167,62.500 131.250 C 62.500 137.488,62.550 137.500,87.500 137.500 C 112.450 137.500,112.500 137.488,112.500 131.250 C 112.500 125.012,112.450 125.000,87.500 125.000 C 66.667 125.000,65.551 125.074,64.063 126.563 M126.563 126.563 C 125.521 127.604,125.000 129.167,125.000 131.250 C 125.000 138.063,117.685 137.500,206.250 137.500 C 294.815 137.500,287.500 138.063,287.500 131.250 C 287.500 124.437,294.815 125.000,206.250 125.000 C 129.167 125.000,128.104 125.021,126.563 126.563 M64.063 164.063 C 63.021 165.104,62.500 166.667,62.500 168.750 C 62.500 175.514,56.844 175.000,131.250 175.000 C 205.656 175.000,200.000 175.514,200.000 168.750 C 200.000 161.986,205.656 162.500,131.250 162.500 C 66.667 162.500,65.600 162.525,64.063 164.063 M214.063 164.063 C 213.021 165.104,212.500 166.667,212.500 168.750 C 212.500 175.258,210.953 175.000,250.000 175.000 C 289.047 175.000,287.500 175.258,287.500 168.750 C 287.500 162.242,289.047 162.500,250.000 162.500 C 216.667 162.500,215.578 162.547,214.063 164.063 M64.063 201.563 C 63.021 202.604,62.500 204.167,62.500 206.250 C 62.500 212.837,60.139 212.500,106.250 212.500 C 152.361 212.500,150.000 212.837,150.000 206.250 C 150.000 199.663,152.361 200.000,106.250 200.000 C 66.667 200.000,65.585 200.040,64.063 201.563 M164.063 201.563 C 163.021 202.604,162.500 204.167,162.500 206.250 C 162.500 212.648,161.758 212.500,193.750 212.500 C 225.742 212.500,225.000 212.648,225.000 206.250 C 225.000 199.852,225.742 200.000,193.750 200.000 C 166.667 200.000,165.567 200.058,164.063 201.563 M300.347 226.676 C 348.918 234.413,376.681 290.542,353.518 334.174 C 329.191 380.000,268.790 388.390,233.387 350.862 C 184.454 298.990,229.528 215.395,300.347 226.676 M64.063 239.063 C 63.021 240.104,62.500 241.667,62.500 243.750 C 62.500 250.483,57.672 250.000,125.000 250.000 C 192.328 250.000,187.500 250.483,187.500 243.750 C 187.500 237.017,192.328 237.500,125.000 237.500 C 66.667 237.500,65.598 237.527,64.063 239.063 M251.563 257.813 C 247.503 261.872,248.550 263.850,265.710 284.558 C 274.351 294.985,282.124 304.131,282.984 304.883 C 284.404 306.124,286.851 306.250,309.462 306.250 C 337.833 306.250,337.500 306.324,337.500 300.000 C 337.500 293.772,337.424 293.752,312.695 293.733 L 291.016 293.716 277.344 277.214 C 259.065 255.150,260.167 256.250,256.327 256.250 C 254.167 256.250,252.617 256.758,251.563 257.813 M64.063 276.563 C 63.021 277.604,62.500 279.167,62.500 281.250 C 62.500 287.488,62.550 287.500,87.500 287.500 C 112.450 287.500,112.500 287.488,112.500 281.250 C 112.500 275.012,112.450 275.000,87.500 275.000 C 66.667 275.000,65.551 275.074,64.063 276.563 M126.563 276.563 C 125.521 277.604,125.000 279.167,125.000 281.250 C 125.000 287.488,125.050 287.500,150.000 287.500 C 174.950 287.500,175.000 287.488,175.000 281.250 C 175.000 275.012,174.950 275.000,150.000 275.000 C 129.167 275.000,128.051 275.074,126.563 276.563 M64.063 314.063 C 63.021 315.104,62.500 316.667,62.500 318.750 C 62.500 325.148,61.758 325.000,93.750 325.000 C 125.742 325.000,125.000 325.148,125.000 318.750 C 125.000 312.352,125.742 312.500,93.750 312.500 C 66.667 312.500,65.567 312.558,64.063 314.063 M139.063 314.063 C 138.021 315.104,137.500 316.667,137.500 318.750 C 137.500 324.728,138.316 325.000,156.250 325.000 C 174.184 325.000,175.000 324.728,175.000 318.750 C 175.000 312.772,174.184 312.500,156.250 312.500 C 141.667 312.500,140.521 312.604,139.063 314.063 " stroke="none" fill="#000000" fill-rule="evenodd"></path></g></svg>
+              </div>
+              <span class="fs15 fw500">History</span>
+            </a>
+        </li>
+        &nbsp;
+        <a class="btn bg-light" href="{% url 'Logout' %}">
+          <img class="bi bi-arrow-bar-right">LOGOUT</img>
+        </a>
+      </div>
+    </nav>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js" integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+
+    <br/>
+    
+    {% load customfilters %}
+    <div class="container">
+    <div class="col-12">
+      <h1 class="h2">Checkout Summary</h1>
+    </div>
+    <div class="col-12">
+      <p>Review your <b>items</b> before you pay</p>
+    </div>
+    <hr />
+    </div>
+    <div class="container">
+    <div class="row g-3">
+      {% if selected_products.count == 0 %}
+      <div class="col-12">
+          You didn't select any items to be checked out. <a href="{% url 'basket:summary' %}">Go back to basket!</a>
+      </div>
+      {% else %}
+      <form id="checkout-form"  method="POST" action="{% url 'payment:checkoutSession' %}">
+          {% csrf_token %}
+          <div class="row">
+              {% for seller_id, seller in sellers.items %}
+              <div class="col-md-12 mb-4">
+                  <div class="card seller-container">
+                      <div class="card-header">
+                          <h3 class="card-title">Seller: {{ seller|get_username_from_id }}</h3>
+                      </div>
+                      <div class="card-body">
+                          {% for bas in selected_products %}
+                            {% if bas.productid.Person_fk_id == seller %}
+                              <div class="card mb-3 border-bottom product-item">
+                                  <div class="row g-0">
+                                      <div class="col-md-2 d-none d-md-block">
+                                          <img class="img-fluid mx-auto d-block" alt="Responsive image" src="../../media/{{ bas.productid.productPhoto }}" />
+                                      </div>
+                                      <div class="col-md-10 ps-md-3">
+                                          <div class="card-body p-1">
+                                              <p class="card-text pb-3">{{ bas.productid.productName }}</p>
+                                              <p class="card-text pb-3">RM {{ bas.productid.productPrice }}</p>
+                                              <p class="card-text pb-3">Quantity: {{ bas.productqty }}</p>
+                                              <p class="card-text pb-3">Subtotal: {{ subtotals|get_subtotal:bas.id }}</p>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                              <div class="col-md-2 align-self-center">
+                                <input type="hidden" id="select_{{ bas.id }}" name="selected_products" value="{{ bas.id }}">
+                              </div>
+                            {% endif %}
+                          {% endfor %}
+                          <div class="card mb-3 border-bottom product-item">
+                              <div class="row g-0">
+                                  <div class="col-md-10 ps-md-3">
+                                      <div class="card-body p-1">
+                                          {% for seller_id_total, total in sellerTotal.items %}
+                                            {% if seller_id_total == seller %}
+                                              <p class="card-text pb-3" style="text-align: right;"><b>Shop total price (Including Shipping RM5): {{ total }}</b></p>
+                                            {% endif %}
+                                          {% endfor %}
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              {% endfor %}
+          </div>
+
+          <div class="col-md-6 offset-md-6">
+            <div class="card mb-3 border-0">
+                <div class="card-body text-right">
+                    <p class="card-text pb-3"><b>Total : RM{{ totalCheckout }}</b></p>
+                    <button type="button" id="checkout-button" class="btn btn-primary">Pay using STRIPE</button>
+                </div>
+            </div>
+          </div>
+      </form>
+      {% endif %}
+
+      <script>
+        $(document).ready(function() {
+          var stripe = Stripe('pk_test_51P92VjP2bkNoORSJVJqlxX22bENpjRnhqQorIT5odR9NYH0VNEkorrHg428woeFtz9sqQcp0Z7UmaJhrNQOCCVkg00VvIx5USi'); // Replace 'YOUR_PUBLISHABLE_KEY' with your actual publishable key
+          $('#checkout-button').on('click', function() {
+            var form = $('#checkout-form');
+            $.ajax({
+              type: 'POST',
+              url: form.attr('action'),
+              data: form.serialize(),
+              success: function(response) {
+                var sessionId = response.id;
+                stripe.redirectToCheckout({ sessionId: sessionId }).then(function (result) {
+                  if (result.error) {
+                    alert(result.error.message);
+                  }
+                });
+              },
+              error: function(xhr, status, error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+              }
+            });
+          });
+        });
+      </script>
+  </body>
+</html>

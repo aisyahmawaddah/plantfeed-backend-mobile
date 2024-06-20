@@ -110,7 +110,7 @@
                 ">
                 <h3>IGROW Invoice</h3>
                 <p style="margin: 15px auto;">
-                  {{ order.address }}
+                  Universiti Teknologi Malaysia, Skudai, Johor, Malaysia
                 </p>
                 <p>
                   <b>Transaction ID</b> <br>{{ order.transaction_code }}
@@ -168,11 +168,11 @@
                 <thead>
                   <tr>
                     <td>Shipping: </td>
-                    <td style="text-align: right;">RM{{ order.shipping }}</td>
+                    <td style="text-align: right;">RM{{ shipping }}</td>
                   </tr>
                   <tr>
                     <td>Total Price: </td>
-                    <td style="text-align: right;">RM{{ order.total }}</td>
+                    <td style="text-align: right;">RM{{ final_total }}</td>
                   </tr>
                 </thead>
               </table>

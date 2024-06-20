@@ -152,7 +152,7 @@
                     </table>
                     
                     <div class="card-body p-4">
-                      <b>{{item.productName}}</b>
+                      <a href="{% url 'marketplace:viewProduct' item.productid %}" style="color: black;"><b>{{item.productName}}</b></a><br>
                       
                     </div>
                     

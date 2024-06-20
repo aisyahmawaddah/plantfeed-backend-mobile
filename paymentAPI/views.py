@@ -23,12 +23,13 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 
 class ProductLandingPageView(TemplateView):
-    template_name = 'checkout.html'
+    template_name = 'checkout-test.html'
     def get_context_data(self, **kwargs):
-        prod = prodProduct.objects.get(productid = "10") # get product with productid = 10
+        basket_ids = [4, 2]  # List of product IDs you want to fetch
+        basket = Basket.objects.filter(id__in=basket_ids)
         context = super(ProductLandingPageView, self).get_context_data(**kwargs)
         context.update({
-            'products': prod,
+            'basket': basket,
             'STRIPE_PUBLIC_KEY': settings.STRIPE_PUBLIC_KEY
         })
         return context
@@ -60,35 +61,103 @@ class CancelPageView(TemplateView):
             return render(request,'summary.html', context)
         except prodProduct.DoesNotExist:
             raise Http404('Data does not exist')
+        
+# class CreateCheckoutSessionView(View):
+#     def post(self, request, *args, **kwargs):
+#         selected_product_ids = request.POST.getlist('selected_products')
+#         selected_products = Basket.objects.all().filter(id__in=selected_product_ids)
 
-class CreateCheckoutSessionView(View):
-    def post(self, request, *args, **kwargs):
-        productId = self.kwargs['pk1']
-        prod = prodProduct.objects.get(productid = productId)
-        stripePrice = int(prod.productPrice * 100)
+#         line_items = []
+        
+#         for product in selected_products:
+#             line_item = {
+#                 'price_data': {
+#                     'currency': 'myr',
+#                     'unit_amount': int(product.productid.productPrice * 100),
+#                     'product_data': {
+#                         'name': product.productid.productName,
+#                         'description': product.productid.productDescription,
+#                     },
+#                 },
+#                 'quantity': product.productqty,
+#             }
+#             line_items.append(line_item)
+
+#         YOUR_DOMAIN = "http://127.0.0.1:8000/paymentAPI"
+#         checkout_session = stripe.checkout.Session.create(
+#             payment_method_types=['card'],
+#             line_items= line_items,
+#             metadata={'productid': productId},
+#             mode='payment',
+#             success_url=YOUR_DOMAIN + '/success/',
+#             cancel_url=YOUR_DOMAIN + '/cancel/',
+#         )
+#         return JsonResponse({
+#             'id': checkout_session.id
+#         })
+        
+@csrf_exempt
+def create_checkout_session(request):
+    if request.method == 'POST':
+        product_ids = request.POST.getlist('selected_products')
+        products = Basket.objects.all().filter(id__in=product_ids)
         YOUR_DOMAIN = "http://127.0.0.1:8000/paymentAPI"
+
+        line_items = []
+        for product in products:
+            line_items.append({
+                'price_data': {
+                    'currency': 'myr',
+                    'unit_amount': int(product.productid.productPrice * 100),
+                    'product_data': {
+                        'name': product.productid.productName,
+                    },
+                },
+                'quantity': 1,
+            })
+
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
-            line_items=[
-                {
-                    'price_data': {
-                        'currency': 'myr',
-                        'unit_amount': stripePrice,
-                        'product_data': {
-                            'name': prod.productName,
-                        },
-                    },
-                    'quantity': 2,
-                },
-            ],
-            metadata={'productid': productId},
+            line_items=line_items,
             mode='payment',
             success_url=YOUR_DOMAIN + '/success/',
             cancel_url=YOUR_DOMAIN + '/cancel/',
         )
+
         return JsonResponse({
             'id': checkout_session.id
         })
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+# class CreateCheckoutSessionView(View):
+#     def post(self, request, *args, **kwargs):
+#         productId = self.kwargs['pk1']
+#         prod = prodProduct.objects.get(productid = productId)
+#         stripePrice = int(prod.productPrice * 100)
+#         YOUR_DOMAIN = "http://127.0.0.1:8000/paymentAPI"
+#         checkout_session = stripe.checkout.Session.create(
+#             payment_method_types=['card'],
+#             line_items=[
+#                 {
+#                     'price_data': {
+#                         'currency': 'myr',
+#                         'unit_amount': stripePrice,
+#                         'product_data': {
+#                             'name': prod.productName,
+#                         },
+#                     },
+#                     'quantity': 2,
+#                 },
+#             ],
+#             metadata={'productid': productId},
+#             mode='payment',
+#             success_url=YOUR_DOMAIN + '/success/',
+#             cancel_url=YOUR_DOMAIN + '/cancel/',
+#         )
+#         return JsonResponse({
+#             'id': checkout_session.id
+#         })
 
 # class CreateCheckoutSessionView(View):
 #     def post(self, request, *args, **kwargs):

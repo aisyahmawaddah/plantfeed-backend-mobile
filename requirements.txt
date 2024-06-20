@@ -28,3 +28,5 @@ djoser
 gunicorn
 django-heroku
 stripe
+django-environ
+django-mathfilters

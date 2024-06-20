@@ -140,37 +140,37 @@
     
     <div id="pending-orders" class="tab-content">
       {% for transaction_code, order_info in products_by_order.items %}
-        {% if order_info.orderStatus == 'Payment Made' %}
-          <button class="accordion"> {{ order_info.transaction_code }} ({{ order_info.buyer_email }})</button>
-          <div class="panel">
-            <table>
-              <tr style="border-bottom: 1px solid #ddd;">
-                <th>Product Name</th>
-                <th>Product Price</th>
-                <th>Product Quantity</th>
-              </tr>
-              {% for product in order_info.products %}
-                <tr style="font-weight: normal;">
-                  <td>{{ product.productName }}</td>
-                  <td>RM{{ product.productPrice }}</td>
-                  <td>{{ product.productQty }}</td>
-                </tr>
-              {% endfor %}
-              <tr style="border-top: 1px solid #ddd;">
-                <td colspan="3">Total (excluding shipping): RM{{ order_info.products.0.total|sub:order_info.products.0.shipping }} <br> Shipping Address: {{ order_info.products.0.address }}</td>
-                <td colspan="1">
-                  <select id="{{transaction_code}}">
-                    <option value="{{order_info.orderStatus}}" selected disabled hidden>{{order_info.orderStatus}}</option>
-                    <option value="Payment Made">Pending</option>
-                    <option value="Package Order">Package Order</option>
-                    <option value="Ship Order">Ship Order</option>
-                  </select>
-                  <button onclick="updateOrderStatus('{{transaction_code}}')">Update</button>
-                </td>
-              </tr>
-            </table>
-          </div>
-        {% endif %}
+          {% if order_info.orderStatus == 'Payment Made' %}
+              <button class="accordion"> {{ order_info.transaction_code }} ({{ order_info.buyer_email }})</button>
+              <div class="panel">
+                  <table>
+                      <tr style="border-bottom: 1px solid #ddd;">
+                          <th>Product Name</th>
+                          <th>Product Price</th>
+                          <th>Product Quantity</th>
+                      </tr>
+                      {% for product in order_info.products %}
+                          <tr style="font-weight: normal;">
+                              <td>{{ product.productName }}</td>
+                              <td>RM{{ product.productPrice }}</td>
+                              <td>{{ product.productQty }}</td>
+                          </tr>
+                      {% endfor %}
+                      <tr style="border-top: 1px solid #ddd;">
+                          <td colspan="3">Total (excluding shipping): RM{{ order_info.total_price_for_seller|floatformat:2 }} <br> Shipping Address: {{ order_info.products.0.address }}</td>
+                          <td colspan="1">
+                              <select id="{{transaction_code}}">
+                                  <option value="{{order_info.orderStatus}}" selected disabled hidden>{{order_info.orderStatus}}</option>
+                                  <option value="Payment Made">Pending</option>
+                                  <option value="Package Order">Package Order</option>
+                                  <option value="Ship Order">Ship Order</option>
+                              </select>
+                              <button onclick="updateOrderStatus('{{transaction_code}}')">Update</button>
+                          </td>
+                      </tr>
+                  </table>
+              </div>
+          {% endif %}
       {% endfor %}
     </div>
     
@@ -195,7 +195,7 @@
                     </tr>
                     {% endfor %}
                     <tr style="border-top: 1px solid #ddd;">
-                      <td colspan="3">Total (excluding shipping): RM{{ order_info.products.0.total|sub:order_info.products.0.shipping }}</td>
+                      <td colspan="3">Total (excluding shipping): RM{{ order_info.total_price_for_seller|floatformat:2 }}</td>
                       <td colspan="1">
                         <select id="{{transaction_code}}">
                           <option value="{{order_info.orderStatus}}" selected>{{order_info.orderStatus}}</option>
@@ -230,7 +230,7 @@
                                 </tr>
                               {% endfor %}
                               <tr style="border-top: 1px solid #ddd;">
-                                <td colspan="3">Total (excluding shipping): RM{{ order_info.products.0.total|sub:order_info.products.0.shipping }}</td>
+                                <td colspan="3">Total (excluding shipping): RM{{ order_info.total_price_for_seller|floatformat:2 }}</td>
                                 <td colspan="1">
                                   <select id="{{transaction_code}}">
                                     <option value="{{order_info.orderStatus}}" selected>{{order_info.orderStatus}}</option>
@@ -265,7 +265,7 @@
                                 </tr>
                               {% endfor %}
                               <tr style="border-top: 1px solid #ddd;">
-                                <td colspan="3">Total (excluding shipping): RM{{ order_info.products.0.total|sub:order_info.products.0.shipping }}</td>
+                                <td colspan="3">Total (excluding shipping): RM{{ order_info.total_price_for_seller|floatformat:2 }}</td>
                               </tr>
                             </table>
                           </div>
@@ -292,7 +292,7 @@
                                 </tr>
                               {% endfor %}
                               <tr style="border-top: 1px solid #ddd;">
-                                <td colspan="3">Total (excluding shipping): RM{{ order_info.products.0.total|sub:order_info.products.0.shipping }}</td>
+                                <td colspan="3">Total (excluding shipping): RM{{ order_info.total_price_for_seller|floatformat:2 }}</td>
                                 <td colspan="1">
                                 </td>
                               </tr>

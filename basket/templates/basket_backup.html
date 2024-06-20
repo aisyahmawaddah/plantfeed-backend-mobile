@@ -1,0 +1,31 @@
+{% for seller in sellers %}
+            {% for bas in selected_products %}
+                <div class="card mb-3 border-0 product-item">
+                    <div class="row g-0">
+                        <div class="col-md-2 d-none d-md-block">
+                            <img class="img-fluid mx-auto d-block" alt="Responsive image" src="../../media/{{ bas.productid.productPhoto }}" />
+                        </div>
+                        <div class="col-md-10 ps-md-3">
+                            <div class="card-body p-1">
+                                <p class="card-text pb-3">Seller: {{ bas.productid.Person_fk.Username}}</p>
+                                <p class="card-text pb-3">{{ bas.productid.productName }}</p>
+                                <p class="card-text pb-3">RM {{ bas.productid.productPrice }}</p>
+                                <p class="card-text pb-3">Quantity: {{ bas.productqty }}</p>
+                                {% load customfilters %}
+                                <p class="card-text pb-3">Subtotal: {{ subtotals|get_subtotal:bas.id }}</p>
+                                {% comment %} <p class="card-text pb-3">Subtotal: {{ subtotals }}</p> {% endcomment %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            <div class="card mb-3 border-0 product-item">
+              <div class="row g-0">
+                  <div class="col-md-10 ps-md-3">
+                      <div class="card-body p-1">
+                          <p class="card-text pb-3">Shop total price (Including Shipping): {{ seller.Username }}</p>
+                      </div>
+                  </div>
+              </div>
+            </div>
+          {% endfor %}

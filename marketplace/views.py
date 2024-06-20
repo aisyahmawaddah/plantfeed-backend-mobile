@@ -16,7 +16,7 @@ from cryptography.fernet import Fernet
 from member.models import Person
 # from sharing.models import Feed
 from .models import prodProduct
-from basket.models import Basket
+from basket.models import Basket, prodReview
 import re
 # from .models import Person
 
@@ -53,6 +53,28 @@ def myMarketplace(request):
         return render(request,'MyMarketplace.html',{'marketplace':marketplace, 'allBasket':allBasket, 'person':person, 'user':user})
     except prodProduct.DoesNotExist:
         raise Http404('Data does not exist')
+    
+def viewProduct(request,pk):
+    try:
+        person=Person.objects.get(Email=request.session['Email'])
+        product = prodProduct.objects.get(productid=pk)
+        reviews = prodReview.objects.filter(productid=product)
+        allBasket = Basket.objects.filter(Person_fk_id=person.id,is_checkout=0)
+        return render(request,'ViewProduct.html',{'product':product, 'person':person, 'allBasket':allBasket, 'reviews':reviews})
+    except prodProduct.DoesNotExist:
+        raise Http404('Data does not exist')
+    
+def viewSeller(request,pk):
+    try:
+        person=Person.objects.get(Email=request.session['Email'])
+        seller = Person.objects.get(id=pk)
+        products = prodProduct.objects.filter(Person_fk=seller)
+        allBasket = Basket.objects.filter(Person_fk_id=person.id,is_checkout=0)
+        return render(request,'ViewSeller.html',{'products':products, 'person':person, 'seller':seller, 'allBasket':allBasket})
+    except Person.DoesNotExist:
+        raise Http404('Seller does not exist')
+    except prodProduct.DoesNotExist:
+        raise Http404('Product does not exist')
     
 # def sellProduct(request, fk1):
 #     person = Person.objects.get(pk=fk1)
@@ -170,6 +192,24 @@ def deleteProduct(request, fk1):
         product = prodProduct.objects.get(pk=fk1)
         product.delete()  # Call delete() on the product instance
         messages.success(request, 'The product has been deleted successfully.')
+    except prodProduct.DoesNotExist:
+        messages.error(request, 'The product does not exist.')
+    return redirect('marketplace:MainMarketplace')
+
+def restrictProduct(request, fk1):
+    try:
+        product = prodProduct.objects.get(pk=fk1)
+        product.restricted = True
+        product.save()
+    except prodProduct.DoesNotExist:
+        messages.error(request, 'The product does not exist.')
+    return redirect('marketplace:MainMarketplace')
+
+def unrestrictProduct(request, fk1):
+    try:
+        product = prodProduct.objects.get(pk=fk1)
+        product.restricted = False
+        product.save()
     except prodProduct.DoesNotExist:
         messages.error(request, 'The product does not exist.')
     return redirect('marketplace:MainMarketplace')

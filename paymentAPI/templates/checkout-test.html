@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Product Checkout</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+  <form id="checkout-form" method="POST" action="{% url 'paymentAPI:create-checkout-session' %}">
+    {% csrf_token %}
+    <div class="products-container">
+      {% for bas in basket %}
+      <div class="card mb-3 border-0 product-item">
+        <div class="row g-0">
+          <div class="col-md-2 d-none d-md-block">
+            <img class="img-fluid mx-auto d-block" alt="The picture of the product" src="../media/{{ bas.productid.productPhoto }}" />
+          </div>
+          <div class="col-md-8 ps-md-3">
+            <div class="card-body p-1">
+              <p class="card-text pb-3">Seller: {{ bas.productid.Person_fk.Username }}</p>
+              <p class="card-text pb-3">{{ bas.productid.productName }}</p>
+              <p class="card-text pb-3">RM {{ bas.productid.productPrice }}</p>
+            </div>
+          </div>
+          <div class="col-md-2">
+            <input type="hidden" id="select_{{ bas.id }}" name="selected_products" value="{{ bas.id }}">
+          </div>
+        </div>
+        <hr class="product-divider">
+      </div>
+      {% endfor %}
+    </div>
+    <div class="checkout-container">
+      <button type="button" id="checkout-button" class="btn btn-primary">Checkout</button>
+    </div>
+  </form>
+
+  <script>
+    $(document).ready(function() {
+      var stripe = Stripe('pk_test_51P92VjP2bkNoORSJVJqlxX22bENpjRnhqQorIT5odR9NYH0VNEkorrHg428woeFtz9sqQcp0Z7UmaJhrNQOCCVkg00VvIx5USi'); // Replace 'YOUR_PUBLISHABLE_KEY' with your actual publishable key
+      $('#checkout-button').on('click', function() {
+        var form = $('#checkout-form');
+        $.ajax({
+          type: 'POST',
+          url: form.attr('action'),
+          data: form.serialize(),
+          success: function(response) {
+            var sessionId = response.id;
+            stripe.redirectToCheckout({ sessionId: sessionId }).then(function (result) {
+              if (result.error) {
+                alert(result.error.message);
+              }
+            });
+          },
+          error: function(xhr, status, error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

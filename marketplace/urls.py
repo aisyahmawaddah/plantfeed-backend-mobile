@@ -21,6 +21,10 @@ urlpatterns = [
     path('MyMarketplace',views.myMarketplace, name="MyMarketplace"),
     path('buy_now/<str:fk1>/<str:fk2>/',views.buy_now, name='buy_now'),
     path('add_to_basket/<str:fk1>/<str:fk2>/',views.add_to_basket, name='add_to_basket'),
+    path('ViewProduct/<str:pk>',views.viewProduct, name="viewProduct"),
+    path('ViewSeller/<str:pk>',views.viewSeller, name="viewSeller"),
+    path('RestrictProduct/<str:fk1>/',views.restrictProduct, name="restrictProduct"),
+    path('UnrestrictProduct/<str:fk1>/',views.unrestrictProduct, name="unrestrictProduct")
 
 ] + static(settings.MEDIA_URL, document_root= settings.MEDIA_ROOT)
 
