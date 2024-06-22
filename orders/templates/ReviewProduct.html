@@ -59,14 +59,14 @@
     <div class="container product-detail">
         <div class="row">
             <div class="col-md-6">
-                <img src="/media/{{ products.0.productid.productPhoto }}" alt="{{ products.0.productid.productName }}" class="product-image">
+                <img src="/media/{{ product.productid.productPhoto }}" alt="{{ product.productid.productName }}" class="product-image">
             </div>
             <div class="col-md-6 product-info">
                 <h2>{{ products.0.productid.productName }}</h2>
-                <p class="product-category">Price: RM {{ products.0.productid.productPrice }}</p>
-                <p class="product-category">Stock: {{ products.0.productid.productStock }} left</p>
-                <p class="product-category">Category: {{ products.0.productid.productCategory }}</p>
-                <p class="product-category">Description: {{ products.0.productid.productDesc }}</p>
+                <p class="product-category">Price: RM {{ product.productid.productPrice }}</p>
+                <p class="product-category">Stock: {{ product.productid.productStock }} left</p>
+                <p class="product-category">Category: {{ product.productid.productCategory }}</p>
+                <p class="product-category">Description: {{ product.productid.productDesc }}</p>
             </div>
         </div>
     </div>
@@ -80,7 +80,7 @@
                     <textarea id="review_{{ product.productid.productid }}" name="review_{{ product.productid.productid }}" class="form-control" placeholder="Write your review here..."></textarea><br/>
                 </div>
             {% endfor %}
-            <button type="submit" class="btn btn-primary">Submit Reviews</button><br/><br/>
+            <button type="submit" class="btn btn-primary">Submit Review</button><br/><br/>
         </form>
     </div>
 

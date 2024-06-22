@@ -117,8 +117,8 @@ def review_product(request, fk1, seller_id):
     person = Person.objects.get(Email=request.session['Email'])
     ids = get_object_or_404(Basket, id=fk1)
     products = Basket.objects.filter(transaction_code=ids.transaction_code, productid__Person_fk_id=seller_id)
-    # product = get_object_or_404(prodProduct, pk=ids.productid.productid)
     print(products)
+    # product = get_object_or_404(prodProduct, pk=ids.productid.productid)
     
     if request.method == "POST":   
         for product in products:

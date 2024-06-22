@@ -173,7 +173,7 @@ def sellProduct(request, fk1):
 
         return redirect('marketplace:MainMarketplace')
     else :
-        return render(request,'SellProduct.html')
+        return render(request,'SellProduct.html', {'person':person})
     
 # def deleteProduct(request,fk1):
 #     product = prodProduct.objects.get(pk=fk1)
@@ -235,6 +235,9 @@ def unrestrictProduct(request, fk1):
 #         return render(request, 'UpdateProduct.html', {'product':product})
 
 def updateProduct(request, fk1):
+    person = Person.objects.get(Email=request.session['Email'])
+    person_id = person.id
+    url = reverse('marketplace:viewSeller', args=[person_id])
     product = prodProduct.objects.get(pk=fk1) 
     if request.method == 'POST':
         # Product Name Validation
@@ -308,9 +311,9 @@ def updateProduct(request, fk1):
         
         product.save()
         
-        return redirect('marketplace:MyMarketplace')
+        return redirect(url)
     else:
-        return render(request, 'UpdateProduct.html', {'product':product})
+        return render(request, 'UpdateProduct.html', {'product':product, 'person':person})
     
 def buy_now(request, fk1,fk2):
     product = prodProduct.objects.get(pk=fk1)
