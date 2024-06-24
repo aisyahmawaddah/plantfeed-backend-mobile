@@ -219,59 +219,107 @@ def order_again(request, fk1, seller_id):
     return redirect('basket:summary',)
 
 #SELLER's HISTORY
+# def SellHistory(request, fk1):
+#     person = Person.objects.get(Email=request.session['Email'])
+#     seller = Person.objects.get(pk=fk1)
+#     products = prodProduct.objects.filter(Person_fk=seller)
+#     product_ids = [product.productid for product in products]
+#     baskets = Basket.objects.filter(productid__in=product_ids, is_checkout=1)
+#     allBasket = Basket.objects.all().filter(Person_fk_id=person.id,is_checkout=0)
+#     transactions = baskets.values_list('transaction_code', flat=True).distinct()
+#     orders = Order.objects.filter(transaction_code__in=transactions)
+
+#     products_by_order = {}
+#     for order in orders:
+#         product_baskets = Basket.objects.filter(transaction_code=order.transaction_code, productid__in=product_ids)
+#         products = []
+#         total_price_for_seller = Decimal('0.00')
+#         for product_basket in product_baskets:
+#             subtotal = product_basket.productid.productPrice * product_basket.productqty
+#             total_price_for_seller += subtotal
+#             products.append({
+#                 "address": order.address,
+#                 "total": order.total,
+#                 "shipping": order.shipping,
+#                 "productQty": product_basket.productqty,
+#                 "productName": product_basket.productid.productName,
+#                 "productDesc": product_basket.productid.productDesc,
+#                 "productPrice": product_basket.productid.productPrice,
+#                 "productCategory": product_basket.productid.productCategory,
+#                 "orderStatus": order.status,
+#             })
+#         if products:  # Only add to the dictionary if there are products for this seller
+#             products_by_order[order.transaction_code] = {
+#                 "transaction_code": order.transaction_code,
+#                 "buyer_email": order.email,
+#                 "buyer_name": order.name,
+#                 "products": products,
+#                 "total_price_for_seller": total_price_for_seller,
+#                 "orderStatus": order.status
+#             }
+
+#     if products_by_order:
+#         return render(request, 'SellHistory.html', {'products_by_order': products_by_order, 'person':person, 'allBasket':allBasket})
+#     else:
+#         return render(request, 'SellHistory.html', {'message': 'No orders found. Start selling your items!', 'person':person, 'allBasket':allBasket})
+    
+from decimal import Decimal
+
 def SellHistory(request, fk1):
     person = Person.objects.get(Email=request.session['Email'])
     seller = Person.objects.get(pk=fk1)
     products = prodProduct.objects.filter(Person_fk=seller)
     product_ids = [product.productid for product in products]
     baskets = Basket.objects.filter(productid__in=product_ids, is_checkout=1)
-    allBasket = Basket.objects.all().filter(Person_fk_id=person.id,is_checkout=0)
+    allBasket = Basket.objects.all().filter(Person_fk_id=person.id, is_checkout=0)
     transactions = baskets.values_list('transaction_code', flat=True).distinct()
     orders = Order.objects.filter(transaction_code__in=transactions)
 
     products_by_order = {}
-    for order in orders:
-        product_baskets = Basket.objects.filter(transaction_code=order.transaction_code, productid__in=product_ids)
+    for transaction_code in transactions:
+        product_baskets = Basket.objects.filter(transaction_code=transaction_code, productid__in=product_ids)
         products = []
         total_price_for_seller = Decimal('0.00')
         for product_basket in product_baskets:
             subtotal = product_basket.productid.productPrice * product_basket.productqty
             total_price_for_seller += subtotal
             products.append({
-                "address": order.address,
-                "total": order.total,
-                "shipping": order.shipping,
+                # "address": product_basket.address,
+                # "total": product_basket.total,
+                # "shipping": product_basket.shipping,
                 "productQty": product_basket.productqty,
                 "productName": product_basket.productid.productName,
                 "productDesc": product_basket.productid.productDesc,
                 "productPrice": product_basket.productid.productPrice,
                 "productCategory": product_basket.productid.productCategory,
-                "orderStatus": order.status,
+                "orderStatus": product_basket.status,
             })
         if products:  # Only add to the dictionary if there are products for this seller
-            products_by_order[order.transaction_code] = {
-                "transaction_code": order.transaction_code,
-                "buyer_email": order.email,
-                "buyer_name": order.name,
+            order_info = orders.filter(transaction_code=transaction_code).first()
+            products_by_order[transaction_code] = {
+                "shipping": order_info.shipping,
+                "total": order_info.total if order_info else "",
+                "address": order_info.address if order_info else "",
+                "transaction_code": transaction_code,
+                "buyer_email": order_info.email if order_info else '',
+                "buyer_name": order_info.name if order_info else '',
                 "products": products,
                 "total_price_for_seller": total_price_for_seller,
-                "orderStatus": order.status
+                "orderStatus": product_baskets.first().status  # Take status from the first product in the basket
             }
 
     if products_by_order:
-        return render(request, 'SellHistory.html', {'products_by_order': products_by_order, 'person':person, 'allBasket':allBasket})
+        return render(request, 'SellHistory.html', {'products_by_order': products_by_order, 'person': person, 'allBasket': allBasket})
     else:
-        return render(request, 'SellHistory.html', {'message': 'No orders found. Start selling your items!', 'person':person, 'allBasket':allBasket})
+        return render(request, 'SellHistory.html', {'message': 'No orders found. Start selling your items!', 'person': person, 'allBasket': allBasket})
+
 
 def update_order_status(request):
     order_id = request.POST.get('order_id')
     order_status = request.POST.get('order_status')
-    
-    order_obj = Order.objects.get(transaction_code=order_id)
-    order_obj.status = order_status
-    order_obj.save()
+    seller_id = request.POST.get('seller_id')
 
-    basket_objs = Basket.objects.filter(transaction_code=order_id)
+    basket_objs = Basket.objects.filter(transaction_code=order_id, productid__Person_fk_id=seller_id)
     for basket_obj in basket_objs:
         basket_obj.status = order_status
         basket_obj.save()
