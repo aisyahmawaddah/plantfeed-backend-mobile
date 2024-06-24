@@ -200,6 +200,8 @@ def pay(request):
             return HttpResponse('Stock is not enough', content_type='application/json')
         else:
             prod.save()
+            
+        prod.productSold += bas.productqty
 
         # Calculate subtotal for the product
         subtotal = (bas.productid.productPrice * bas.productqty)

@@ -27,6 +27,7 @@ class prodProduct(models.Model):
     productStock = models.IntegerField(default=0)
     productPhoto = models.ImageField(upload_to ='images/', null=True)
     productRating = models.IntegerField(default=0)
+    productSold = models.IntegerField(default=0)
     timePosted = models.DateTimeField(default=datetime.now, blank=True)
     Person_fk = models.ForeignKey(Person, on_delete=models.CASCADE)
     restricted = models.BooleanField(default=False)

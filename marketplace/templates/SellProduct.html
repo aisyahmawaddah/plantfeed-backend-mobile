@@ -45,17 +45,8 @@
       background-color: #d4edda;
       border-color: #c3e6cb;
   }
-
-  .back-button {
-    margin: 20px;
-  }
 </style>
 {% include 'header-marketplace.html' %}
-<!-- Back Button -->
-<div class="container back-button">
-  <button onclick="goBack()" class="btn btn-secondary">Back</button>
-</div>
-<br/>
 
 {% block content %}
 <div class="container">
@@ -124,7 +115,7 @@
                             <br/><br/>
                             <br/><br/>
                             <div class="col-12">
-                              <a class="btn btn-primary" href="{% url 'marketplace:MainMarketplace' %}" role="button">Back to Marketplace</a>
+                              <a class="btn btn-primary" href="{% url 'marketplace:viewSeller' person.id %}" role="button">Back to Shop</a>
                               <button type="submit" class="btn btn-success " value="Sharing">Upload</button>
                             </div>
                           </form>

@@ -18,6 +18,7 @@ from member.models import Person
 from .models import prodProduct
 from basket.models import Basket, prodReview
 import re
+from django.db.models import Sum, F, Q, ExpressionWrapper, DecimalField, Max
 # from .models import Person
 
 # Create your views here.
@@ -70,7 +71,63 @@ def viewSeller(request,pk):
         seller = Person.objects.get(id=pk)
         products = prodProduct.objects.filter(Person_fk=seller)
         allBasket = Basket.objects.filter(Person_fk_id=person.id,is_checkout=0)
-        return render(request,'ViewSeller.html',{'products':products, 'person':person, 'seller':seller, 'allBasket':allBasket})
+        
+        # Filter baskets for products sold by the seller
+        analyticsfilter = Basket.objects.filter(productid_id__Person_fk=seller)
+        
+        # Calculate gross income
+        gross_income = analyticsfilter.filter(Q(status="Order Received") | Q(status="Product Reviewed")) \
+                                .annotate(gross_income=ExpressionWrapper(F('productid_id__productPrice') * F('productqty'),
+                                                                         output_field=DecimalField())) \
+                                .aggregate(Sum('gross_income'))['gross_income__sum']
+                                
+        product_sold = analyticsfilter.filter(Q(status="Order Received") | Q(status="Product Reviewed")).aggregate(Sum('productqty'))['productqty__sum']
+        
+        product_in_shop = products.count()
+        
+        popular = products.aggregate(Max('productSold'))
+        max_product_sold = popular['productSold__max']
+        most_popular_product_object = products.filter(productSold=max_product_sold).first()
+        most_popular_product = most_popular_product_object.productName if most_popular_product_object else None
+        
+        # If gross_income is None, set it to 0
+        gross_income = gross_income if gross_income is not None else 0
+        
+        total_order = analyticsfilter.filter(Q(status="Order Received") | Q(status="Product Reviewed") | Q(status="Cancel") | Q(status="Package Order") | Q(status="Ship Order") | Q(status="Payment Made") | Q(status="Package Order")).values('transaction_code').distinct().count()
+        
+        pending_order = analyticsfilter.filter(Q(status="Package Order") | Q(status="Payment Made")).values('transaction_code').distinct().count()
+        
+        shipped_order = analyticsfilter.filter(Q(status="Ship Order")).values('transaction_code').distinct().count()
+        
+        completed_order = analyticsfilter.filter(Q(status="Order Received") | Q(status="Product Reviewed")).values('transaction_code').distinct().count()
+        
+        cancelled_order = analyticsfilter.filter(Q(status="Cancel")).values('transaction_code').distinct().count()
+        
+        limit = 5
+        top_customers = Basket.objects.filter(
+            productid__Person_fk=seller,
+            status__in=["Order Completed", "Product Reviewed"]
+        ).values('Person_fk__Username').annotate(total_spent=Sum(F('productqty') * F('productid_id__productPrice'))).order_by('-total_spent')[:limit]
+        
+        
+        context = {
+            'products': products,
+            'person': person,
+            'seller': seller,
+            'allBasket': allBasket,
+            'gross_income': gross_income,
+            'product_sold': product_sold,
+            'product_in_shop': product_in_shop,
+            'most_popular_product': most_popular_product,
+            'total_order': total_order,
+            'pending_order': pending_order,
+            'shipped_order': shipped_order,
+            'completed_order': completed_order, 
+            'cancelled_order': cancelled_order,
+            'top_customers': top_customers
+        }
+        
+        return render(request,'ViewSeller.html', context)
     except Person.DoesNotExist:
         raise Http404('Seller does not exist')
     except prodProduct.DoesNotExist:
@@ -101,6 +158,7 @@ def viewSeller(request,pk):
     
 def sellProduct(request, fk1):
     person = Person.objects.get(pk=fk1)
+    allBasket = Basket.objects.filter(Person_fk_id=person.id,is_checkout=0)
     if request.method == 'POST':
         product = prodProduct()
         # Product Name Validation
@@ -111,8 +169,8 @@ def sellProduct(request, fk1):
 
         # Product Description Validation
         product.productDesc = request.POST.get('productDesc')
-        if len(product.productDesc) > 500:
-            messages.error(request, 'Product description cannot be more than 500 characters.')
+        if len(product.productDesc) > 1500:
+            messages.error(request, 'Product description cannot be more than 1500 characters.')
             return redirect(request.META.get('HTTP_REFERER'))
         
         # Product Category Validation
@@ -173,7 +231,7 @@ def sellProduct(request, fk1):
 
         return redirect('marketplace:MainMarketplace')
     else :
-        return render(request,'SellProduct.html', {'person':person})
+        return render(request,'SellProduct.html', {'person':person, 'allBasket':allBasket})
     
 # def deleteProduct(request,fk1):
 #     product = prodProduct.objects.get(pk=fk1)
@@ -195,6 +253,17 @@ def deleteProduct(request, fk1):
     except prodProduct.DoesNotExist:
         messages.error(request, 'The product does not exist.')
     return redirect('marketplace:MainMarketplace')
+
+def deleteProduct2(request, fk1):
+    try:
+        product = prodProduct.objects.get(pk=fk1)
+        seller = request.session['Email']
+        seller_id = Person.objects.get(Email=seller).id
+        product.delete()  # Call delete() on the product instance
+        messages.success(request, 'The product has been deleted successfully.')
+    except prodProduct.DoesNotExist:
+        messages.error(request, 'The product does not exist.')
+    return redirect('marketplace:viewSeller', seller_id)
 
 def restrictProduct(request, fk1):
     try:
@@ -237,6 +306,7 @@ def unrestrictProduct(request, fk1):
 def updateProduct(request, fk1):
     person = Person.objects.get(Email=request.session['Email'])
     person_id = person.id
+    allBasket = Basket.objects.filter(Person_fk_id=person.id,is_checkout=0)
     url = reverse('marketplace:viewSeller', args=[person_id])
     product = prodProduct.objects.get(pk=fk1) 
     if request.method == 'POST':
@@ -248,8 +318,8 @@ def updateProduct(request, fk1):
 
         # Product Description Validation
         product_desc = request.POST.get('productDesc')
-        if len(product_desc) > 500:
-            messages.error(request, 'Product description cannot be more than 500 characters.')
+        if len(product_desc) > 1500:
+            messages.error(request, 'Product description cannot be more than 1500 characters.')
             return redirect(request.META.get('HTTP_REFERER'))
         
         # Product Category Validation
@@ -313,7 +383,7 @@ def updateProduct(request, fk1):
         
         return redirect(url)
     else:
-        return render(request, 'UpdateProduct.html', {'product':product, 'person':person})
+        return render(request, 'UpdateProduct.html', {'product':product, 'person':person, 'allBasket':allBasket})
     
 def buy_now(request, fk1,fk2):
     product = prodProduct.objects.get(pk=fk1)

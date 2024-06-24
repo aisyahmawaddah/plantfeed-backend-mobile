@@ -95,6 +95,7 @@ def cancel_order(request, fk1, seller_id):
         # Update the product stock for each item in the basket
         product = basket_item.productid  # Access the prodProduct instance
         product.productStock += basket_item.productqty  # Update the stock
+        product.productSold -= basket_item.productqty  # Update the sold count
         product.save()  # Save the changes
     
     basket.update(status="Cancel")
@@ -224,6 +225,7 @@ def SellHistory(request, fk1):
     products = prodProduct.objects.filter(Person_fk=seller)
     product_ids = [product.productid for product in products]
     baskets = Basket.objects.filter(productid__in=product_ids, is_checkout=1)
+    allBasket = Basket.objects.all().filter(Person_fk_id=person.id,is_checkout=0)
     transactions = baskets.values_list('transaction_code', flat=True).distinct()
     orders = Order.objects.filter(transaction_code__in=transactions)
 
@@ -257,9 +259,9 @@ def SellHistory(request, fk1):
             }
 
     if products_by_order:
-        return render(request, 'SellHistory.html', {'products_by_order': products_by_order, 'person':person})
+        return render(request, 'SellHistory.html', {'products_by_order': products_by_order, 'person':person, 'allBasket':allBasket})
     else:
-        return render(request, 'SellHistory.html', {'message': 'No orders found. Start selling your items!', 'person':person})
+        return render(request, 'SellHistory.html', {'message': 'No orders found. Start selling your items!', 'person':person, 'allBasket':allBasket})
 
 def update_order_status(request):
     order_id = request.POST.get('order_id')

@@ -52,28 +52,6 @@
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
 </head>
 
-{% comment %} {% if messages %}
-  {% for message in messages %}
-    <div id="message" class="alert alert-success">
-      {{ message }}
-    </div>
-  {% endfor %}
-{% endif %} {% endcomment %}
-
-{% if messages %}
-  {% for message in messages %}
-    {% if message.tags == "error" %}
-      <div id="error-message" class="alert alert-danger">
-        {{ message }}
-      </div>
-    {% else %}
-      <div id="message" class="alert alert-success">
-        {{ message }}
-      </div>
-    {% endif %}
-  {% endfor %}
-{% endif %}
-
 <script>
   setTimeout(function() {
     document.getElementById("message").style.display = "none";
@@ -97,8 +75,22 @@
 {% if person.UserLevel == "admin" %}
   {% include 'header-marketplace-admin.html' %}
 {% endif %}
-<br/>
 
+{% if messages %}
+  {% for message in messages %}
+    {% if message.tags == "error" %}
+      <div id="error-message" class="alert alert-danger">
+        {{ message }}
+      </div>
+    {% else %}
+      <div id="message" class="alert alert-success">
+        {{ message }}
+      </div>
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+<br />
 {% block content %}
 <div class="container">
   <div class="row">
@@ -114,14 +106,8 @@
                       <table style="border:none;margin: 0 auto;padding: 40px;width: fit-content;border-collapse: collapse; border-spacing: 0;">
                         <tr>
                           <td style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">
-                            <a href="{% url 'marketplace:SellProduct' person.id %}" class="link-primary">
-                              <label class="fa-solid fa-cart-plus"></label> Sell Product
-                            </a> 
-                          </td>
-                          <td style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">
-                            &nbsp &nbsp
-                            <a href="{% url 'orders:SellHistory' person.id %}" class="link-primary">
-                              <label class="fa-solid fa-clock-rotate-left"></label> Orders
+                            <a href="{% url 'marketplace:viewSeller' person.id %}" class="link-primary">
+                              <label class="fa-solid fa-cart-plus"></label> View Shop
                             </a> 
                           </td>
                         </tr>
@@ -140,6 +126,7 @@
                 {% csrf_token %}
                 {% if marketplace %}
                 {% for item in marketplace reversed %}
+                {% if item.Person_fk.Email != request.session.Email %}
                 {% if item.productStock > 0 %}
                 {% if person.UserLevel != "admin" %}
                   {% if not item.restricted %}
@@ -183,13 +170,13 @@
                             <form id="buy-form" method="post" action="{% url 'marketplace:add_to_basket' item.productid person.id %}">
                               {% csrf_token %} 
                               <input type="hidden" name="productqty" value="1">
-                              <button type="submit" style="float: right; margin-right: 5px">Add to basket</button>
+                              <button type="submit" class="btn btn-primary" style="float: right; margin-right: 5px">Add to basket</button>
                             </form>
                           
                             <form id="buy-form" method="post" action="{% url 'marketplace:buy_now' item.productid person.id %}">
                               {% csrf_token %} 
                               <input type="hidden" name="productqty" value="1">
-                              <button type="submit" style="float: right; margin-right: 10px" id="buy-now-btn">Buy now</button>
+                              <button type="submit" class="btn btn-success" style="float: right; margin-right: 10px" id="buy-now-btn">Buy now</button>
                             </form>
                         
                             <br><br>
@@ -289,13 +276,13 @@
                             <form id="buy-form" method="post" action="{% url 'marketplace:add_to_basket' item.productid person.id %}">
                               {% csrf_token %} 
                               <input type="hidden" name="productqty" value="1">
-                              <button type="submit" style="float: right; margin-right: 5px">Add to basket</button>
+                              <button type="submit" style="float: right; margin-right: 5px" class="btn btn-primary">Add to basket</button>
                             </form>
                           
                             <form id="buy-form" method="post" action="{% url 'marketplace:buy_now' item.productid person.id %}">
                               {% csrf_token %} 
                               <input type="hidden" name="productqty" value="1">
-                              <button type="submit" style="float: right; margin-right: 10px" id="buy-now-btn">Buy now</button>
+                              <button type="submit" style="float: right; margin-right: 10px" id="buy-now-btn" class="btn btn-success">Buy now</button>
                             </form>
                         
                             <br><br>
@@ -352,6 +339,7 @@
                     </div>
 
                   </div>
+                {% endif %}
                 {% endif %}
                 {% endif %}
                 {% endfor %}

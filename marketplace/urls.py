@@ -17,6 +17,7 @@ urlpatterns = [
     path('MainMarketplace',views.mainMarketplace, name="MainMarketplace"),
     path('SellProduct.html/<str:fk1>/',views.sellProduct, name="SellProduct"),
     path('DeleteProduct/<str:fk1>/',views.deleteProduct, name="DeleteProduct"),
+    path('DeleteProduct2/<str:fk1>/',views.deleteProduct2, name="DeleteProduct2"),
     path('UpdateProduct.html/<str:fk1>/',views.updateProduct, name="UpdateProduct"),
     path('MyMarketplace',views.myMarketplace, name="MyMarketplace"),
     path('buy_now/<str:fk1>/<str:fk2>/',views.buy_now, name='buy_now'),
