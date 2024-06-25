@@ -227,9 +227,7 @@ def sellProduct(request, fk1):
         
         product.save()
 
-        messages.success(request,'Product Has Been Added Succesfully..!')
-
-        return redirect('marketplace:MainMarketplace')
+        return redirect('marketplace:viewSeller', person.id)
     else :
         return render(request,'SellProduct.html', {'person':person, 'allBasket':allBasket})
     
