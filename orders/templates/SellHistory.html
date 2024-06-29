@@ -157,7 +157,7 @@
                           </tr>
                       {% endfor %}
                       <tr style="border-top: 1px solid #ddd;">
-                          <td colspan="3">Total (excluding shipping): RM{{ order_info.total_price_for_seller|floatformat:2 }} <br> Shipping Address: {{ order_info.products.0.address }}</td>
+                          <td colspan="3">Total (excluding shipping): RM{{ order_info.total_price_for_seller|floatformat:2 }} <br> Shipping Address: {{ order_info.address }}</td>
                           <td colspan="1">
                               <select id="{{transaction_code}}">
                                   <option value="{{order_info.orderStatus}}" selected disabled hidden>{{order_info.orderStatus}}</option>
