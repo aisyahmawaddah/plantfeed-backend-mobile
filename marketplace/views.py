@@ -163,26 +163,29 @@ def sellProduct(request, fk1):
         product = prodProduct()
         # Product Name Validation
         product.productName = request.POST.get('productName')
-        if len(product.productName) > 30:
-            messages.error(request, 'Product name cannot be more than 30 characters.')
+        if len(product.productName) > 30 or len(product.productName) == 0:
+            messages.error(request, 'Product name cannot be empty and more than 30 characters.')
             return redirect(request.META.get('HTTP_REFERER'))
 
         # Product Description Validation
         product.productDesc = request.POST.get('productDesc')
-        if len(product.productDesc) > 1500:
-            messages.error(request, 'Product description cannot be more than 1500 characters.')
+        if len(product.productDesc) > 1500 or len(product.productDesc) == 0:
+            messages.error(request, 'Product description cannot be empty and more than 1500 characters.')
             return redirect(request.META.get('HTTP_REFERER'))
         
         # Product Category Validation
         product.productCategory = request.POST.get('productCategory')
         customCategory = request.POST.get('customCategory')
         if product.productCategory == "None Selected":
-            messages.error(request, 'Product category has to be selected')
+            messages.error(request, 'Product category has to be selected.')
             return redirect(request.META.get('HTTP_REFERER'))
         
         if product.productCategory == "Others" and customCategory:
             # Use custom category if "Others" is selected and custom category is provided
             product.productCategory = customCategory
+            if len(product.productCategory) == 0:
+                messages.error(request, 'Product category cannot be empty.')
+                return redirect(request.META.get('HTTP_REFERER'))
         else:
             # Use the selected predefined category
             product.productCategory = product.productCategory
@@ -195,7 +198,7 @@ def sellProduct(request, fk1):
 
         # Check if the input matches the pattern
         if not re.match(price_pattern, product.productPrice):
-            messages.error(request, 'Product price should only contain digits and allow up to two digits after the decimal point.')
+            messages.error(request, 'Product price cannot be empty and should only contain digits and allow up to two digits after the decimal point.')
             return redirect(request.META.get('HTTP_REFERER'))
         elif len(price_parts) == 1:
             # No decimal point in the input, check if it consists of digits
@@ -205,7 +208,7 @@ def sellProduct(request, fk1):
         elif len(price_parts) == 2:
             # Input contains a decimal point, check the digits before and after the decimal point
             if not (price_parts[0].isdigit() and len(price_parts[1]) <= 2 and price_parts[1].isdigit()):
-                messages.error(request, 'Product price should only contain digits and allow two digits after the decimal point.')
+                messages.error(request, 'Product price cannot be empty and should only contain digits and allow two digits after the decimal point.')
                 return redirect(request.META.get('HTTP_REFERER'))
         else:
             # Input contains more than one decimal point, invalid format
@@ -214,12 +217,18 @@ def sellProduct(request, fk1):
 
         # Product Stock Validation
         product.productStock = request.POST.get('productStock')
+        if len(product.productStock) == 0:
+            messages.error(request, 'Product stock cannot be empty.')
+            return redirect(request.META.get('HTTP_REFERER'))
         if not product.productStock.isdigit():
             messages.error(request, 'Product stock should only contain digits.')
             return redirect(request.META.get('HTTP_REFERER'))
         
         if len(request.FILES) != 0:
             product.productPhoto = request.FILES['productPhoto']
+        else:
+            messages.error(request, 'Product photo cannot be empty.')
+            return redirect(request.META.get('HTTP_REFERER'))
         
         fss = FileSystemStorage()
         
@@ -310,14 +319,14 @@ def updateProduct(request, fk1):
     if request.method == 'POST':
         # Product Name Validation
         product_name = request.POST.get('productName')
-        if len(product_name) > 20:
-            messages.error(request, 'Product name cannot be more than 20 characters.')
+        if len(product_name) > 30 or len(product_name) == 0:
+            messages.error(request, 'Product name cannot be empty and more than 30 characters.')
             return redirect(request.META.get('HTTP_REFERER'))
 
         # Product Description Validation
         product_desc = request.POST.get('productDesc')
-        if len(product_desc) > 1500:
-            messages.error(request, 'Product description cannot be more than 1500 characters.')
+        if len(product_desc) > 1500 or len(product_desc) == 0:
+            messages.error(request, 'Product description cannot be empty and more than 1500 characters.')
             return redirect(request.META.get('HTTP_REFERER'))
         
         # Product Category Validation
@@ -343,7 +352,7 @@ def updateProduct(request, fk1):
 
         # Check if the input matches the pattern
         if not re.match(price_pattern, product_price):
-            messages.error(request, 'Product price should only contain digits and allow up to two digits after the decimal point.')
+            messages.error(request, 'Product price cannot be empty and should only contain digits and allow up to two digits after the decimal point.')
             return redirect(request.META.get('HTTP_REFERER'))
         elif len(price_parts) == 1:
             # No decimal point in the input, check if it consists of digits
@@ -353,7 +362,7 @@ def updateProduct(request, fk1):
         elif len(price_parts) == 2:
             # Input contains a decimal point, check the digits before and after the decimal point
             if not (price_parts[0].isdigit() and len(price_parts[1]) <= 2 and price_parts[1].isdigit()):
-                messages.error(request, 'Product price should only contain digits and allow two digits after the decimal point.')
+                messages.error(request, 'Product price cannot be empty and should only contain digits and allow two digits after the decimal point.')
                 return redirect(request.META.get('HTTP_REFERER'))
         else:
             # Input contains more than one decimal point, invalid format
@@ -362,6 +371,9 @@ def updateProduct(request, fk1):
 
         # Product Stock Validation
         product_stock = request.POST.get('productStock')
+        if len(product_stock) == 0:
+            messages.error(request, 'Product stock cannot be empty.')
+            return redirect(request.META.get('HTTP_REFERER'))
         if not product_stock.isdigit():
             messages.error(request, 'Product stock should only contain digits.')
             return redirect(request.META.get('HTTP_REFERER'))

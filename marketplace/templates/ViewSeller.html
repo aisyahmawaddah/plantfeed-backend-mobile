@@ -125,6 +125,13 @@
 </head>
 <body>
     {% include 'header-marketplace.html' %}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-danger">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
 
     <!-- Seller Details Section -->
 <div class="container seller-detail">
@@ -328,7 +335,7 @@
                                 {% endif %}
                                 <img src="/media/{{ product.productPhoto }}" alt="{{ product.productName }}" class="card-img-top" style="max-height: 200px">
                                 <div class="card-body">
-                                    <h5 class="card-title">{{ product.productName }}</h5>
+                                    <h5 class="card-title"><a href="{% url 'marketplace:viewProduct' product.productid %}" style="font-size: h4; color: #333;">{{ product.productName }}</a></h5>
                                     <p class="card-text">Price: RM {{ product.productPrice }}</p>
                                     <p class="card-text">Stock: {{ product.productStock }} left</p>
                                     <p class="card-text">Category: {{ product.productCategory }}</p>
@@ -414,5 +421,17 @@
     var deleteUrl = "{% url 'marketplace:DeleteProduct2' fk1=0 %}".replace('0', productId);
     window.location.href = deleteUrl;
   }
+
+  // Hide alert messages after 3 seconds
+  window.setTimeout(function() {
+    var alerts = document.querySelectorAll('.alert');
+    alerts.forEach(function(alert) {
+        alert.style.transition = 'opacity 1s ease-out';
+        alert.style.opacity = '0';
+        setTimeout(function() {
+            alert.remove();
+        }, 1000);
+    });
+  }, 3000);
 </script>
 {% endblock %}
