@@ -209,6 +209,7 @@ input[type=text],input[type=number]{
     <div class="text mt-3"> 
         <span><input type="text" name="About" value="{{ person.Occupation }}" disabled></span> 
     </div> 
+    <a href="{% url 'topic:viewSelectedTopic' %}" class="card-link">myTopic</a>
     <div class="gap-3 mt-3 icons d-flex flex-row justify-content-center align-items-center"> 
         <span><i class="fa fa-twitter"></i></span> 
         <span><i class="fa fa-facebook-f"></i></span> 

@@ -18,6 +18,7 @@ from member.models import Person
 from .models import prodProduct
 from basket.models import Basket, prodReview
 import re
+from django.db.models import Sum, F, Q, ExpressionWrapper, DecimalField, Max
 # from .models import Person
 
 # Create your views here.
@@ -70,7 +71,63 @@ def viewSeller(request,pk):
         seller = Person.objects.get(id=pk)
         products = prodProduct.objects.filter(Person_fk=seller)
         allBasket = Basket.objects.filter(Person_fk_id=person.id,is_checkout=0)
-        return render(request,'ViewSeller.html',{'products':products, 'person':person, 'seller':seller, 'allBasket':allBasket})
+        
+        # Filter baskets for products sold by the seller
+        analyticsfilter = Basket.objects.filter(productid_id__Person_fk=seller)
+        
+        # Calculate gross income
+        gross_income = analyticsfilter.filter(Q(status="Order Received") | Q(status="Product Reviewed")) \
+                                .annotate(gross_income=ExpressionWrapper(F('productid_id__productPrice') * F('productqty'),
+                                                                         output_field=DecimalField())) \
+                                .aggregate(Sum('gross_income'))['gross_income__sum']
+                                
+        product_sold = analyticsfilter.filter(Q(status="Order Received") | Q(status="Product Reviewed")).aggregate(Sum('productqty'))['productqty__sum']
+        
+        product_in_shop = products.count()
+        
+        popular = products.aggregate(Max('productSold'))
+        max_product_sold = popular['productSold__max']
+        most_popular_product_object = products.filter(productSold=max_product_sold).first()
+        most_popular_product = most_popular_product_object.productName if most_popular_product_object else None
+        
+        # If gross_income is None, set it to 0
+        gross_income = gross_income if gross_income is not None else 0
+        
+        total_order = analyticsfilter.filter(Q(status="Order Received") | Q(status="Product Reviewed") | Q(status="Cancel") | Q(status="Package Order") | Q(status="Ship Order") | Q(status="Payment Made") | Q(status="Package Order")).values('transaction_code').distinct().count()
+        
+        pending_order = analyticsfilter.filter(Q(status="Package Order") | Q(status="Payment Made")).values('transaction_code').distinct().count()
+        
+        shipped_order = analyticsfilter.filter(Q(status="Ship Order")).values('transaction_code').distinct().count()
+        
+        completed_order = analyticsfilter.filter(Q(status="Order Received") | Q(status="Product Reviewed")).values('transaction_code').distinct().count()
+        
+        cancelled_order = analyticsfilter.filter(Q(status="Cancel")).values('transaction_code').distinct().count()
+        
+        limit = 5
+        top_customers = Basket.objects.filter(
+            productid__Person_fk=seller,
+            status__in=["Order Completed", "Product Reviewed"]
+        ).values('Person_fk__Username').annotate(total_spent=Sum(F('productqty') * F('productid_id__productPrice'))).order_by('-total_spent')[:limit]
+        
+        
+        context = {
+            'products': products,
+            'person': person,
+            'seller': seller,
+            'allBasket': allBasket,
+            'gross_income': gross_income,
+            'product_sold': product_sold,
+            'product_in_shop': product_in_shop,
+            'most_popular_product': most_popular_product,
+            'total_order': total_order,
+            'pending_order': pending_order,
+            'shipped_order': shipped_order,
+            'completed_order': completed_order, 
+            'cancelled_order': cancelled_order,
+            'top_customers': top_customers
+        }
+        
+        return render(request,'ViewSeller.html', context)
     except Person.DoesNotExist:
         raise Http404('Seller does not exist')
     except prodProduct.DoesNotExist:
@@ -101,30 +158,34 @@ def viewSeller(request,pk):
     
 def sellProduct(request, fk1):
     person = Person.objects.get(pk=fk1)
+    allBasket = Basket.objects.filter(Person_fk_id=person.id,is_checkout=0)
     if request.method == 'POST':
         product = prodProduct()
         # Product Name Validation
         product.productName = request.POST.get('productName')
-        if len(product.productName) > 30:
-            messages.error(request, 'Product name cannot be more than 30 characters.')
+        if len(product.productName) > 30 or len(product.productName) == 0:
+            messages.error(request, 'Product name cannot be empty and more than 30 characters.')
             return redirect(request.META.get('HTTP_REFERER'))
 
         # Product Description Validation
         product.productDesc = request.POST.get('productDesc')
-        if len(product.productDesc) > 500:
-            messages.error(request, 'Product description cannot be more than 500 characters.')
+        if len(product.productDesc) > 1500 or len(product.productDesc) == 0:
+            messages.error(request, 'Product description cannot be empty and more than 1500 characters.')
             return redirect(request.META.get('HTTP_REFERER'))
         
         # Product Category Validation
         product.productCategory = request.POST.get('productCategory')
         customCategory = request.POST.get('customCategory')
         if product.productCategory == "None Selected":
-            messages.error(request, 'Product category has to be selected')
+            messages.error(request, 'Product category has to be selected.')
             return redirect(request.META.get('HTTP_REFERER'))
         
         if product.productCategory == "Others" and customCategory:
             # Use custom category if "Others" is selected and custom category is provided
             product.productCategory = customCategory
+            if len(product.productCategory) == 0:
+                messages.error(request, 'Product category cannot be empty.')
+                return redirect(request.META.get('HTTP_REFERER'))
         else:
             # Use the selected predefined category
             product.productCategory = product.productCategory
@@ -137,7 +198,7 @@ def sellProduct(request, fk1):
 
         # Check if the input matches the pattern
         if not re.match(price_pattern, product.productPrice):
-            messages.error(request, 'Product price should only contain digits and allow up to two digits after the decimal point.')
+            messages.error(request, 'Product price cannot be empty and should only contain digits and allow up to two digits after the decimal point.')
             return redirect(request.META.get('HTTP_REFERER'))
         elif len(price_parts) == 1:
             # No decimal point in the input, check if it consists of digits
@@ -147,7 +208,7 @@ def sellProduct(request, fk1):
         elif len(price_parts) == 2:
             # Input contains a decimal point, check the digits before and after the decimal point
             if not (price_parts[0].isdigit() and len(price_parts[1]) <= 2 and price_parts[1].isdigit()):
-                messages.error(request, 'Product price should only contain digits and allow two digits after the decimal point.')
+                messages.error(request, 'Product price cannot be empty and should only contain digits and allow two digits after the decimal point.')
                 return redirect(request.META.get('HTTP_REFERER'))
         else:
             # Input contains more than one decimal point, invalid format
@@ -156,12 +217,18 @@ def sellProduct(request, fk1):
 
         # Product Stock Validation
         product.productStock = request.POST.get('productStock')
+        if len(product.productStock) == 0:
+            messages.error(request, 'Product stock cannot be empty.')
+            return redirect(request.META.get('HTTP_REFERER'))
         if not product.productStock.isdigit():
             messages.error(request, 'Product stock should only contain digits.')
             return redirect(request.META.get('HTTP_REFERER'))
         
         if len(request.FILES) != 0:
             product.productPhoto = request.FILES['productPhoto']
+        else:
+            messages.error(request, 'Product photo cannot be empty.')
+            return redirect(request.META.get('HTTP_REFERER'))
         
         fss = FileSystemStorage()
         
@@ -169,11 +236,9 @@ def sellProduct(request, fk1):
         
         product.save()
 
-        messages.success(request,'Product Has Been Added Succesfully..!')
-
-        return redirect('marketplace:MainMarketplace')
+        return redirect('marketplace:viewSeller', person.id)
     else :
-        return render(request,'SellProduct.html')
+        return render(request,'SellProduct.html', {'person':person, 'allBasket':allBasket})
     
 # def deleteProduct(request,fk1):
 #     product = prodProduct.objects.get(pk=fk1)
@@ -195,6 +260,17 @@ def deleteProduct(request, fk1):
     except prodProduct.DoesNotExist:
         messages.error(request, 'The product does not exist.')
     return redirect('marketplace:MainMarketplace')
+
+def deleteProduct2(request, fk1):
+    try:
+        product = prodProduct.objects.get(pk=fk1)
+        seller = request.session['Email']
+        seller_id = Person.objects.get(Email=seller).id
+        product.delete()  # Call delete() on the product instance
+        messages.success(request, 'The product has been deleted successfully.')
+    except prodProduct.DoesNotExist:
+        messages.error(request, 'The product does not exist.')
+    return redirect('marketplace:viewSeller', seller_id)
 
 def restrictProduct(request, fk1):
     try:
@@ -235,18 +311,22 @@ def unrestrictProduct(request, fk1):
 #         return render(request, 'UpdateProduct.html', {'product':product})
 
 def updateProduct(request, fk1):
+    person = Person.objects.get(Email=request.session['Email'])
+    person_id = person.id
+    allBasket = Basket.objects.filter(Person_fk_id=person.id,is_checkout=0)
+    url = reverse('marketplace:viewSeller', args=[person_id])
     product = prodProduct.objects.get(pk=fk1) 
     if request.method == 'POST':
         # Product Name Validation
         product_name = request.POST.get('productName')
-        if len(product_name) > 20:
-            messages.error(request, 'Product name cannot be more than 20 characters.')
+        if len(product_name) > 30 or len(product_name) == 0:
+            messages.error(request, 'Product name cannot be empty and more than 30 characters.')
             return redirect(request.META.get('HTTP_REFERER'))
 
         # Product Description Validation
         product_desc = request.POST.get('productDesc')
-        if len(product_desc) > 500:
-            messages.error(request, 'Product description cannot be more than 500 characters.')
+        if len(product_desc) > 1500 or len(product_desc) == 0:
+            messages.error(request, 'Product description cannot be empty and more than 1500 characters.')
             return redirect(request.META.get('HTTP_REFERER'))
         
         # Product Category Validation
@@ -272,7 +352,7 @@ def updateProduct(request, fk1):
 
         # Check if the input matches the pattern
         if not re.match(price_pattern, product_price):
-            messages.error(request, 'Product price should only contain digits and allow up to two digits after the decimal point.')
+            messages.error(request, 'Product price cannot be empty and should only contain digits and allow up to two digits after the decimal point.')
             return redirect(request.META.get('HTTP_REFERER'))
         elif len(price_parts) == 1:
             # No decimal point in the input, check if it consists of digits
@@ -282,7 +362,7 @@ def updateProduct(request, fk1):
         elif len(price_parts) == 2:
             # Input contains a decimal point, check the digits before and after the decimal point
             if not (price_parts[0].isdigit() and len(price_parts[1]) <= 2 and price_parts[1].isdigit()):
-                messages.error(request, 'Product price should only contain digits and allow two digits after the decimal point.')
+                messages.error(request, 'Product price cannot be empty and should only contain digits and allow two digits after the decimal point.')
                 return redirect(request.META.get('HTTP_REFERER'))
         else:
             # Input contains more than one decimal point, invalid format
@@ -291,6 +371,9 @@ def updateProduct(request, fk1):
 
         # Product Stock Validation
         product_stock = request.POST.get('productStock')
+        if len(product_stock) == 0:
+            messages.error(request, 'Product stock cannot be empty.')
+            return redirect(request.META.get('HTTP_REFERER'))
         if not product_stock.isdigit():
             messages.error(request, 'Product stock should only contain digits.')
             return redirect(request.META.get('HTTP_REFERER'))
@@ -308,9 +391,9 @@ def updateProduct(request, fk1):
         
         product.save()
         
-        return redirect('marketplace:MyMarketplace')
+        return redirect(url)
     else:
-        return render(request, 'UpdateProduct.html', {'product':product})
+        return render(request, 'UpdateProduct.html', {'product':product, 'person':person, 'allBasket':allBasket})
     
 def buy_now(request, fk1,fk2):
     product = prodProduct.objects.get(pk=fk1)

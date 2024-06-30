@@ -18,13 +18,27 @@
             height: 500px;
             border-radius: 10px;
             object-fit: cover;
-        }
+        }        
         .product-info {
-            padding: 20px;
+          padding: 20px;
+          background-color: #f9f9f9;
+          border-radius: 10px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          max-width: 80%;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+        .product-info h2 {
+            color: #333;
+        }
+        .product-info p {
+            color: #666;
         }
         .product-price {
             font-size: 1.5em;
             color: #4CAF50;
+            font-weight: bold;
         }
         .product-stock {
             font-size: 1.2em;
@@ -34,88 +48,130 @@
             font-size: 1.2em;
             color: #888;
         }
-        .back-button {
-          margin: 20px;
-        }
         .review-section {
           margin-top: 50px;
           text-align: center;
         }
         .review {
-            border: 1px solid #ddd;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            max-width: 800px;
-            margin: 20px auto;
-            display: flex;
-            align-items: flex-start;
-        }
+          display: grid;
+          grid-template-columns: auto 1fr auto;
+          grid-template-rows: auto auto;
+          grid-template-areas: 
+              "image author date"
+              "image content content";
+          border: 1px solid #ddd;
+          padding: 15px;
+          border-radius: 5px;
+          margin-bottom: 20px;
+          max-width: 800px;
+          margin: 20px auto;
+          background-color: #f9f9f9;
+        }        
         .review img {
+            grid-area: image;
             border-radius: 50%;
             width: 60px;
             height: 60px;
             margin-right: 15px;
-        }
-        .review-content-container {
-            flex: 1;
-        }
+            align-self: start;
+        }       
         .review-author {
+            grid-area: author;
             font-weight: bold;
-        }
+            color: #333;
+            justify-self: start;
+            text-align: left;
+        }        
+        .review-content {
+            grid-area: content;
+            margin-top: 10px;
+            text-align: justify;
+            color: #555;
+            margin-right: 10px;      
+        }        
+        .review-date-container {
+            grid-area: date;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }       
         .review-date {
             color: #888;
-            float: right;
+        }      
+        .seller-info {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 30px auto;
+            text-align: center;
         }
-        .review-content {
-            margin-top: 10px;
-            text-align: left;
+        .seller-info img {
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            margin-bottom: 10px;
+        }
+        .seller-info h4 {
+            color: #333;
+        }
+        .seller-info p {
+            color: #666;
+        }
+        .button-container {
+          margin-top: auto;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
         }
     </style>
 </head>
 <body>
     {% include 'header-marketplace.html' %}
-    <!-- Back Button -->
-    <div class="container back-button">
-      <button onclick="goBack()" class="btn btn-secondary">Back</button>
-    </div>
 
+    <!-- Product Detail Section -->
     <div class="container product-detail">
         <div class="row">
             <div class="col-md-6">
                 <img src="/media/{{ product.productPhoto }}" alt="{{ product.productName }}" class="product-image">
             </div>
             <div class="col-md-6 product-info">
-                <h2>{{ product.productName }}</h2>
+              <div class="row">
+                <div class="col-12 d-flex justify-content-between align-items-center">
+                  <h2>{{ product.productName }}</h2>
+                  <p style="color: #666;">{{ product.productSold }} Sold</p>
+                </div>
+              </div>
+                <p>{{ product.productDesc }}</p>
                 <p class="product-price">Price: RM {{ product.productPrice }}</p>
                 <p class="product-stock">Stock: {{ product.productStock }} left</p>
                 <p class="product-category">Category: {{ product.productCategory }}</p>
-                <p>{{ product.productDesc }}</p>
-                {% if product.Person_fk.Email != request.session.Email %}
-                  <form method="post" action="{% url 'marketplace:add_to_basket' product.productid person.id %}">
-                      {% csrf_token %}
-                      <input type="hidden" name="productqty" value="1">
-                      <button type="submit" class="btn btn-primary">Add to Basket</button>
-                  </form>
-                  <form method="post" action="{% url 'marketplace:buy_now' product.productid person.id %}">
-                      {% csrf_token %}
-                      <input type="hidden" name="productqty" value="1">
-                      <button type="submit" class="btn btn-success" style="margin-top: 10px;">Buy Now</button>
-                  </form>
-                {% endif %}
-                {% if product.Person_fk.Email == request.session.Email %}
-                  <a href="#" type="button" id="delete-button" style="visibility: visible; float: right; margin-right: 10px" data-toggle="modal" data-target="#confirmDeleteModal" class="btn btn-danger">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
-                      <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
-                    </svg>
-                  </a>                  
-                  <a href="{% url 'marketplace:UpdateProduct' product.productid %}" type="button" id="update-button" style="visibility: visible; margin-right: 10px; float: right" class="btn btn-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
-                      <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
-                    </svg>
-                  </a>
-                  <br><br>
-                {% endif %}
+                <div class="button-container">
+                  {% if product.Person_fk.Email != request.session.Email %}
+                    <form method="post" action="{% url 'marketplace:add_to_basket' product.productid person.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="productqty" value="1">
+                        <button type="submit" class="btn btn-primary" style="float: right; width: 200px;">Add to Basket</button>
+                    </form>
+                    <form method="post" action="{% url 'marketplace:buy_now' product.productid person.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="productqty" value="1">
+                        <button type="submit" class="btn btn-success" style="margin-top: 10px; float: right; width: 200px;">Buy Now</button>
+                    </form>
+                  {% endif %}
+                  {% if product.Person_fk.Email == request.session.Email %}
+                    <a href="#" type="button" id="delete-button" style="float: right; width: 200px;" data-toggle="modal" data-target="#confirmDeleteModal" class="btn btn-danger">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                        <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
+                      </svg>
+                    </a>                  
+                    <a href="{% url 'marketplace:UpdateProduct' product.productid %}" type="button" id="update-button" style="margin-top: 10px; float: right; width: 200px;" class="btn btn-primary">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                        <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
+                      </svg>
+                    </a>
+                    <br><br>
+                  {% endif %}
+                </div>
 
                 <!-- Modal -->
                 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
@@ -141,21 +197,30 @@
         </div>
     </div>
 
+    <!-- Seller Info Section -->
+    <div class="container seller-info">
+        <img src="/media/{{ product.Person_fk.Photo }}" alt="{{ product.Person_fk.Name }}'s profile picture">
+        <h4>Seller: <a href="{% url 'marketplace:viewSeller' product.Person_fk.id %}" style="font-size: h4; color: #333;">{{ product.Person_fk.Username }}</a></h4>
+        <p>Email: {{ product.Person_fk.Email }}</p>
+    </div>
+
     <!-- Customer Reviews Section -->
     <div class="container review-section">
       <h3>Customer Reviews</h3>
       {% for review in reviews %}
-          <div class="review">
-              <img src="/media/{{ review.Person_fk.Photo }}" alt="{{ review.Person_fk.Name }}'s profile picture">
-              <div class="review-content-container">
-                  <p class="review-author">{{ review.Person_fk.Name }}</p>
-                  <p class="review-date">{{ review.date|date:"F j, Y" }}</p>
-                  <div class="clearfix"></div>
-                  <p class="review-content">{{ review.content }}</p>
-              </div>
+        <div class="review">
+          <img src="/media/{{ review.Person_fk.Photo }}" alt="{{ review.Person_fk.Name }}'s profile picture">
+          <div class="review-content-container">
+              <p class="review-author">{{ review.Person_fk.Name }}</p>
+              <p class="review-content">{{ review.content }}</p>
           </div>
+          <div class="review-date-container">
+              <p class="review-date">{{ review.date|date:"F j, Y" }}</p>
+          </div>
+        </div>    
       {% empty %}
           <p>No reviews yet. Buy this product and be the first to review this product!</p>
+          <br>
       {% endfor %}
     </div>
     
@@ -168,10 +233,6 @@
 </html>
 
 <script>
-  function goBack() {
-    window.history.back();
-  }
-
   function deleteProduct() {
     window.alert("Product successfully deleted!");
   }
@@ -186,7 +247,7 @@
     var productId = document.getElementById('productIdInput').value;
     console.log('Deleting product with ID:', productId);
     // Redirect to the delete URL
-    var deleteUrl = "{% url 'marketplace:DeleteProduct' fk1=0 %}".replace('0', productId);
+    var deleteUrl = "{% url 'marketplace:DeleteProduct2' fk1=0 %}".replace('0', productId);
     window.location.href = deleteUrl;
   }
 </script>

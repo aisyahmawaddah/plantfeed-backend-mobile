@@ -200,6 +200,8 @@ def pay(request):
             return HttpResponse('Stock is not enough', content_type='application/json')
         else:
             prod.save()
+            
+        prod.productSold += bas.productqty
 
         # Calculate subtotal for the product
         subtotal = (bas.productid.productPrice * bas.productqty)
@@ -275,23 +277,4 @@ def successCheckout(request):
     return render(request,'success.html')  
    
 def cancelCheckout(request):
-    try:
-        product=prodProduct.objects.all()
-        person=Person.objects.get(Email=request.session['Email'])
-        user=Person.objects.all()
-        allBasket = Basket.objects.all().filter(Person_fk_id=person.id,is_checkout=0)
-            
-        total = 0
-            
-        for x in allBasket:
-            total += x.productid.productPrice * x.productqty
-        context = {
-            'allBasket': allBasket,
-            'product': product,
-            'person': person,
-            'user': user,
-            'total':total
-        }
-        return render(request,'summary.html', context)
-    except prodProduct.DoesNotExist:
-        raise Http404('Data does not exist')
+    return redirect('basket:summary')

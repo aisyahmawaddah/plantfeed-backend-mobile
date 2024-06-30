@@ -41,7 +41,7 @@ def selectTopic(request):
         Topiclist = request.POST.getlist('topic')
         for topic in Topiclist:
             Topic.objects.create(TopicName=topic, Person_fk=person)
-        return render(request, 'login.html')
+        return redirect('Login')
     else:
         return render(request, 'Topic.html', {'person': person})
     
@@ -60,7 +60,7 @@ def updateSelectedTopic(request):
         Topiclist = request.POST.getlist('topic')
         for topic in Topiclist:
             Topic.objects.create(TopicName=topic, Person_fk=personlist)
-        return render(request, 'profile2.html',{'person': person})
+        return redirect('ViewProfile')
     else:
         return render(request, 'Topic.html',{'person': person})
 
