@@ -40,8 +40,6 @@ from orders.models import Order
 from member.models import Person
 from django.http.response import Http404
 from basket.models import Basket
-# Set your secret key. Remember to switch to your live secret key in production.
-# See your keys here: https://dashboard.stripe.com/apikeys
 stripe.api_key = settings.STRIPE_SECRET_KEY
 from django.views.decorators.csrf import csrf_exempt
 from urllib.parse import urlencode
@@ -49,87 +47,6 @@ from decimal import Decimal
 
 import json
 import os
-# from .models import Person
-
-# Create your views here.
-# def pay(request):
-#     try:
-#         tcode = 'TRANS#' + str(timezone.now())
-#         orderStatus = "Payment Made"
-#         person = Person.objects.get(Email=request.session['Email'])
-
-#         # Retrieve all basket items for the current user that are not checked out
-#         basket_items = Basket.objects.filter(Person_fk_id=person.id, is_checkout=0)
-
-#         # Dictionary to store total amount for each seller
-#         seller_totals = {}
-
-#         # Calculate total amount for each seller
-#         for bas in basket_items:
-#             seller_id = bas.productid.Person_fk_id
-#             if seller_id not in seller_totals:
-#                 seller_totals[seller_id] = 0
-
-#             seller_totals[seller_id] += bas.productid.productPrice * bas.productqty
-
-#         # Process each seller's items and create a single order for each seller
-#         for seller_id, total in seller_totals.items():
-#             # Create a single order for this seller
-#             ord = Order()
-#             ord.name = request.POST['name']
-#             ord.email = request.POST['email']
-#             ord.address = request.POST['address']
-#             ord.payment = request.POST['payment']
-#             ord.creditnumber = request.POST['creditnumber']
-#             ord.expiration = request.POST['expiration']
-#             ord.cvv = request.POST['cvv']
-#             ord.transaction_code = tcode
-#             ord.user_id = person.id
-#             ord.namecard = request.POST['namecard']
-#             ord.shipping = request.POST['shipping']
-#             ord.total = total
-#             ord.status = orderStatus
-#             ord.seller_id = seller_id
-#             ord.save()
-
-#         # Mark all basket items as checked out
-#         basket_items.update(is_checkout=1, transaction_code=tcode, status=orderStatus)
-
-#         return redirect('orders:history')
-
-#     except Person.DoesNotExist:
-#         raise Http404('User does not exist')
-
-# def pay(request):
-#     tcode = 'TRANS#'+str(timezone.now())
-#     orderStatus = "Payment Made"
-#     person=Person.objects.get(Email=request.session['Email'])
-    
-#     for bas in Basket.objects.all().filter(Person_fk_id=person.id,is_checkout=0) :
-#         prod = prodProduct.objects.all().get(productid=bas.productid.productid)
-#         prod.productStock -= bas.productqty
-#         if prod.productStock < 0 :
-#             return HttpResponse('Stock is not enough', content_type='application/json')
-#         else :
-#             prod.save()
-#     ord = Order()
-#     ord.name = request.POST['name']
-#     ord.email = request.POST['email']
-#     ord.address = request.POST['address']
-#     ord.payment = request.POST['payment']
-#     ord.creditnumber = request.POST['creditnumber']
-#     ord.expiration = request.POST['expiration']
-#     ord.cvv = request.POST['cvv']
-#     ord.transaction_code = tcode
-#     ord.user_id = person.id
-#     ord.namecard = request.POST['namecard']
-#     ord.shipping = request.POST['shipping']
-#     ord.total = request.POST['total']
-#     ord.status = orderStatus
-
-#     ord.save()
-#     Basket.objects.all().filter(Person_fk_id=person.id,is_checkout=0).update(is_checkout=1,transaction_code=tcode, status = orderStatus)
-#     return redirect('orders:history')
 
 def checkoutSession(request):
     if request.method == 'POST':
@@ -196,12 +113,11 @@ def pay(request):
     for bas in selected_products:
         prod = get_object_or_404(prodProduct, productid=bas.productid.productid)
         prod.productStock -= bas.productqty
+        prod.productSold += bas.productqty
         if prod.productStock < 0:
             return HttpResponse('Stock is not enough', content_type='application/json')
         else:
             prod.save()
-            
-        prod.productSold += bas.productqty
 
         # Calculate subtotal for the product
         subtotal = (bas.productid.productPrice * bas.productqty)
@@ -239,39 +155,6 @@ def pay(request):
     ord.save()
     selected_products.update(is_checkout=1, transaction_code=tcode, status=orderStatus)
     return redirect('orders:history')
-        
-# def create_checkout_session(request):
-#     if request.method == 'POST':
-#         product_ids = request.POST.getlist('selected_products')
-#         products = Basket.objects.all().filter(id__in=product_ids)
-#         YOUR_DOMAIN = "http://127.0.0.1:8000/paymentAPI"
-
-#         line_items = []
-#         for product in products:
-#             line_items.append({
-#                 'price_data': {
-#                     'currency': 'myr',
-#                     'unit_amount': int(product.productid.productPrice * 100),
-#                     'product_data': {
-#                         'name': product.productid.productName,
-#                     },
-#                 },
-#                 'quantity': 1,
-#             })
-
-#         checkout_session = stripe.checkout.Session.create(
-#             payment_method_types=['card'],
-#             line_items=line_items,
-#             mode='payment',
-#             success_url=YOUR_DOMAIN + '/success/',
-#             cancel_url=YOUR_DOMAIN + '/cancel/',
-#         )
-
-#         return JsonResponse({
-#             'id': checkout_session.id
-#         })
-
-#     return JsonResponse({'error': 'Invalid request'}, status=400)
         
 def successCheckout(request):
     return render(request,'success.html')  
