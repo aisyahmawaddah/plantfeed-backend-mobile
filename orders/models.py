@@ -12,18 +12,11 @@ class Order(models.Model):
     name = models.CharField(max_length=150)
     email = models.CharField(max_length=1000)
     address = models.CharField(max_length=1000)
-    # payment = models.CharField(max_length=1000)
-    # namecard = models.CharField(max_length=1000)
-    # creditnumber = models.CharField(max_length=1000)
-    # expiration = models.CharField(max_length=1000)
-    # cvv = models.CharField(max_length=1000)
     shipping = models.CharField(max_length=1000,null=True)
     transaction_code = models.CharField(max_length=1000)
     total = models.FloatField(null=True)
     status = models.CharField(max_length=250, null=True)
     user = models.ForeignKey(Person, on_delete=models.CASCADE)
-    # seller = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='seller_id')
-
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
