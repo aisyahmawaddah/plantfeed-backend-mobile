@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head></head>
+
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+
+<style>
+  
+  textarea{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+  form{
+    border:4px solid black;
+    margin: 0 auto;
+    padding: 60px;
+    width: fit-content;
+      }
+  
+      .accordion {
+      background-color: #eee;
+      color: #444;
+      cursor: pointer;
+      padding: 18px;
+      width: 100%;
+      border: none;
+      text-align: left;
+      outline: none;
+      font-size: 15px;
+      transition: 0.4s;
+    }
+
+    .active, .accordion:hover {
+      background-color: #ccc;
+    }
+
+    .accordion:after {
+      content: '\002B';
+      color: #777;
+      font-weight: bold;
+      float: right;
+      margin-left: 5px;
+    }
+
+    .active:after {
+      content: "\2212";
+    }
+
+    .panel {
+      padding: 0 18px;
+      background-color: white;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.2s ease-out;
+    }
+  
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border: none;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: white;
+    }
+    
+    .tabs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.tab-link {
+  padding: 10px 20px;
+  background-color: #f2f2f2;
+  border: 1px solid #ddd;
+  border-radius: 5px 5px 0 0;
+  
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.tab-link:hover {
+  background-color: #ddd;
+}
+
+.tab-content {
+  display: none;
+  padding: 20px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-top: none;
+}
+
+.tab-content table tr th {
+  padding: 10px;
+  text-align: left;
+  font-weight: bold;
+}
+
+.tab-content table tr td {
+  padding: 10px;
+  text-align: left;
+}
+</style>
+
+
+<div id="response-message" style="display:none;" class="alert alert-success"></div>
+
+
+{% include 'header-marketplace.html' %}
+<br/>
+<body>
+  {% load mathfilters %}
+  <div class="container">
+    <div class="tabs">
+      <button class="tab-link" data-tab="pending-orders">Pending Orders</button>
+      <button class="tab-link" data-tab="packaged-orders">Packaged Orders</button>
+      <button class="tab-link" data-tab="shipped-orders">Shipped Orders</button>
+      <button class="tab-link" data-tab="completed-orders">Completed Orders</button>
+      <button class="tab-link" data-tab="cancelled-orders">Cancelled Orders</button>
+    </div>
+    
+    <div id="pending-orders" class="tab-content">
+      {% for transaction_code, order_info in products_by_order.items %}
+          {% if order_info.orderStatus == 'Payment Made' %}
+              <button class="accordion"> {{ order_info.transaction_code }} ({{ order_info.buyer_email }})</button>
+              <div class="panel">
+                  <table>
+                      <tr style="border-bottom: 1px solid #ddd;">
+                          <th>Product Name</th>
+                          <th>Product Price</th>
+                          <th>Product Quantity</th>
+                      </tr>
+                      {% for product in order_info.products %}
+                          <tr style="font-weight: normal;">
+                              <td>{{ product.productName }}</td>
+                              <td>RM{{ product.productPrice }}</td>
+                              <td>{{ product.productQty }}</td>
+                          </tr>
+                      {% endfor %}
+                      <tr style="border-top: 1px solid #ddd;">
+                          <td colspan="3">Total (excluding shipping): RM{{ order_info.total_price_for_seller|floatformat:2 }} <br> Shipping Address: {{ order_info.address }}</td>
+                          <td colspan="1">
+                              <select id="{{transaction_code}}">
+                                  <option value="{{order_info.orderStatus}}" selected disabled hidden>{{order_info.orderStatus}}</option>
+                                  <option value="Payment Made">Pending</option>
+                                  <option value="Package Order">Package Order</option>
+                                  <option value="Ship Order">Ship Order</option>
+                              </select>
+                              <button onclick="updateOrderStatus('{{transaction_code}}', '{{ person.id }}')">Update</button>
+                          </td>
+                      </tr>
+                  </table>
+              </div>
+          {% endif %}
+      {% endfor %}
+    </div>
+    
+    <div id="packaged-orders" class="tab-content">
+      {% for transaction_code, order_info in products_by_order.items %}
+        {% if order_info.orderStatus == 'Package Order' %}
+          <button class="accordion"> {{ order_info.transaction_code }} ({{ order_info.buyer_email }})</button>
+          <div class="panel">
+            <table>
+              <tr style="border-bottom: 1px solid #ddd;">
+                <th>Product Name</th>
+                <th>Product Price</th>
+                <th>Product Quantity</th>
+              </tr>
+              {% for product in order_info.products %}
+                <tr style="font-weight: normal;">
+                  <td>
+                    <tr style="font-weight: normal;">
+                      <td>{{ product.productName }}</td>
+                      <td>RM{{ product.productPrice }}</td>
+                      <td>{{ product.productQty }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr style="border-top: 1px solid #ddd;">
+                      <td colspan="3">Total (excluding shipping): RM{{ order_info.total_price_for_seller|floatformat:2 }}</td>
+                      <td colspan="1">
+                        <select id="{{transaction_code}}">
+                          <option value="{{order_info.orderStatus}}" selected>{{order_info.orderStatus}}</option>
+                          <option value="Payment Made">Pending</option>
+                          <option value="Ship Order">Ship Order</option>
+                        </select>
+                        <button onclick="updateOrderStatus('{{transaction_code}}', '{{ person.id }}')">Update</button>
+                      </td>
+                    </tr>
+                    </table>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+    </div>
+
+                    <div id="shipped-orders" class="tab-content">
+                      {% for transaction_code, order_info in products_by_order.items %}
+                        {% if order_info.orderStatus == 'Ship Order' %}
+                          <button class="accordion"> {{ order_info.transaction_code }} ({{ order_info.buyer_email }})</button>
+                          <div class="panel">
+                            <table>
+                              <tr style="border-bottom: 1px solid #ddd;">
+                                <th>Product Name</th>
+                                <th>Product Price</th>
+                                <th>Product Quantity</th>
+                              </tr>
+                              {% for product in order_info.products %}
+                                <tr style="font-weight: normal;">
+                                  <td>{{ product.productName }}</td>
+                                  <td>RM{{ product.productPrice }}</td>
+                                  <td>{{ product.productQty }}</td>
+                                </tr>
+                              {% endfor %}
+                              <tr style="border-top: 1px solid #ddd;">
+                                <td colspan="3">Total (excluding shipping): RM{{ order_info.total_price_for_seller|floatformat:2 }}</td>
+                                <td colspan="1">
+                                  <select id="{{transaction_code}}">
+                                    <option value="{{order_info.orderStatus}}" selected>{{order_info.orderStatus}}</option>
+                                    <option value="Payment Made">Pending</option>
+                                    <option value="Packaged Order">Packaged Order</option>
+                                  </select>
+                                  <button onclick="updateOrderStatus('{{transaction_code}}', '{{ person.id }}')">Update</button>
+                                </td>
+                              </tr>
+                            </table>
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+
+                    <div id="completed-orders" class="tab-content">
+                      {% for transaction_code, order_info in products_by_order.items %}
+                        {% if order_info.orderStatus == 'Order Received' or order_info.orderStatus == 'Product Reviewed'%}
+                          <button class="accordion"> {{ order_info.transaction_code }} ({{ order_info.buyer_email }})</button>
+                          <div class="panel">
+                            <table>
+                              <tr style="border-bottom: 1px solid #ddd;">
+                                <th>Product Name</th>
+                                <th>Product Price</th>
+                                <th>Product Quantity</th>
+                              </tr>
+                              {% for product in order_info.products %}
+                                <tr style="font-weight: normal;">
+                                  <td>{{ product.productName }}</td>
+                                  <td>RM{{ product.productPrice }}</td>
+                                  <td>{{ product.productQty }}</td>
+                                </tr>
+                              {% endfor %}
+                              <tr style="border-top: 1px solid #ddd;">
+                                <td colspan="3">Total (excluding shipping): RM{{ order_info.total_price_for_seller|floatformat:2 }}</td>
+                              </tr>
+                            </table>
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+
+                    <div id="cancelled-orders" class="tab-content">
+                      {% for transaction_code, order_info in products_by_order.items %}
+                        {% if order_info.orderStatus == 'Cancel' %}
+                          <button class="accordion"> {{ order_info.transaction_code }} ({{ order_info.buyer_email }})</button>
+                          <div class="panel">
+                            <table>
+                              <tr style="border-bottom: 1px solid #ddd;">
+                                <th>Product Name</th>
+                                <th>Product Price</th>
+                                <th>Product Quantity</th>
+                              </tr>
+                              {% for product in order_info.products %}
+                                <tr style="font-weight: normal;">
+                                  <td>{{ product.productName }}</td>
+                                  <td>RM{{ product.productPrice }}</td>
+                                  <td>{{ product.productQty }}</td>
+                                </tr>
+                              {% endfor %}
+                              <tr style="border-top: 1px solid #ddd;">
+                                <td colspan="3">Total (excluding shipping): RM{{ order_info.total_price_for_seller|floatformat:2 }}</td>
+                                <td colspan="1">
+                                </td>
+                              </tr>
+                            </table>
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+  </div>
+<script>
+  var acc = document.getElementsByClassName("accordion");
+  var i;
+
+  for (i = 0; i < acc.length; i++) {
+    acc[i].addEventListener("click", function() {
+      this.classList.toggle("active");
+      var panel = this.nextElementSibling;
+      if (panel.style.maxHeight) {
+        panel.style.maxHeight = null;
+      } else {
+        panel.style.maxHeight = panel.scrollHeight + "px";
+      }
+    });
+  }
+
+  function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          // Does this cookie string begin with the name we want?
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+          }
+      }
+  }
+  return cookieValue;
+}
+
+function updateOrderStatus(transactionCode, personId) {
+  const csrftoken = getCookie('csrftoken');
+  const order_status_element = document.getElementById(transactionCode);
+  const order_status = order_status_element.value;
+
+  $.ajax({
+    url: '/orders/update_order_status/',
+    type: 'POST',
+    headers: { 'X-CSRFToken': csrftoken },
+    data: { "order_id": transactionCode, "order_status": order_status, "seller_id": personId },
+    success: function(response) {
+  if (response.status == 1) {
+    location.reload();
+    document.getElementById("response-message").innerHTML = response.message;
+    document.getElementById("response-message").style.display = "block";
+    setTimeout(function() {
+      document.getElementById("response-message").style.display = "none";
+    }, 3000); // hide message after 3 seconds
+  } else {
+    alert(response.message);
+  }
+}
+  });
+}
+
+var tabLinks = document.querySelectorAll(".tab-link");
+var tabContents = document.querySelectorAll(".tab-content");
+
+// Function to show a particular tab content
+function showTabContent(tabId) {
+  for (var i = 0; i < tabContents.length; i++) {
+    if (tabContents[i].id === tabId) {
+      if (tabContents[i].children.length === 0) {
+        tabContents[i].innerHTML = "No orders here";
+      }
+      tabContents[i].style.display = "block";
+    } else {
+      tabContents[i].style.display = "none";
+    }
+  }
+}
+
+// Loop through all the tab links and add click event listener to each
+for (var i = 0; i < tabLinks.length; i++) {
+  tabLinks[i].addEventListener("click", function() {
+    var tabId = this.getAttribute("data-tab");
+    showTabContent(tabId);
+  });
+}
+
+// Show the first tab content by default
+showTabContent(tabContents[0].id);
+
+
+</script>
+</body>
+</html>

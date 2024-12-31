@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<style>
+  .profile-pic {
+  color: transparent;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  transition: all 0.3s ease;
+}
+.profile-pic input {
+  display: none;
+}
+.profile-pic img {
+  position: absolute;
+  object-fit: cover;
+  width: 165px;
+  height: 165px;
+  box-shadow: 0 0 10px 0 rgba(255, 255, 255, 0.35);
+  border-radius: 100px;
+  z-index: 0;
+}
+.profile-pic .-label {
+  cursor: pointer;
+  height: 165px;
+  width: 165px;
+}
+.profile-pic:hover .-label {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 10000;
+  color: #fafafa;
+  transition: background-color 0.2s ease-in-out;
+  border-radius: 100px;
+  margin-bottom: 0;
+}
+.profile-pic span {
+  display: inline-flex;
+  padding: 0.2em;
+  height: 2em;
+}
+</style>
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js" integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+
+  <div class="p-3 mb-2 bg-success text-white text-center">
+    <h1 class="p-3 mb-2 bg-success text-white text-center">PlantFeed Web Application</h1>
+  </div>
+
+  <p class="h3 text-center align-content: center;">Registration Form</p>
+  <hr />
+  <br />
+  <form method="POST" class="container text-center" id="post-form" action="{% url 'Register' %}" enctype="multipart/form-data" onsubmit="return formValidate();">
+    {% csrf_token %}
+
+    <div class="profile-pic">
+      <label class="-label" for="file">
+        <span class="glyphicon glyphicon-camera"></span>
+        <span>Choose Profile Picture</span>
+      </label>
+      <input id="file" type="file" name="Photo" onchange="loadFile(event)"/>
+      <img src="https://as2.ftcdn.net/v2/jpg/03/42/99/71/1000_F_342997143_wz7x1yR7KWhmhSKF9OHwuQ2W4W7IUDvH.jpg" name="Photo" id="Photo" width="200" />
+    </div>
+    <br>
+    <!-- Email and Password -->
+    <div class="form-row">
+      <!-- <div class="form-group col-md-6">
+        <div class="col-12">
+          <label for="inputImage" class="form-label">Profile Photo : </label>
+          <input type="file" class="form-control" id="inputMedia" name="Photo" placeholder="Enter Media">
+        </div>
+      </div> -->
+      
+      <div class="form-group col-md-6">
+        <label for="inputEmail" class="container text-left">Email</label>
+        <input type="email" class="form-control" id="email" placeholder="Enter email" name="email" required>
+        <small id="emailError" class="text-danger"></small>
+        <small id="emailAvailability" class="text-success"></small>
+      </div>
+      
+
+      <div class="form-group col-md-6">
+        <label for="inputPassword" class="container text-left">Password</label>
+        <input type="password" class="form-control" id="Password" placeholder="Enter password" name="password" minlength="8"
+          maxlength="20" required>
+        <small id="passwordHelpInline" class="text-muted">Must be 8-20 characters long.</small>
+      </div>
+    </div>
+
+    <!-- Username and name -->
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <label for="inputUsername" class="container text-left">Username</label>
+        <input type="text" class="form-control" id="username" placeholder="Enter username" name="username" required>
+        <small id="usernameError" class="text-danger"></small>
+        <small id="usernameAvailability" class="text-success"></small>
+      </div>
+      <div class="form-group col-md-6">
+        <label for="inputName" class="container text-left">Name</label>
+        <input type="text" class="form-control" id="name" placeholder="Enter name" name="name" required>
+      </div>
+    </div>
+
+    <!-- DOB and age -->
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <label for="inputDOB" class="container text-left">Date Of Birth</label>
+        <input type="date" class="form-control" id="dateofbirth" placeholder="Enter date of birth" name="dob"
+          required onchange="calculateAge()">
+      </div>
+      <div class="form-group col-md-6">
+        <label for="inputAge" class="container text-left">Age</label>
+        <input type="text" class="form-control" id="age" placeholder="Enter age" name= "age" readonly>
+      </div>
+    </div>
+
+    <!-- Gender and marital status -->
+    <legend class="col-form-label col-sm-2 pt-0 text-left">Gender</legend>
+    <div class="custom-control custom-radio text-left">
+      <input type="radio" id="customRadio1" name="gender" class="custom-control-input" value="M" required checked>
+      <label class="custom-control-label" for="customRadio1">Male</label>
+    </div>
+    <div class="custom-control custom-radio text-left">
+      <input type="radio" id="customRadio2" name="gender" class="custom-control-input" value="F">
+      <label class="custom-control-label" for="customRadio2">Female</label>
+    </div>
+    <br />
+    <div class="form-row">
+      <div class="form-group col-md-4">
+        <label for="inputState" class="container text-left" name="maritalstatus">Marital Status</label>
+        <select id="MaritalStatus" class="form-control" name="maritalstatus" required>
+          <option selected>Enter marital status</option>
+          <option value="Married" name="maritalstatus">Married</option>
+          <option value="Unmarried" name="maritalstatus" selected>Unmarried</option>
+          <option value="Divorced" name="maritalstatus">Divorced</option>
+        </select>
+      </div>
+
+      <div class="form-group col-md-4">
+        <label for="inputUserLevel" class="container text-left" name="userlevel">User Level</label>
+        <select id="UserLevel" class="form-control" name="userlevel" required>
+          <option value="user" name="userlevel" selected>User</option>
+          <option value="admin" name="userlevel">Admin</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- District and state -->
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <label for="inputDistrict" class="container text-left">District</label>
+        <input type="text" class="form-control" id="district" placeholder="Enter district" name="district" required>
+      </div>
+      <div class="form-group col-md-6">
+        <label for="inputState" class="container text-left">State</label>
+        <input type="text" class="form-control" id="state" placeholder="Enter state" name="state" required>
+      </div>
+    </div>
+
+    <!-- Occupation and about -->
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <label for="inputOccupation" class="container text-left">Occupation</label>
+        <input type="text" class="form-control" id="occupation" placeholder="Enter occupation" name="occupation">
+      </div>
+      <div class="form-group col-md-6">
+        <label for="inputAbout" class="container text-left">About</label>
+        <input type="text" class="form-control" id="about" placeholder="Enter about" name="about" required>
+      </div>
+    </div>
+    <!-- Submit -->
+    <!-- <button type="submit" class="btn btn-success" value="Registration">Register</button> -->
+    <button type="submit" class="btn btn-success" value="Reg" onclick="return formValidate()">Register</button>
+    <br /><br />
+    <hr />
+    <em>If you already a member <a href="{% url 'Login' %}">Login</a></em>
+    <br /><br /><br /><br />
+  </form>
+
+  {% if messages %}
+  <div class="container">
+    <hr>
+    {% for msg in messages %}
+    <b>{{msg}}</b>
+    {% endfor %}
+    <hr>
+  </div>
+  {% endif %}
+
+</body>
+
+
+
+<script>
+  var loadFile = function (event) {
+    var image = document.getElementById("Photo");
+    image.src = URL.createObjectURL(event.target.files[0]);
+  }
+
+  function formValidate() {
+    var age = document.getElementById("age").value;
+    if (isNaN(age) || age < 1) {
+      alert("Please provide your age in the correct format!");
+      document.getElementById("age").focus();
+      return false;
+    }
+
+    var password = document.getElementById("Password").value;
+    var passwordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,20}$/;
+    if (!password.match(passwordRegex)) {
+      alert("Password must be 8-20 characters long and contain symbols and numbers!");
+      document.getElementById("Password").focus();
+      return false;
+    }
+
+    var username = document.getElementById("username").value;
+    // Perform an asynchronous request to check if the username exists in the database
+    // Implement your own logic here
+
+    return true;
+  }
+
+  function calculateAge() {
+    var dobField = document.getElementById("dateofbirth");
+    var ageField = document.getElementById("age");
+
+    var selectedDate = new Date(dobField.value);
+    var today = new Date();
+
+    var age = today.getFullYear() - selectedDate.getFullYear();
+    var monthDiff = today.getMonth() - selectedDate.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < selectedDate.getDate())) {
+      age--;
+    }
+
+    ageField.value = age;
+  }
+</script>
+
+<script>
+  var usernameInput = document.getElementById("username");
+  var usernameAvailability = document.getElementById("usernameAvailability");
+
+  usernameInput.addEventListener("input", function() {
+    var username = usernameInput.value;
+    if (username) {
+      checkUsernameAvailability(username);
+    } else {
+      clearUsernameAvailability();
+    }
+  });
+
+  function checkUsernameAvailability(username) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === XMLHttpRequest.DONE) {
+        if (xhr.status === 200) {
+          var response = JSON.parse(xhr.responseText);
+          if (response.available) {
+            showUsernameAvailability("Username is available!", "text-success");
+          } else {
+            showUsernameAvailability("Username is already taken!", "text-danger");
+          }
+        } else {
+          console.error("Error occurred while checking username availability.");
+        }
+      }
+    };
+    xhr.open("GET", "/check_username_availability?username=" + encodeURIComponent(username), true);
+    xhr.send();
+  }
+
+  function clearUsernameAvailability() {
+    usernameAvailability.innerText = "";
+    usernameAvailability.classList.remove("text-success", "text-danger");
+  }
+
+  function showUsernameAvailability(message, className) {
+    usernameAvailability.innerText = message;
+    usernameAvailability.classList.add(className);
+    usernameAvailability.classList.remove("text-success", "text-danger");
+  }
+</script>
+
+<script>
+  var emailInput = document.getElementById("email");
+  var emailAvailability = document.getElementById("emailAvailability");
+
+  emailInput.addEventListener("input", function() {
+    var email = emailInput.value;
+    if (email) {
+      checkEmailAvailability(email);
+    } else {
+      clearEmailAvailability();
+    }
+  });
+
+  function checkEmailAvailability(email) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === XMLHttpRequest.DONE) {
+        if (xhr.status === 200) {
+          var response = JSON.parse(xhr.responseText);
+          if (response.available) {
+            showEmailAvailability("Email is available!", "text-success");
+          } else {
+            showEmailAvailability("Email is already taken!", "text-danger");
+          }
+        } else {
+          console.error("Error occurred while checking email availability.");
+        }
+      }
+    };
+    xhr.open("GET", "/check_email_availability?email=" + encodeURIComponent(email), true);
+    xhr.send();
+  }
+
+  function clearEmailAvailability() {
+    emailAvailability.innerText = "";
+    emailAvailability.classList.remove("text-success", "text-danger");
+  }
+
+  function showEmailAvailability(message, className) {
+    emailAvailability.innerText = message;
+    emailAvailability.classList.add(className);
+    emailAvailability.classList.remove("text-success", "text-danger");
+  }
+</script>
+
+
+
+</html>
