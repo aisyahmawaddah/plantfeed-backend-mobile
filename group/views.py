@@ -27,6 +27,11 @@ from rest_framework import generics, permissions
 from sharing.models import GFeedPlantTagging, GFeedSoilTagging, GroupTimeline, GroupTimelineComment, FeedPlantTagging, FeedSoilTagging
 import json
 from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
+from datetime import datetime
+from django.http import HttpResponse
+import requests
+from urllib.parse import urljoin
 
 #group
 def mainGroup(request):
@@ -361,6 +366,8 @@ def PLSharing(request, pk):
 def PLGraphAPI(request):
     if request.method == "POST":
         try:
+            print("Received request method:", request.method)
+            print("Received data:", request.body)
             graph = pl_graph_api()
             data = json.loads(request.body)
             userid = data.get('userid')
@@ -368,20 +375,43 @@ def PLGraphAPI(request):
             graph.name = data.get('chart_name')
             graph.embed_link = data.get('embed_link')
             graph.chart_type = data.get('chart_type')
-            graph.start_date = data.get('start_date')
-            graph.end_date = data.get('end_date')
+            graph.start_date = timezone.make_aware(datetime.strptime(data.get('start_date'), '%Y-%m-%d'))
+            graph.end_date = timezone.make_aware(datetime.strptime(data.get('end_date'), '%Y-%m-%d'))
             graph.Person_fk = user
-            
-            graph.save()     
-            
+
+            graph.save()
+
             return JsonResponse({'success': 'Chart has been saved'}, status=200)
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON format'}, status=400)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
-    else:
-        return JsonResponse({'error': 'No data detected'}, status=404)
+    elif request.method == "GET":
+        try:
+            # Fetch all saved charts
+            charts = pl_graph_api.objects.all()
 
+            # Serialize data into a list of dictionaries
+            chart_data = [
+                {
+                    "id": chart.id,
+                    "name": chart.name,
+                    "embed_link": chart.embed_link,
+                    "chart_type": chart.chart_type,
+                    "start_date": chart.start_date.isoformat(),
+                    "end_date": chart.end_date.isoformat(),
+                    "user_id": chart.Person_fk.id,
+                }
+                for chart in charts
+            ]
+
+            return JsonResponse({"charts": chart_data}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    else:
+        return JsonResponse({'error': 'Unsupported request method'}, status=405)
+    
+    
 def AddGroupSharing(request, pk):
     
     user=Person.objects.get(Email=request.session['Email'])
@@ -548,3 +578,57 @@ class MembershipDeleteAPIView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except GroupMembership.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+
+def proxy_view(request):
+    """Fetch and proxy content from an external source."""
+    target_url = request.GET.get('url')  # The target URL to fetch
+    if not target_url:
+        raise Http404("No URL provided.")
+
+    try:
+        # Fetch the content from the target URL
+        response = requests.get(target_url)
+        content = response.text
+
+        # Rewrite relative URLs to use the proxy
+        base_proxy_url = '/group/proxy/?url=http://52.64.72.29:8000'
+        content = content.replace('href="/', f'href="{base_proxy_url}/')
+        content = content.replace('src="/', f'src="{base_proxy_url}/')
+        content = content.replace('action="/', f'action="{base_proxy_url}/')
+
+        # Inject JavaScript to rewrite dynamic requests
+        rewrite_script = """
+        <script>
+            document.querySelectorAll('a[href^="/"], img[src^="/"], form[action^="/"]').forEach(el => {
+                if (el.href) el.href = '/group/proxy/?url=http://52.64.72.29:8000' + el.getAttribute('href');
+                if (el.src) el.src = '/group/proxy/?url=http://52.64.72.29:8000' + el.getAttribute('src');
+                if (el.action) el.action = '/group/proxy/?url=http://52.64.72.29:8000' + el.getAttribute('action');
+            });
+
+            // Rewrite fetch and XHR requests
+            (function() {
+                const originalFetch = window.fetch;
+                window.fetch = function(input, init) {
+                    if (typeof input === 'string' && input.startsWith('/')) {
+                        input = '/group/proxy/?url=http://52.64.72.29:8000' + input;
+                    }
+                    return originalFetch(input, init);
+                };
+                const originalXhrOpen = XMLHttpRequest.prototype.open;
+                XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
+                    if (url.startsWith('/')) {
+                        url = '/group/proxy/?url=http://52.64.72.29:8000' + url;
+                    }
+                    originalXhrOpen.call(this, method, url, async, user, password);
+                };
+            })();
+        </script>
+        """
+        content = content.replace("</body>", f"{rewrite_script}</body>")
+
+        return HttpResponse(content, content_type=response.headers.get('Content-Type', 'text/html'))
+    except requests.exceptions.RequestException as e:
+        return HttpResponse(f"Error fetching content: {e}", status=500)
+

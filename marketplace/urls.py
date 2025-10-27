@@ -7,7 +7,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 # from LOGIN.views import UserReg, sharing, discussion, view, workshop, booking, member
-from .import views
+from .import api, views
 # from .import index
 from .views import *
 # from .api import UserList, UserDetail, UserAuthentication
@@ -52,5 +52,11 @@ urlpatterns = [
     path('api/products/<int:product_id>/delete/', delete_product, name='api-delete-product'),  # Delete product
     path('api/products/<int:product_id>/reviews/', get_product_reviews, name='api-get-reviews'),  # Get product reviews
     path('api/sell_product/<int:fk1>/', sell_product, name='sell_product'),
+    path('check-duplicate-product-name/', views.check_duplicate_product_name, name='check_duplicate_product_name'),
+
+    # Seller-Specific Product Endpoints
+    path('api/seller/<int:seller_id>/products/', api.get_products_by_seller, name='api-products-by-seller'),  # Seller products
+    path('api/seller/<int:seller_id>/', view_seller, name='api-view-seller'),  # View seller information
+
 ]
 

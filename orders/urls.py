@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from . import api, views
 from .api import (
     history,
     cancel_order,
@@ -7,8 +7,8 @@ from .api import (
     review_product,
     invoice,
     order_again,
-    sell_history,
-    update_order_history_status
+    sell_history_api,
+    update_order_status_api
 )
 
 app_name = 'orders'
@@ -19,17 +19,16 @@ urlpatterns = [
     path('order_again/<str:fk1>/<int:seller_id>/', views.order_again, name='order_again'),
     path('complete_order/<str:fk1>/<int:seller_id>/', views.complete_order, name='complete_order'),
     path('cancel_order/<str:fk1>/<int:seller_id>/', views.cancel_order, name='cancel_order'),
-    path('SellHistory.html/<str:fk1>/', views.SellHistory, name="SellHistory"),
+    path('SellHistory.html/<int:seller_id>/', views.SellHistory, name='SellHistory'),
     path('update_order_status/', views.update_order_status, name='update_order_status'),
     path('review_product/<str:fk1>/<int:seller_id>/', views.review_product, name='review_product'),
 
     # API Endpoints
     path('api/history/', history, name='api-history'),
-    path('api/cancel_order/<int:order_id>/<int:seller_id>/', cancel_order, name='api-cancel-order'),
-    path('orders/api/complete_order/<int:order_id>/<int:seller_id>/', complete_order, name='api-complete-order'),
-    path('api/review_product/<str:fk1>/<int:seller_id>/', review_product, name='api-review-product'),
-    path('api/invoice/<str:fk1>/<int:seller_id>/', invoice, name='api-invoice'),
-    path('api/order_again/<int:order_id>/<int:seller_id>/', order_again, name='order-again'),
-    path('api/sell_history/<str:fk1>/', sell_history, name='api-sell-history'),
-    path('api/update_order_status/', update_order_history_status, name='api-update-order-status'),
+    path('api/cancel-order/<int:basket_id>/<int:user_id>/', cancel_order, name='cancel-order'),
+    path('api/complete-order/<int:basket_id>/<int:user_id>/', complete_order, name='complete-order'),
+    path('api/review_product/<int:user_id>/<int:basket_id>/', review_product, name='review_product'),    path('api/invoice/<str:fk1>/<int:seller_id>/', invoice, name='api-invoice'),
+    path('api/order-again/<int:basket_id>/<int:user_id>/', order_again, name='order-again'),
+    path('api/sell_history/<int:fk1>/', sell_history_api, name='sell_history_api'),
+    path('api/update_order_status/', api.update_order_status_api, name='update_order_status_api'),
 ]

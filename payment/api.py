@@ -12,6 +12,10 @@ from django.utils import timezone
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 import json
+import logging
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+logger = logging.getLogger(__name__)
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -105,14 +109,12 @@ def process_payment(request):
 
         # Update the database for the selected products
         selected_products = Basket.objects.filter(id__in=selected_product_ids)
-        sellers = set()  # Set to keep track of unique sellers
+        sellers = {}  # Dictionary to track shipping per seller
         product_total = 0  # Variable to accumulate total product price
 
         for bas in selected_products:
             product = bas.productid  # Get the product
             seller = product.Person_fk  # Assuming Person_fk is the seller
-
-            sellers.add(seller)  # Add seller to sellers set
 
             # Update product stock and sold count
             product_obj = get_object_or_404(prodProduct, productid=product.productid)
@@ -133,8 +135,14 @@ def process_payment(request):
             # Calculate total product price
             product_total += product_obj.productPrice * bas.productqty
 
-        # Calculate shipping cost: RM 5 for each unique seller
-        shipping_cost = len(sellers) * 5  # RM 5 per unique seller
+            # Calculate shipping per seller
+            if seller in sellers:
+                sellers[seller] += bas.productqty
+            else:
+                sellers[seller] = bas.productqty
+
+        # Calculate shipping cost: RM 5 per quantity per seller
+        shipping_cost = sum(quantity * 5 for quantity in sellers.values())
 
         # Calculate final total
         total_amount = product_total + shipping_cost  # Total including products and shipping
@@ -148,7 +156,7 @@ def process_payment(request):
             status=order_status,
             user=person,
             address=address,
-            shipping=shipping_cost  # You can store shipping separately if you want
+            shipping=shipping_cost  # Store total shipping
         )
 
         # Create OrderItem entry for each product in the order
@@ -166,6 +174,9 @@ def process_payment(request):
         return Response({'error': 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
     
     
 @api_view(['POST'])
@@ -179,7 +190,7 @@ def create_payment_intent(request):
 
         # Get the person instance by user_id
         person = get_object_or_404(Person, id=user_id)
-        
+
         # Retrieve product_ids from the request body
         product_ids = request.data.get('selected_products', [])
 
@@ -193,28 +204,49 @@ def create_payment_intent(request):
             return Response({'error': 'No valid basket items found for checkout'}, status=status.HTTP_404_NOT_FOUND)
 
         # Calculate total amount in cents
-        total_amount = 0
-        
-        # Set shipping cost per item
-        shipping_cost_per_item = 500  # RM 5.00 (in cents)
+        product_total_cents = 0
+        shipping_cost_per_item_cents = 500  # RM5.00 in cents
+        sellers = {}  # Dictionary to track total quantity per seller
 
         for product in products:
-            subtotal = product.productid.productPrice * 100 * product.productqty  # Total price for each product
-            total_amount += subtotal + (shipping_cost_per_item * product.productqty)  # Add shipping per item
+            # Ensure productPrice is Decimal for precision
+            price = Decimal(product.productid.productPrice)
+            subtotal_cents = price * 100 * product.productqty  # Price in cents
+            product_total_cents += subtotal_cents
 
-        # Log the total amount for debugging
-        print(f"Total amount (with shipping per item): {total_amount} cents")
+            # Track quantity per seller
+            seller = product.productid.Person_fk
+            if seller in sellers:
+                sellers[seller] += product.productqty
+            else:
+                sellers[seller] = product.productqty
+
+        # Calculate shipping cost: RM 5 per quantity per seller
+        shipping_cost_cents = sum(quantity * shipping_cost_per_item_cents for quantity in sellers.values())
+
+        # Calculate final total
+        total_amount_cents = int(product_total_cents + shipping_cost_cents)  # Total in cents
+
+        # Logging for debugging
+        logger.info(f"Product Total (cents): {product_total_cents}")
+        logger.info(f"Shipping Cost (cents): {shipping_cost_cents}")
+        logger.info(f"Total Amount (cents): {total_amount_cents}")
 
         # Create the Stripe payment intent
         payment_intent = stripe.PaymentIntent.create(
-            amount=int(total_amount),
+            amount=total_amount_cents,
             currency='myr',
             receipt_email=person.Email,
         )
 
-        return Response({'client_secret': payment_intent['client_secret']}, status=status.HTTP_200_OK)
+        # Return client_secret and total_amount
+        return Response({
+            'client_secret': payment_intent['client_secret'],
+            'total_amount': total_amount_cents  # Pass the total amount back to frontend
+        }, status=status.HTTP_200_OK)
 
     except Person.DoesNotExist:
         return Response({'error': 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
+        logger.error(f"Error creating payment intent: {e}")
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

@@ -218,9 +218,13 @@ CORS_ALLOW_HEADERS = [
 ]
 
 # CSRF settings
-CSRF_TRUSTED_ORIGINS = ['http://*', 'https://*']
+CSRF_TRUSTED_ORIGINS = ['http://*', 'https://*', 'https://989b-2405-3800-8bb-a348-d1ed-f1e4-4aa7-4c15.ngrok-free.app',]
 ALLOWED_ORIGINS = CSRF_TRUSTED_ORIGINS.copy()
 
 # Cookies settings
 CSRF_COOKIE_SECURE = env('CSRF_COOKIE_SECURE')
 SESSION_COOKIE_SECURE = env('SESSION_COOKIE_SECURE')
+
+X_FRAME_OPTIONS = 'ALLOWALL'  # Allows all domains to embed your content
+
+

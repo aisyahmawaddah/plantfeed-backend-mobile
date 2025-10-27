@@ -7,13 +7,15 @@ from rest_framework import status
 from .models import prodProduct, Person
 from basket.models import Basket, prodReview
 from member.models import Person
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, DecimalField, ExpressionWrapper, Max, F, Count
 from .serializers import ProductSerializer, ReviewSerializer
 from django.http import JsonResponse
 import re
 from django.shortcuts import get_object_or_404
+from urllib.parse import urljoin
+from django.conf import settings
 
-
+# Endpoint for Marketplace
 @api_view(['GET'])
 def list_products(request):
     products = prodProduct.objects.all()
@@ -23,84 +25,108 @@ def list_products(request):
 @api_view(['GET'])
 def view_product(request, product_id):
     try:
+        # Get the product
         product = prodProduct.objects.get(productid=product_id)
-        reviews = prodReview.objects.filter(productid=product)
-
-        serialized_reviews = ReviewSerializer(reviews, many=True).data
-
-        product_data = {
-            "productid": product.productid,
-            "name": product.productName,
-            "description": product.productDesc,
-            "category": product.productCategory,
-            "price": product.productPrice,
-            "stock": product.productStock,
-            "photo": product.productPhoto.url if product.productPhoto else None,
-            "rating": product.productRating,
-            "sold": product.productSold,
-            "time_posted": product.timePosted.isoformat(),
-            "restricted": product.restricted,
-            "seller_info": {
-                "id": product.Person_fk.id,
-                "Username": product.Person_fk.Username,
-                "Email": product.Person_fk.Email,
-            },
-            "reviews": serialized_reviews
-        }
-
-        return JsonResponse(product_data)  # Use JsonResponse which handles utf-8 encoding
+        
+        # Serialize the product data
+        product_serializer = ProductSerializer(product)
+        
+        # Fetch reviews for this product
+        reviews = prodReview.objects.filter(productid_id=product_id)
+        
+        # Serialize the reviews
+        reviews_serializer = ReviewSerializer(reviews, many=True)
+        
+        # Add the serialized reviews to the product data
+        product_data = product_serializer.data
+        product_data['reviews'] = reviews_serializer.data  # Add reviews to the response
+        
+        return Response(product_data, status=status.HTTP_200_OK)
     except prodProduct.DoesNotExist:
-        return Response({'error': 'Product does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
     
     
-# Add a product to the basket
 @api_view(['POST'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
 def add_to_basket(request):
     product_id = request.data.get('product_id')
     quantity = request.data.get('quantity', 1)
+    user_id = request.data.get('user_id')
+
+    if not user_id:
+        return Response({'error': 'User ID not provided'}, status=status.HTTP_400_BAD_REQUEST)
+
     try:
-        user = request.user  # This takes the token from the Authorization header
+        user = get_object_or_404(Person, id=user_id)
         product = prodProduct.objects.get(productid=product_id)
 
         if product.productStock < quantity:
             return Response({'error': 'Not enough stock available'}, status=status.HTTP_400_BAD_REQUEST)
 
-        basket_item, created = Basket.objects.get_or_create(productid=product, Person_fk=user, is_checkout=False)
-        if not created:
+        # Manually replicate "get or create" logic
+        try:
+            basket_item = Basket.objects.get(
+                productid=product,
+                Person_fk=user,
+                is_checkout=False
+            )
+            # If found, increment quantity
             basket_item.productqty += quantity
-        else:
-            basket_item.productqty = quantity
-        basket_item.save()
+        except Basket.DoesNotExist:
+            # If not found, create new basket record
+            basket_item = Basket(
+                productid=product,
+                Person_fk=user,
+                is_checkout=False,
+                productqty=quantity
+            )
 
+        basket_item.save()  # calls the custom save() without force_insert
         return Response({'message': 'Product added to basket'}, status=status.HTTP_201_CREATED)
+
     except prodProduct.DoesNotExist:
         return Response({'error': 'Product does not exist'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-# Buy now functionality
+
+
 @api_view(['POST'])
 def buy_now(request):
-    user_email = request.data.get('email')
+    user_id = request.data.get('user_id')
     product_id = request.data.get('product_id')
-    quantity = request.data.get('quantity', 1)
-    
+    quantity = int(request.data.get('quantity', 1))
+
+    if not user_id:
+        return Response({'error': 'User ID not provided'}, status=status.HTTP_400_BAD_REQUEST)
+
     try:
-        user = Person.objects.get(Email=user_email)
+        user = get_object_or_404(Person, id=user_id)
         product = prodProduct.objects.get(productid=product_id)
-        
+
         if product.productStock < quantity:
             return Response({'error': 'Not enough stock available'}, status=status.HTTP_400_BAD_REQUEST)
 
-        basket_item, created = Basket.objects.get_or_create(productid=product, Person_fk=user, is_checkout=0)
-        basket_item.productqty = quantity
-        basket_item.save()
+        # Manually replicate get or create logic
+        try:
+            basket_item = Basket.objects.get(
+                productid=product,
+                Person_fk=user,
+                is_checkout=False
+            )
+            # INCREMENT existing quantity rather than overwrite
+            basket_item.productqty += quantity
+        except Basket.DoesNotExist:
+            basket_item = Basket(
+                productid=product,
+                Person_fk=user,
+                is_checkout=False,
+                productqty=quantity
+            )
 
-        # Additional logic for immediate checkout can be placed here
+        basket_item.save()  # No force_insert, so custom Basket.save() won't cause an error
         return Response({'message': 'Product added for immediate purchase'}, status=status.HTTP_200_OK)
 
+    except prodProduct.DoesNotExist:
+        return Response({'error': 'Product does not exist'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -108,29 +134,59 @@ def buy_now(request):
 @api_view(['GET'])
 def view_seller(request, seller_id):
     try:
+        # Get seller details
         seller = Person.objects.get(pk=seller_id)
         products = prodProduct.objects.filter(Person_fk=seller)
-
         analyticsfilter = Basket.objects.filter(productid__Person_fk=seller)
-        
+
         # Calculate analytics
-        total_sales = analyticsfilter.filter(Q(status="Order Received") | Q(status="Product Reviewed")) \
-                                     .aggregate(Sum('productqty'))['productqty__sum'] or 0
+        total_sales = analyticsfilter.filter(
+            Q(status="Order Received") | Q(status="Product Reviewed")
+        ).aggregate(Sum('productqty'))['productqty__sum'] or 0
+
+        # Fix distinct issue
+        total_orders = analyticsfilter.values('transaction_code').annotate(
+            transaction_count=Count('transaction_code')
+        ).count()
+
+        # Additional analytics
+        gross_income_data = analyticsfilter.filter(
+            Q(status="Order Received") | Q(status="Product Reviewed")
+        ).annotate(
+            gross_income=F('productid_id__productPrice') * F('productqty')
+        ).aggregate(Sum('gross_income'))
         
-        total_orders = analyticsfilter.distinct('transaction_code').count()
+        gross_income = gross_income_data.get('gross_income__sum', 0) or 0
         
+        product_in_shop = products.count()
+
+        most_popular_product = prodProduct.objects.filter(
+            Person_fk=seller
+        ).order_by('-productSold').first()
+
+        most_popular_product_name = most_popular_product.productName if most_popular_product else "N/A"
+
         # Prepare response data
         seller_data = {
             'seller_name': seller.Username,
-            'products': [{"productid": p.productid, "name": p.productName, "price": p.productPrice} for p in products],
+            'products': [
+                {"productid": p.productid, "name": p.productName, "price": p.productPrice} 
+                for p in products
+            ],
             'total_sales': total_sales,
             'total_orders': total_orders,
+            'gross_income': gross_income,
+            'product_in_shop': product_in_shop,
+            'most_popular_product': most_popular_product_name,
         }
 
         return Response(seller_data, status=status.HTTP_200_OK)
 
     except Person.DoesNotExist:
         return Response({'error': 'Seller does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # Example of updating a product (for seller)
 @api_view(['PUT'])
@@ -175,6 +231,111 @@ def get_product_reviews(request, product_id):
 
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#endpoint to view sshop analytics 
+def get_seller_analytics(request, pk):
+    try:
+        # Get seller
+        seller = Person.objects.get(id=pk)
+        analyticsfilter = Basket.objects.filter(productid_id__Person_fk=seller)
+
+        # Gross Income
+        gross_income_data = analyticsfilter.filter(
+            Q(status="Order Received") | Q(status="Product Reviewed")
+        ).annotate(
+            gross_income=F('productid_id__productPrice') * F('productqty')
+        ).aggregate(Sum('gross_income'))
+        gross_income = gross_income_data.get('gross_income__sum', 0) or 0
+
+        # Products Sold
+        product_sold = analyticsfilter.filter(
+            Q(status="Order Received") | Q(status="Product Reviewed")
+        ).aggregate(Sum('productqty'))['productqty__sum'] or 0
+
+        # Products in Shop
+        product_in_shop = prodProduct.objects.filter(Person_fk=seller).count()
+
+        # Most Popular Product
+        most_popular_product = prodProduct.objects.filter(
+            Person_fk=seller
+        ).order_by('-productSold').first()
+        
+        most_popular_product_name = most_popular_product.productName if most_popular_product else "N/A"
+
+        # Total Orders (Fix for distinct issue)
+        total_orders = analyticsfilter.values('transaction_code').annotate(
+            transaction_count=Count('transaction_code')
+        ).count()
+
+        # Pending Orders
+        pending_order = analyticsfilter.filter(
+            Q(status="Package Order") | Q(status="Payment Made")
+        ).values('transaction_code').annotate(
+            order_count=Count('transaction_code')
+        ).count()
+
+        # Shipped Orders
+        shipped_order = analyticsfilter.filter(
+            Q(status="Ship Order")
+        ).values('transaction_code').annotate(
+            order_count=Count('transaction_code')
+        ).count()
+
+        # Completed Orders
+        completed_order = analyticsfilter.filter(
+            Q(status="Order Received") | Q(status="Product Reviewed")
+        ).values('transaction_code').annotate(
+            order_count=Count('transaction_code')
+        ).count()
+
+        # Cancelled Orders
+        cancelled_order = analyticsfilter.filter(
+            Q(status="Cancel")
+        ).values('transaction_code').annotate(
+            order_count=Count('transaction_code')
+        ).count()
+
+        # Response Data
+        data = {
+            'gross_income': gross_income,
+            'product_sold': product_sold,
+            'product_in_shop': product_in_shop,
+            'most_popular_product': most_popular_product_name,
+            'total_order': total_orders,
+            'pending_order': pending_order,
+            'shipped_order': shipped_order,
+            'completed_order': completed_order,
+            'cancelled_order': cancelled_order
+        }
+
+        return JsonResponse(data)
+
+    except Person.DoesNotExist:
+        return JsonResponse({'error': 'Seller does not exist'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+    
+# Get products by seller ID
+def get_products_by_seller(request, seller_id):
+    try:
+        products = prodProduct.objects.filter(Person_fk_id=seller_id)
+        product_list = []
+
+        for product in products:
+            product_list.append({
+                'productid': product.productid,
+                'productName': product.productName,
+                'productDesc': product.productDesc,
+                'productPrice': product.productPrice,
+                'productStock': product.productStock,
+                # Return relative path for productPhoto
+                'productPhoto': product.productPhoto.url if product.productPhoto else None,
+                'timePosted': product.timePosted,
+            })
+
+        return JsonResponse({'products': product_list}, safe=False)
+    except prodProduct.DoesNotExist:
+        return JsonResponse({'error': 'No products found for this seller'}, status=404)
 
 @api_view(['POST', 'GET'])
 def sell_product(request, fk1):

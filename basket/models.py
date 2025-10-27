@@ -16,8 +16,8 @@ class Basket(models.Model):
     transaction_code = models.CharField(max_length=255,null=True)
     status = models.CharField(max_length=250,null=True)
     
-    def save(self):
-        super().save()
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
         
 class prodReview(models.Model):
     

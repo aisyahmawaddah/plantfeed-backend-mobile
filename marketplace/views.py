@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http.response import Http404
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -305,11 +306,17 @@ def updateProduct(request, fk1):
             messages.error(request, 'Product stock should only contain digits.')
             return redirect(request.META.get('HTTP_REFERER'))
         
+        # Duplication Check (Add this block)
+        if prodProduct.objects.filter(productName=product_name).exclude(pk=product.pk).exists():
+            messages.error(request, 'Product name already exists. Please choose a different name.')
+            return redirect(request.META.get('HTTP_REFERER'))
+        
         product.productName = product_name
         product.productDesc = product_desc
         product.productCategory = product_category
         product.productPrice = product_price
         product.productStock = product_stock
+        
         
         if len(request.FILES) != 0:
             product.productPhoto = request.FILES['productPhoto']
@@ -321,6 +328,15 @@ def updateProduct(request, fk1):
         return redirect(url)
     else:
         return render(request, 'UpdateProduct.html', {'product':product, 'person':person, 'allBasket':allBasket})
+
+def check_duplicate_product_name(request):
+    product_name = request.GET.get('name')
+    product_id = request.GET.get('id')
+
+    # Check for duplicates excluding the current product
+    is_duplicate = prodProduct.objects.filter(productName=product_name).exclude(pk=product_id).exists()
+    
+    return JsonResponse({'isDuplicate': is_duplicate})
     
 def buy_now(request, fk1,fk2):
     product = prodProduct.objects.get(pk=fk1)

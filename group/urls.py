@@ -51,6 +51,7 @@ urlpatterns = [
     path('GroupSharingComment/<str:pk>',views.addGSComment, name="GroupSharingComment"),
     path('PL-Sharing/<str:pk>', views.PLSharing, name="PL-Sharing"),
     path('PlantLink-Graph-API', views.PLGraphAPI, name="PlantLink-Graph-API"),
+    path('proxy/', proxy_view, name='proxy'),
  
 
 ] + static(settings.MEDIA_URL, document_root= settings.MEDIA_ROOT)

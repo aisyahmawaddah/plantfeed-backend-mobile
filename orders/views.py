@@ -153,13 +153,18 @@ def order_again(request, fk1, seller_id):
     
 from decimal import Decimal
 
-def SellHistory(request, fk1):
-    person = Person.objects.get(Email=request.session['Email'])
-    seller = Person.objects.get(pk=fk1)
+def SellHistory(request, seller_id):
+    allBasket = []
+
+    try:
+        # Validate seller existence
+        seller = Person.objects.get(pk=seller_id)
+    except Person.DoesNotExist:
+        return JsonResponse({'error': 'Seller not found.'}, status=404)
+
     products = prodProduct.objects.filter(Person_fk=seller)
     product_ids = [product.productid for product in products]
     baskets = Basket.objects.filter(productid__in=product_ids, is_checkout=1)
-    allBasket = Basket.objects.all().filter(Person_fk_id=person.id, is_checkout=0)
     transactions = baskets.values_list('transaction_code', flat=True).distinct()
     orders = Order.objects.filter(transaction_code__in=transactions)
 
@@ -180,38 +185,17 @@ def SellHistory(request, fk1):
                 "orderStatus": product_basket.status,
             })
         order_info = orders.filter(transaction_code=transaction_code).first()
-        if order_info:  # Check if order_info is not None
-            products_by_order[transaction_code] = {
-                "shipping": order_info.shipping,
-                "total": order_info.total,
-                "address": order_info.address,
-                "transaction_code": transaction_code,
-                "buyer_email": order_info.email,
-                "buyer_name": order_info.name,
-                "products": products,
-                "total_price_for_seller": total_price_for_seller,
-                "orderStatus": product_baskets.first().status
-            }
-        else:
-            # Log or handle cases where an order might be missing
-            products_by_order[transaction_code] = {
-                "shipping": "",
-                "total": "",
-                "address": "",
-                "transaction_code": transaction_code,
-                "buyer_email": '',
-                "buyer_name": '',
-                "products": products,
-                "total_price_for_seller": total_price_for_seller,
-                "orderStatus": product_baskets.first().status,
-                "warning": "Order information is missing."
-            }
+        products_by_order[transaction_code] = {
+            "transaction_code": transaction_code,
+            "products": products,
+            "total_price_for_seller": total_price_for_seller,
+            "orderStatus": product_baskets.first().status,
+        }
 
     if products_by_order:
-        return render(request, 'SellHistory.html', {'products_by_order': products_by_order, 'person': person, 'allBasket': allBasket})
+        return render(request, 'SellHistory.html', {'products_by_order': products_by_order, 'person': seller, 'allBasket': allBasket})
     else:
-        return render(request, 'SellHistory.html', {'message': 'No orders found. Start selling your items!', 'person': person, 'allBasket': allBasket})
-
+        return render(request, 'SellHistory.html', {'message': 'No orders found. Start selling your items!', 'person': seller, 'allBasket': allBasket})
 
 def update_order_status(request):
     order_id = request.POST.get('order_id')

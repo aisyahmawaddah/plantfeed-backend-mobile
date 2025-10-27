@@ -16,6 +16,8 @@ from basket.models import Basket
 from basket.serializers import BasketSerializer
 from basket.serializers import ProdProductSerializer, PersonSerializer
 from django.db import transaction 
+from django.core.exceptions import ObjectDoesNotExist
+import traceback
 
 # Fetch Order History
 @api_view(['GET'])
@@ -84,104 +86,169 @@ def history(request):
 
 @api_view(['POST'])
 @transaction.atomic
-def cancel_order(request, order_id, seller_id):
-    user_id = request.data.get('user_id')
+def cancel_order(request, basket_id, user_id):
+    """
+    Cancels all baskets for *the same seller* (Person_fk.id) under one transaction code,
+    but leaves baskets from other sellers untouched (partial cancellation).
+    """
+    # 1) Validate the user
+    try:
+        user = Person.objects.get(id=user_id)
+    except ObjectDoesNotExist:
+        return Response(
+            {'message': 'Invalid user ID.'},
+            status=status.HTTP_404_NOT_FOUND
+        )
 
-    if not user_id:
-        return Response({'message': 'user_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+    # 2) Fetch the basket for this user
+    try:
+        basket = Basket.objects.get(id=basket_id, Person_fk=user)
+    except ObjectDoesNotExist:
+        return Response(
+            {'message': 'Basket not found or does not belong to this user.'},
+            status=status.HTTP_404_NOT_FOUND
+        )
 
-    # Fetch the buyer (user) and order
-    buyer = get_object_or_404(Person, id=user_id)
-    order = get_object_or_404(Order, id=order_id)
+    # 3) Fetch the corresponding order via the transaction code in the basket
+    try:
+        order = Order.objects.get(transaction_code=basket.transaction_code)
+    except ObjectDoesNotExist:
+        return Response(
+            {'message': 'Order associated with the basket not found.'},
+            status=status.HTTP_404_NOT_FOUND
+        )
 
-    # Remove or comment out the authorization check
-    # if order.user.id != seller_id:
-    #     return Response({'message': 'You do not have permission to cancel this order.'}, status=status.HTTP_403_FORBIDDEN)
+    # 4) If the entire order is already canceled, no further action
+    if order.status.lower() == 'cancel':
+        return Response(
+            {'message': 'Order is already fully canceled.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
-    # Check if the order is already canceled
-    if order.status.lower() == "cancel":
-        return Response({'message': 'Order is already canceled.'}, status=status.HTTP_400_BAD_REQUEST)
+    # 5) Identify the "seller" (actually Person_fk) for this basket's product
+    #    We'll use the numeric ID.
+    seller_id = basket.productid.Person_fk.id
 
-    # Update the order status to "Cancel"
-    order.status = "Cancel"
-    order.save()
+    # 6) Find all baskets under the same transaction code *and* same seller ID
+    baskets_to_cancel = Basket.objects.filter(
+        transaction_code=basket.transaction_code,
+        productid__Person_fk__id=seller_id
+    )
 
-    # Update related OrderItems and Product stock if necessary
-    order_items = OrderItem.objects.filter(order=order)
-    for item in order_items:
-        product = item.product
-        product.productStock += item.quantity
-        product.productSold = max(product.productSold - item.quantity, 0)
+    # 7) Mark those baskets as canceled
+    baskets_to_cancel.update(status='Cancel')
+
+    # 8) Update product stock/sold for each canceled basket
+    for b_item in baskets_to_cancel:
+        product = b_item.productid  # This is a prodProduct instance
+        product.productStock += b_item.productqty
+        product.productSold = max(0, product.productSold - b_item.productqty)
         product.save()
 
-    serializer = OrderSerializer(order)
-    return Response({
-        'message': 'Order canceled successfully.',
-        'order': serializer.data
-    }, status=status.HTTP_200_OK)
+    # 9) Check if there are any baskets left for this transaction code not canceled
+    other_baskets_active = Basket.objects.filter(
+        transaction_code=basket.transaction_code
+    ).exclude(status='Cancel')
 
-from rest_framework.decorators import api_view
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.response import Response
-from rest_framework import status
+    # If none remain, the entire order is effectively canceled
+    if not other_baskets_active.exists():
+        order.status = 'Cancel'
+    else:
+        # Some baskets are still active => partial cancel
+        order.status = 'Partial Cancel'
 
-@csrf_exempt  # This will disable CSRF protection for this view
-@api_view(['POST'])
-def complete_order(request, order_id, seller_id):
-    user_id = request.data.get('user_id')  # Retrieve user_id from body data
-
-    if not user_id:
-        return Response({'message': 'user_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    person = get_object_or_404(Person, id=user_id)
-
-    # Fetch the Order using the order_id from the URL
-    order = get_object_or_404(Order, id=order_id)  # Use order_id instead of fk1
-
-    # Verify that the user_id matches the seller_id
-    if person.id != seller_id:
-        return Response({'message': 'You do not have permission to complete this order.'}, status=status.HTTP_403_FORBIDDEN)
-
-    # Check if the order is already received
-    if order.status.lower() == "order received":
-        return Response({'message': 'Order is already marked as received.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    # Update order status to "Order Received"
-    order.status = "Order Received"
     order.save()
 
-    # Update all related baskets’ status (assuming baskets are linked to the order somehow)
-    baskets = Basket.objects.filter(transaction_code=order.transaction_code, productid__Person_fk_id=seller_id)
-    baskets.update(status="Order Received")
+    return Response(
+        {
+            'message': f'Baskets for seller with ID {seller_id} canceled successfully.'
+        },
+        status=status.HTTP_200_OK
+    )
+    
 
-    return Response({'message': 'Order completed successfully.'}, status=status.HTTP_200_OK)
+@csrf_exempt
+@api_view(['POST'])
+@transaction.atomic
+def complete_order(request, basket_id, user_id):
+    """
+    Mark as 'Order Received' all baskets for *the same seller* 
+    under one transaction code, leaving other sellers' baskets untouched.
+    """
 
+    # 1) Ensure user exists
+    person = get_object_or_404(Person, id=user_id)
+
+    # 2) Fetch the basket by basket_id, ensuring it belongs to user
+    basket = get_object_or_404(Basket, id=basket_id, Person_fk=person)
+
+    # 3) Fetch the associated Order using the transaction_code from the basket
+    order = get_object_or_404(Order, transaction_code=basket.transaction_code)
+
+    # 4) Identify the "seller" (assuming prodProduct has Person_fk or similar)
+    seller_id = basket.productid.Person_fk.id  # The product's seller
+
+    # 5) Mark only baskets from this transaction code *and* the same seller
+    baskets_to_complete = Basket.objects.filter(
+        transaction_code=basket.transaction_code,
+        productid__Person_fk__id=seller_id
+    )
+
+    # If any are already "Order Received," skip them or just ignore
+    # For simplicity, we just update them to "Order Received"
+    baskets_to_complete.update(status="Order Received")
+
+    # 6) Check if *all* baskets for this transaction code are now "Order Received"
+    #    or if some remain active with other sellers
+    not_received_yet = Basket.objects.filter(
+        transaction_code=basket.transaction_code
+    ).exclude(status="Order Received")
+
+    if not not_received_yet.exists():
+        # All baskets are received => set the order to 'Order Received'
+        order.status = "Order Received"
+    else:
+        # Partial => only *some* seller's baskets are received
+        order.status = "Partial Received"
+    order.save()
+
+    return Response(
+        {'message': 'Order completed (partially or fully) successfully.'},
+        status=status.HTTP_200_OK
+    )
+    
 
 # Review Product
 @api_view(['POST'])
-def review_product(request, fk1, seller_id):
-    user_id = request.data.get('user_id')  # Retrieve user_id from body data
+def review_product(request, user_id, basket_id):
     person = get_object_or_404(Person, id=user_id)
+    basket = get_object_or_404(Basket, id=basket_id)
+    products = Basket.objects.filter(
+        transaction_code=basket.transaction_code,
+        productid__Person_fk=basket.productid.Person_fk
+    )
 
-    ids = get_object_or_404(Basket, id=fk1)
-    products = Basket.objects.filter(transaction_code=ids.transaction_code, productid__Person_fk_id=seller_id)
+    reviews_submitted = False
+    for product in products:
+        # Use productid instead of id
+        content = request.data.get(f'review_{product.productid.productid}')  # Correctly access productid
+        if content:
+            review = prodReview(
+                content=content,
+                restricted=False,
+                Person_fk=person,
+                basketid=product,
+                productid=product.productid  # Ensure this is correctly referencing the prodProduct instance
+            )
+            review.save()
+            reviews_submitted = True
 
-    if request.method == "POST":   
-        for product in products:
-            content = request.POST.get(f'review_{product.productid.productid}')
-            if content:
-                review = prodReview()
-                review.content = content
-                review.restricted = False
-                review.Person_fk = person
-                review.basketid = product
-                review.productid = product.productid
-                review.save()
-
+    if reviews_submitted:
         products.update(status="Product Reviewed")
         return Response({'message': 'Product reviewed successfully.'}, status=status.HTTP_201_CREATED)
 
     return Response({'message': 'No reviews submitted.'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 # Invoice
 @api_view(['GET'])
@@ -207,111 +274,204 @@ def invoice(request, fk1, seller_id):
 
 # Order Again
 @api_view(['POST'])
-def order_again(request, order_id, seller_id):
-    user_id = request.data.get('user_id')  # Retrieve user_id from body data
+@transaction.atomic
+def order_again(request, basket_id, user_id):
+    """
+    Re-add items from the same seller under the same transaction code
+    to the user's active basket(s), ignoring other sellers.
+    """
+
     person = get_object_or_404(Person, id=user_id)
 
-    # Retrieve the basket by order_id
-    ids = get_object_or_404(Basket, id=order_id)
-    basket = Basket.objects.filter(transaction_code=ids.transaction_code, productid__Person_fk_id=seller_id)
+    # 1) Get the reference basket
+    reference_basket = get_object_or_404(Basket, id=basket_id, Person_fk=person)
 
-    for item in basket:
+    # 2) Identify the seller
+    seller_id = reference_basket.productid.Person_fk.id
+
+    # 3) Find all baskets for the same transaction_code and same seller
+    baskets_to_reorder = Basket.objects.filter(
+        transaction_code=reference_basket.transaction_code,
+        productid__Person_fk__id=seller_id
+    )
+
+    # We'll re-create or update each item in the user's *active* basket
+    for item in baskets_to_reorder:
         product = item.productid
-        user = item.Person_fk
-        productqty = item.productqty
-        
-        # Check if the requested quantity exceeds stock
-        if product.productStock < productqty:
-            return Response({'message': f'{product.productName}(s) exceeds the stock limit in your basket'}, status=status.HTTP_400_BAD_REQUEST)
+        qty = item.productqty
 
-        # Check if the product is already in the user's basket
-        existing_basket = Basket.objects.filter(productid=product, Person_fk=user, is_checkout=0).first()
+        # Check stock
+        if product.productStock < qty:
+            return Response(
+                {'message': f'{product.productName}(s) exceeds available stock.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        if existing_basket:  # If the product already exists in the basket
-            # If adding the current quantity exceeds stock
-            if existing_basket.productqty + productqty > product.productStock:
-                return Response({'message': f'{product.productName}(s) exceeds the stock limit in your basket'}, status=status.HTTP_400_BAD_REQUEST)
-            existing_basket.productqty += productqty  # Increase the quantity
-            existing_basket.save()  # Save changes
-            return Response({'message': 'Order quantity successfully updated in your basket'}, status=status.HTTP_200_OK)
+        # Check if there's an existing (non-checked-out) basket entry for this product
+        existing_basket = Basket.objects.filter(
+            productid=product,
+            Person_fk=person,
+            is_checkout=False
+        ).first()
+
+        if existing_basket:
+            # If combining would exceed stock
+            if existing_basket.productqty + qty > product.productStock:
+                return Response(
+                    {'message': f'{product.productName}(s) exceeds available stock limit.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            # Otherwise, increment the quantity
+            existing_basket.productqty += qty
+            existing_basket.save()
         else:
-            # Create a new basket entry if it doesn't exist
-            Basket.objects.create(productqty=productqty, productid=product, Person_fk=user, is_checkout=0, transaction_code='')
-    
-    return Response({'message': 'The order was added to your basket.'}, status=status.HTTP_200_OK)
+            # Create a new basket entry
+            Basket.objects.create(
+                productqty=qty,
+                productid=product,
+                Person_fk=person,
+                is_checkout=False,
+                transaction_code=''  # blank or new code
+            )
+
+    return Response(
+        {'message': 'The items were re-added to your basket (partially or fully).'},
+        status=status.HTTP_200_OK
+    )
 
 
-# Sell History
-@api_view(['GET'])
-def sell_history(request, fk1):
-    user_id = request.GET.get('user_id')  # Retrieve user_id from query parameters
-    person = get_object_or_404(Person, id=user_id)
-    seller = Person.objects.get(pk=fk1)
-    products = prodProduct.objects.filter(Person_fk=seller)
-    product_ids = [product.productid for product in products]
-    baskets = Basket.objects.filter(productid__in=product_ids, is_checkout=1)
-    transactions = baskets.values_list('transaction_code', flat=True).distinct()
-    orders = Order.objects.filter(transaction_code__in=transactions)
-
-    products_by_order = {}
-    
-    for transaction_code in transactions:
-        product_baskets = Basket.objects.filter(transaction_code=transaction_code, productid__in=product_ids)
-        products = []
-        total_price_for_seller = Decimal('0.00')
-        
-        for product_basket in product_baskets:
-            subtotal = product_basket.productid.productPrice * product_basket.productqty
-            total_price_for_seller += subtotal
-            products.append({
-                "productQty": product_basket.productqty,
-                "productName": product_basket.productid.productName,
-                "productDesc": product_basket.productid.productDesc,
-                "productPrice": product_basket.productid.productPrice,
-                "productCategory": product_basket.productid.productCategory,
-                "orderStatus": product_basket.status,
-            })
-        
-        order_info = orders.filter(transaction_code=transaction_code).first()
-        if order_info:  # Ensure order_info exists
-            products_by_order[transaction_code] = {
-                "shipping": order_info.shipping,
-                "total": order_info.total,
-                "address": order_info.address,
-                "transaction_code": transaction_code,
-                "buyer_email": order_info.email,
-                "buyer_name": order_info.name,
-                "products": products,
-                "total_price_for_seller": total_price_for_seller,
-                "orderStatus": product_baskets.first().status
-            }
-
-    if products_by_order:
-        return Response({'products_by_order': products_by_order, 'person': person}, status=status.HTTP_200_OK)
-    else:
-        return Response({'message': 'No orders found. Start selling your items!'}, status=status.HTTP_404_NOT_FOUND)
-
-# Update Order History Status
-@api_view(['POST'])
-def update_order_history_status(request):
-    order_id = request.data.get('order_id')
-    order_status = request.data.get('order_status')
-    seller_id = request.data.get('seller_id')
-
+# Sell History API
+@api_view(["GET"])
+def sell_history_api(request, fk1):
     try:
-        # Check and update the status of the relevant order and basket items
-        order = Order.objects.get(id=order_id)
-        order.status = order_status
-        order.save()
+        # Check if seller exists
+        seller = Person.objects.get(pk=fk1)
+        
+        # Fetch seller's products
+        products = prodProduct.objects.filter(Person_fk=seller)
+        product_ids = [product.productid for product in products]
+        
+        # Fetch baskets with checkout status
+        baskets = Basket.objects.filter(productid__in=product_ids, is_checkout=1)
+        
+        # Extract unique transaction codes
+        transactions = baskets.values_list('transaction_code', flat=True).distinct()
+        
+        # Get orders related to those transactions
+        orders = Order.objects.filter(transaction_code__in=transactions)
 
-        basket_objs = Basket.objects.filter(transaction_code=order.transaction_code, productid__Person_fk_id=seller_id)
+        # Return empty if no orders are found
+        if not orders.exists():
+            return Response({
+                'status': 'success',
+                'message': 'No orders found for this seller.',
+                'orders': []
+            })
+
+        # Debugging: Log orders found
+        print(f"Orders Found: {orders}")
+
+        # Group products by transaction
+        products_by_order = {}
+
+        for transaction_code in transactions:
+            # Fetch baskets for each transaction
+            product_baskets = Basket.objects.filter(
+                transaction_code=transaction_code,
+                productid__in=product_ids
+            )
+            products = []
+            total_price_for_seller = Decimal('0.00')
+            
+            for product_basket in product_baskets:
+                subtotal = product_basket.productid.productPrice * product_basket.productqty
+                total_price_for_seller += subtotal
+                
+                products.append({
+                    "productQty": product_basket.productqty,
+                    "productName": product_basket.productid.productName,
+                    "productDesc": product_basket.productid.productDesc,
+                    "productPrice": product_basket.productid.productPrice,
+                    "productCategory": product_basket.productid.productCategory,
+                    "orderStatus": product_basket.status,
+                })
+
+            # Attach order info if available
+            if products:
+                order_info = orders.filter(transaction_code=transaction_code).first()
+                
+                products_by_order[transaction_code] = {
+                    "shipping": getattr(order_info, 'shipping', ''),
+                    "total": getattr(order_info, 'total', ''),
+                    "address": getattr(order_info, 'address', ''),
+                    "transaction_code": transaction_code,
+                    "buyer_email": getattr(order_info, 'email', ''),
+                    "buyer_name": getattr(order_info, 'name', ''),
+                    "products": products,
+                    "total_price_for_seller": total_price_for_seller,
+                    "orderStatus": product_baskets.first().status,
+                }
+
+        # Return the response with orders by transaction
+        return Response({
+            'status': 'success',
+            'message': 'Orders retrieved successfully.',
+            'orders': products_by_order
+        })
+
+    except Person.DoesNotExist:
+        # Handle case when the seller is not found
+        return Response({
+            'status': 'error',
+            'message': 'Seller not found.',
+            'error_code': 404
+        }, status=404)
+
+    except Exception as e:
+        # Capture and print the full traceback for debugging
+        error_details = traceback.format_exc()
+        print(f"Unexpected Error: {e}\n{error_details}")
+
+        # Return the error response
+        return Response({
+            'status': 'error',
+            'message': 'An error occurred while fetching sell history.',
+            'error_details': str(e),
+            'trace': error_details if request.user.is_superuser else '',  # Show trace for superusers
+            'error_code': 500
+        }, status=500)
+        
+@api_view(['POST'])
+def update_order_status_api(request):
+    try:
+        # Print raw body to debug
+        print(f"Raw Request Body: {request.body}")
+
+        data = json.loads(request.body)
+        print(f"Parsed Data: {data}")
+
+        transaction_code = data.get('transaction_code')
+        order_status = data.get('order_status')
+        seller_id = data.get('seller_id')
+
+        if not transaction_code or not order_status or not seller_id:
+            return Response({'error': 'Missing required fields'}, status=400)
+
+        basket_objs = Basket.objects.filter(transaction_code=transaction_code, productid__Person_fk_id=seller_id)
+        
+        if not basket_objs.exists():
+            return Response({'error': 'Order not found'}, status=404)
+
         for basket_obj in basket_objs:
             basket_obj.status = order_status
             basket_obj.save()
-        
-        return Response({'status': 1, 'message': 'Order status updated successfully'}, status=status.HTTP_200_OK)
 
-    except Order.DoesNotExist:
-        return Response({'status': 0, 'message': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'status': 1, 'message': 'Order status updated successfully'})
+
+    except json.JSONDecodeError as e:
+        print(f"JSON Decode Error: {str(e)}")
+        return Response({'error': 'Invalid JSON format'}, status=400)
+
     except Exception as e:
-        return Response({'status': 0, 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        print(f"Exception: {str(e)}")
+        return Response({'error': str(e)}, status=500)

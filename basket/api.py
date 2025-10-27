@@ -144,21 +144,16 @@ def checkout(request):
         subtotals = {}
         seller_totals = {}
         product_details = {}
-        sellers_shipping = set()  # Track unique sellers for shipping fees
 
         for basket in selected_products:
             product = basket.productid  # Get the product associated with the basket item
             seller = product.Person_fk  # This is the seller
-            
             seller_name = seller.Name  # Get seller's name
 
             # Calculate subtotal for this product
             subtotal = product.productPrice * basket.productqty
             seller_totals[seller_name] = seller_totals.get(seller_name, 0) + subtotal
             
-            # Add seller to shipping calculation
-            sellers_shipping.add(seller_name)
-
             subtotals[basket.id] = subtotal
             
             # Store additional product details
@@ -166,21 +161,19 @@ def checkout(request):
                 'name': product.productName,
                 'photo': product.productPhoto.url if product.productPhoto else None,
                 'quantity': basket.productqty,
-                'seller_name': seller_name
+                'seller_name': seller_name,
+                'unit_price': product.productPrice
             }
 
-        # Calculate total shipping fee (RM 5 per unique seller)
-        total_shipping_fee = len(sellers_shipping) * 5
-
-        # Total checkout amount
-        total_checkout = sum(seller_totals.values()) + total_shipping_fee
+        # Total checkout amount without shipping fee
+        total_checkout = sum(seller_totals.values())
 
         return Response({
-            'totalCheckout': total_checkout,
+            'totalCheckout': total_checkout,  # does not include shipping
             'subtotals': subtotals,
-            'sellerTotals': seller_totals,  # Now it maps to seller names
+            'sellerTotals': seller_totals,
             'product_details': product_details,
-            'totalShippingFee': total_shipping_fee,  # Show the total shipping fee
+            'totalShippingFee': 0,  # Remove or set to 0 if frontend handles shipping
             'STRIPE_PUBLIC_KEY': settings.STRIPE_PUBLIC_KEY
         }, status=status.HTTP_200_OK)
 
@@ -188,6 +181,7 @@ def checkout(request):
         return Response({'error': 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET'])
 def checkout_all(request):
@@ -207,7 +201,6 @@ def checkout_all(request):
         subtotals = {}
         seller_totals = {}
         product_details = {}
-        sellers_shipping = set()  # Track unique sellers for shipping fees
 
         for basket in selected_products:
             product = basket.productid  # Get the product associated with the basket item
@@ -219,9 +212,6 @@ def checkout_all(request):
             subtotal = product.productPrice * basket.productqty
             seller_totals[seller_name] = seller_totals.get(seller_name, 0) + subtotal
             
-            # Add seller to shipping calculation
-            sellers_shipping.add(seller_name)
-
             subtotals[basket.id] = subtotal
             
             # Store additional product details
@@ -232,18 +222,15 @@ def checkout_all(request):
                 'seller_name': seller_name
             }
 
-        # Calculate total shipping fee (RM 5 per unique seller)
-        total_shipping_fee = len(sellers_shipping) * 5
-
-        # Total checkout amount
-        total_checkout = sum(seller_totals.values()) + total_shipping_fee
+        # Total checkout amount without shipping fee
+        total_checkout = sum(seller_totals.values())
 
         return Response({
-            'totalCheckout': total_checkout,
+            'totalCheckout': total_checkout,  # does not include shipping
             'subtotals': subtotals,
             'sellerTotals': seller_totals,
             'product_details': product_details,
-            'totalShippingFee': total_shipping_fee,  # Show the total shipping fee
+            'totalShippingFee': 0,  # Remove or set to 0 if frontend handles shipping
             'STRIPE_PUBLIC_KEY': settings.STRIPE_PUBLIC_KEY
         }, status=status.HTTP_200_OK)
 
@@ -251,3 +238,4 @@ def checkout_all(request):
         return Response({'error': 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
