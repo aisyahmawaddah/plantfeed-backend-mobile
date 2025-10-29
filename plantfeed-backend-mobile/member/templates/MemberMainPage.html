@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <style>
+    * {box-sizing: border-box;}
+    .content {
+      max-width: 500px;
+      margin: auto;
+    }
+
+    table {
+      border: 4px solid black;
+      margin: 0 auto;
+      padding: 40px;
+      width: fit-content;
+    }
+
+    .panel {
+    margin-bottom: 30px;
+    color: #696969;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
+}
+
+#myUL {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+#myUL li a {
+  border: 1px solid #ddd;
+  margin-top: -1px; /* Prevent double borders */
+  background-color: #f6f6f6;
+  padding: 12px;
+  text-decoration: none;
+  font-size: 15px;
+  color: black;
+  display: block
+}
+
+#myUL li a:hover:not(.header) {
+  background-color: #eee;
+}
+  </style>
+</head>
+
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+  integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+
+<!-- <h1 class="p-3 mb-2 bg-success text-white text-center">iGROW Knowledge Management System</h1> -->
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+  integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+  integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+  integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js"
+  integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
+
+
+
+<div class="pos-f-t">
+  <div class="collapse" id="navbarToggleExternalContent">
+    <div class="p-4" style="background-color: #8FBC8F;">
+      <h4 class="text-white">What are you looking for?</h4>
+      <span class="text-muted">Search here...</span>
+      <form class="form-inline my-2">
+        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+        <button class="btn btn-primary" type="submit">Search</button>
+      </form>
+    </div>
+    
+  </div>
+  <nav class="navbar navbar-dark bg-success">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  </nav>
+</div>
+
+<nav class="navbar navbar-expand navbar-dark bg-success">
+  <a class="navbar-brand" href="#">P  L  A  N  T  F  E  E  D</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+        <a class="nav-link " href="{% url 'Home' %}">Home</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link " href="{% url 'sharing:MainSharing' %}">Sharing</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href=" {% url 'group:MainGroup' %}">Group</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" href="{% url 'MemberMainPage' %}">Member</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'workshop:MainWorkshop' %}">Workshop</a>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Marketplace
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="{% url 'marketplace:MainMarketplace' %}">Browse Marketplace<span class="sr-only">(current)</span></a>
+          <a class="dropdown-item" href="{% url 'marketplace:MyMarketplace' %}">My Marketplace</a>
+        </div>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Profile
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="{% url 'ViewProfile' %}">View Profile<span class="sr-only">(current)</span></a>
+          <a class="dropdown-item" href="{% url 'EditProfile' %}">Edit Profile</a>
+        </div>
+      </li>
+
+    </ul>
+
+    
+
+    <a class="btn bg-light" href="{% url 'Logout' %}" style="margin-left: 30px;">
+      <img class="bi bi-arrow-bar-right">LOGOUT</img>
+    </a>
+  </div>
+</nav>
+<br />
+{% block content %}
+
+  <body>
+
+    
+    <div class="container">
+    {% csrf_token %}
+    <div class="container bg-light" style="text-align: center;">
+      <label for="exampleFormControlTextarea1" style="font-size: 2em;">Member</label>
+      <form action="{% url 'SearchMember' %}" class="form-inline my-2 my-lg-0" method="get" id="searchform" >
+        <input id="myInput" name="search" class="form-control mr-sm-2" type="text" onkeyup="myFunction()" oninput="checkEmpty()" placeholder="Search your member here..." aria-label="Search" style="width: 560px; text-align: center; margin-top: 30px; margin-left: 250px; margin-bottom: 30px;">
+        <!-- <button id="search-btn" class="btn bg-primary" type="submit" style="margin-top: 30px; margin-bottom: 30px;">Search</button> -->
+        
+      </form>
+
+      <ul id="myUL">
+        {% for userList in userList reversed %}
+          <li hidden><a href="{% url 'OpenProfileMember' userList.id %}">{{userList.Username}}</a></li>
+        {% endfor %}
+      </ul>
+
+      <script>
+        function myFunction() {
+            var input, filter, ul, li, a, i, txtValue;
+            input = document.getElementById("myInput");
+            filter = input.value.toUpperCase();
+            ul = document.getElementById("myUL");
+            li = ul.getElementsByTagName("li");
+            
+            
+            for (i = 0; i < li.length; i++) {
+                a = li[i].getElementsByTagName("a")[0];
+                txtValue = a.textContent || a.innerText;
+                if (filter) {
+                  if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    li[i].removeAttribute("hidden");
+                  } else {
+                    li[i].setAttribute("hidden", "true");
+                  }
+                  } else {
+                    li[i].style.display = "";
+                }
+            }
+        }
+
+        function checkEmpty() {
+          var input = document.getElementById("myInput");
+            if (input.value === "") {
+              var li = document.querySelectorAll("#myUL li");
+              li.forEach(function(item) {
+              item.setAttribute("hidden", "true");
+            });
+          }
+        }
+        </script>
+      
+      
+      <!-- <div id="popup-container" style=" width: 450px; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; border: 1px solid black; padding: 20px; z-index: 1; display: none; ">
+        {{ error }}
+        
+        {% if Name %}
+      <center>
+        <br/>
+        <h1>Search Result Found</h1>
+      </center>
+      <br>
+      {% for i in Name %}
+
+      <center>
+        <hr>
+        <h2>Name: {{ i.Name}} </h2>
+        <h5>Username: {{ i.Username}} </h5>
+        <h5>District: {{ i.District }}</h5>
+        <h5>State: {{ i.State }}</h5>
+        <h5>Occupation: {{ i.Occupation}}</h5>
+        <h7> <a href="{% url 'sendMemberRequest' i.id %}"> Send member request</a></h7>
+        <br />
+        <hr>
+      </center>
+      <br />
+      {% endfor %}
+      {% else %}
+      <center>
+        <h2>Name: {{ sentRequestUser.Name}} </h2>
+        <h5>Username: {{ sentRequestUser.Username}} </h5>
+        <h5>District: {{ sentRequestUser.District }}</h5>
+        <h5>State: {{ sentRequestUser.State }}</h5>
+        <h5>Occupation: {{ sentRequestUser.Occupation}}</h5>
+      </center>
+      {% endif %}
+
+      <hr>
+      {% if messages %}
+      <center>
+      {% for msg in messages %}
+      <b style="color: red;">{{msg}}</b>
+      {% endfor %}
+    </center>
+      {% endif %}
+      <hr />
+        <button id="close-button">Close</button>
+      </div>     
+    </div> -->
+    <br/>
+    <!-- <div class="col-12">
+      <a class="btn btn-primary" href="#" role="button">Pending Member Request</a>
+    </div> -->
+    <br/>
+
+    {% endblock content %}
+     {% block body %}
+
+    
+
+    <div class="container">
+        <div class="container" style="float: left; width: 50%;">
+            <section style="background-color: #FFF5EE;">
+                <div class="container py-5">
+                  <p style="text-align: center;">FRIEND REQUEST</p>
+                    <table style="border: 0; width: 450px;">
+                      {% for userRequestList in userRequestList reversed%}
+                        <tr>
+                          
+                          <td style="text-align: left;"  colspan="2">
+                            
+                            <div class="user-image">
+                                
+                              <img class="rounded-circle" src="media/{{userRequestList.from_user.Photo}}" alt="..." style="width: 45px; height: 45px; margin: 10px;">
+                              <span class="username" >{{userRequestList.from_user.Username}}</span>
+                              <!-- <a class="btn btn-info" href="#" role="button " style="margin-left:80px;">Accept member
+                                request</a> -->
+                            <div style="margin-left: 150px; float: right; padding-top: 15px;">
+                                <a  href="{% url 'acceptMemberRequest' userRequestList.id %}" onclick="return confirmAccept()" role="button">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                                      </svg>
+                                    </a>
+                                    <a  href="{% url 'DeleteMemberRequest' userRequestList.id %}" onclick="return confirmDelete()" role="button " style="margin-left:20px;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
+                                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/>
+                                      </svg>
+                                      </a>
+                            </div>
+
+                              <!-- {{userRequestList.from_user.Name}} -->
+                            </td>
+                            
+                        </tr>
+                        {%endfor%}
+                        </table>
+
+                    </div>
+                          </div>
+                          
+                
+                </section>
+                </div>
+        
+
+        <div class="container" style="float: left; width: 50%;">
+            <section style="background-color:#FFF5EE;">
+                <div class="container py-5">
+                  <p style="text-align: center;">FRIENDLIST</p>
+                    <table style="border: 0; width: 450px;">
+                      {% for person in memberList %}
+                        <tr>
+                          <td style="text-align: left;"  colspan="2">
+                            <div class="user-image">
+                              
+                              <img class="rounded-circle" src="media/{{person.from_person.Photo}}" alt="..." style="width: 45px; height: 45px; margin: 10px;">
+                              <span class="username">{{ person.from_person.Username }}</span>
+
+                              <div style="float: right; margin-top: 16px;">
+                                <a  href="{% url 'ChatRoom' person.chatRoom.id %}" target="_blank" role="button " style="margin-left:150px;">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-chat-dots-fill" viewBox="0 0 16 16">
+                                      <path d="M16 8c0 3.866-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.584.296-1.925.864-4.181 1.234-.2.032-.352-.176-.273-.362.354-.836.674-1.95.77-2.966C.744 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7zM5 8a1 1 0 1 0-2 0 1 1 0 0 0 2 0zm4 0a1 1 0 1 0-2 0 1 1 0 0 0 2 0zm3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+                                    </svg>
+                                  </a>
+                                <a  href="{% url 'DeleteMember' person.from_person.id person.to_person.id  %}" onclick="return confirmDelete()" target="_blank" role="button " style="margin-left:15px;">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                                    <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z"/>
+                                  </svg>
+                                </a>
+                              </div>
+                              
+                              <!-- {{userRequestList.from_user.Name}} -->
+                          </div>
+                          </td>
+                          
+                        </tr>
+                        {%endfor%}
+                        </table>
+                </div>
+                </section>
+        </div>
+        
+  </div>
+
+
+
+</body>
+
+{% endblock body %}
+
+</html>
+
+<script>
+const closeButton = document.getElementById('close-button');
+const popupContainer = document.getElementById('popup-container');
+const searchButton = document.getElementById('search-btn');
+const form = document.getElementById('searchform');
+
+// form.addEventListener('submit', (event) => {
+//   event.preventDefault(); // prevent the form from reloading the page
+
+//   // perform the search and display the results
+//   //const searchTerm = input.value;
+//   //results.innerHTML = `Search results for "${searchTerm}":`;
+//   popupContainer.style.display = 'block';
+// });
+
+if (popupContainer.style.display == 'none') {
+  popupContainer.style.display = 'block';
+  } else {
+    popupContainer.style.display = 'none';
+  }
+
+closeButton.addEventListener('click', function() {
+  popupContainer.style.display = 'none';
+});
+
+function confirmDelete(){
+  return confirm("Are you sure you want to delete this member?");
+}
+
+function confirmAccept(){
+  return confirm("Are you sure you want to accept this member?");
+}
+
+
+</script>

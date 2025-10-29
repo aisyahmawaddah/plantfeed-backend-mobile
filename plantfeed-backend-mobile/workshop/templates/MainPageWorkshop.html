@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <style>
+    .content {
+      max-width: 500px;
+      margin: auto;
+    }
+
+    table {
+      border: 4px solid black;
+      margin: 0 auto;
+      padding: 40px;
+      width: fit-content;
+    }
+
+    .panel {
+    margin-bottom: 30px;
+    color: #696969;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
+}
+  </style>
+</head>
+
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+  integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+
+<!-- <h1 class="p-3 mb-2 bg-success text-white text-center">iGROW Knowledge Management System</h1> -->
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+  integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+  integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+  integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js"
+  integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
+
+
+
+<div class="pos-f-t">
+  <div class="collapse" id="navbarToggleExternalContent">
+    <div class="p-4" style="background-color: #8FBC8F;">
+      <h4 class="text-white">What are you looking for?</h4>
+      <span class="text-muted">Search here...</span>
+      <form class="form-inline my-2">
+        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+        <button class="btn btn-primary" type="submit">Search</button>
+      </form>
+    </div>
+    
+  </div>
+  <nav class="navbar navbar-dark bg-success">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  </nav>
+</div>
+
+<nav class="navbar navbar-expand navbar-dark bg-success">
+  <a class="navbar-brand" href="#">P  L  A  N  T  F  E  E  D</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+        <a class="nav-link " href="{% url 'Home' %}">Home</a>
+        {% if person.UserLevel == 'user' %}
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'sharing:MainSharing' %}">Sharing</a>
+      </li>
+      {% endif %}
+      </li>
+            <li class="nav-item">
+        <a class="nav-link " href=" {% url 'group:MainGroup' %}">Group</a>
+      </li>
+      {% if person.UserLevel == 'user' %}
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'MemberMainPage' %}">Member</a>
+      </li>
+      {% endif %}
+      <li class="nav-item">
+        <a class="nav-link active" href="{% url 'workshop:MainWorkshop' %}">Workshop</a>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Marketplace
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="{% url 'marketplace:MainMarketplace' %}">Browse Marketplace<span class="sr-only">(current)</span></a>
+          <a class="dropdown-item" href="{% url 'marketplace:MyMarketplace' %}">My Marketplace</a>
+        </div>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Profile
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="{% url 'ViewProfile' %}">View Profile<span class="sr-only">(current)</span></a>
+          <a class="dropdown-item" href="{% url 'EditProfile' %}">Edit Profile</a>
+        </div>
+      </li>
+
+    </ul>
+    <a class="btn bg-light" href="{% url 'Logout' %}">
+      <img class="bi bi-arrow-bar-right">LOGOUT</img>
+    </a>
+  </div>
+</nav>
+<br />
+  <br />
+  <!-- <p class="h1 bg-light text-center">Workshop</p> -->
+  <div class="container my-3 bg-light" style="text-align: center;">
+    <label for="exampleFormControlTextarea1" style="font-size: 2em;">Workshop</label>
+  </div>
+  <br />
+  {% csrf_token %}
+
+  {% block body %}
+  <div class="container">
+    {% if person.UserLevel == 'admin' %}
+    <a class="btn btn-primary" href="{% url 'workshop:CreateWorkshop' %}" role="button">Create Workshop</a>
+    
+    <a class="btn btn-primary" href="{% url 'workshop:MyWorkshop' %}" role="button">View Your Workshop</a>
+    
+    {% else %}
+    <a class="btn btn-primary" href="{% url 'workshop:MyBooking' %}" role="button">View Your Booking</a>
+
+    
+    {% if inboxCount != 0 %}
+      <a class="btn btn-primary" href="{% url 'workshop:ViewInbox' %}" role="button">Inbox  <span class="badge badge-light">{{inboxCount}}</span></a>
+    {% else %}
+      <a class="btn btn-primary" href="{% url 'workshop:ViewInbox' %}" role="button">Inbox  <span class="badge badge-light">0</span></a>
+    {% endif %}
+   
+    <br />
+    <br />
+    {% endif %}
+  </div>
+  <br />
+
+  {% if context_SoilTags %}
+  <div class="container">
+    <form method="POST" class="container row g-3" action="{% url 'workshop:Workshop_SoilTag' %}">
+      {% csrf_token %}
+      <div class="container">
+        <label for="inputSoil" class="form-label">Soil Tag : </label><br>
+        {% for soilTag in context_SoilTags.SoilTags %}
+        <input type="radio" name="SoilTag" value="{{ soilTag.id }}" id="{{ soilTag.id }}"><label for="{{ soilTag.id }}">
+          {{soilTag.SoilTagName }}</label> <br>
+        {% endfor %}
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-success " value="Filter">Filter</button>
+      </div>
+    </form>
+    <br/>
+  </div>
+
+  {% elif context_PlantTags %}
+
+  <div class="container">
+    <form method="POST" class="container row g-3" action="{% url 'workshop:Workshop_PlantTag' %}">
+      {% csrf_token %}
+      <div class="container">
+        <label for="inputPlant" class="form-label">Plant Tag : </label><br>
+        {% for plantTag in context_PlantTags.PlantTags %}
+        <input type="radio" name="PlantTag" value="{{ plantTag.id }}" id="{{ plantTag.id }}"><label
+          for="{{ plantTag.id }}">{{ plantTag.PlantTagName }}</label> <br>
+        {% endfor %}
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-success " value="Filter">Filter</button>
+      </div>
+    </form>
+    <br/>
+  </div>
+
+  {% else %}
+
+  <div class="container">
+
+    <h5>Filter Workshop By Tags: </h5>
+    <a href="{% url 'workshop:Workshop_SoilTag' %}" class="link-primary">Enable Soil Tags</a> ||
+    <a href="{% url 'workshop:Workshop_PlantTag' %}" class="link-primary">Enable Plant Tags</a>
+
+    <form method="POST" class="center">
+      {% csrf_token %}
+  
+      <br /><br />
+      <center>
+        <div class="container">
+          <div class="row">
+            <table border="1" class="table">
+              
+              <select id="inputLocation" name="State" required>
+                <option selected disabled=true>--select state --</option>
+                <option>Johor</option>
+                <option>Kedah</option>
+                <option>Kelantan</option>
+                <option>Melaka</option>
+                <option>Negeri Sembilan</option>
+                <option>Pahang</option>
+                <option>Pulau Pinang</option>
+                <option>Perak</option>
+                <option>Perlis</option>
+                <option>Sabah</option>
+                <option>Sarawak</option>
+                <option>Selangor</option>
+                <option>Terengganu</option>
+                <option>W.P. Kuala Lumpur</option>
+              </select>
+              &nbsp;&nbsp;
+              <button type="submit" class="btn btn-success " value="Filter">Filter</button>
+              <br>
+              <br>
+      </center>
+    </form>
+  </div>
+
+  {% endif %}
+
+  <!-- <form method="POST" class="center">
+    {% csrf_token %}
+
+    <br /><br />
+    <center>
+      <div class="container">
+        <div class="row">
+          <table border="1" class="table">
+            <input type="radio" name="Gender" value="M">&nbsp; Male &nbsp;
+            <input type="radio" name="Gender" value="F"> &nbsp;Female &nbsp;
+            &nbsp;
+            <select id="inputLocation" name="State" required>
+              <option selected disabled=true>--select state --</option>
+              <option>Johor</option>
+              <option>Kedah</option>
+              <option>Kelantan</option>
+              <option>Melaka</option>
+              <option>Negeri Sembilan</option>
+              <option>Pahang</option>
+              <option>Pulau Pinang</option>
+              <option>Perak</option>
+              <option>Perlis</option>
+              <option>Sabah</option>
+              <option>Sarawak</option>
+              <option>Selangor</option>
+              <option>Terengganu</option>
+              <option>W.P. Kuala Lumpur</option>
+            </select>
+            &nbsp;&nbsp;
+            <button type="submit" class="btn btn-success " value="Filter">Filter</button>
+            <br>
+            <br>
+    </center>
+  </form> -->
+  <div class="container">
+    <div class="row">
+      <table class="table">
+        <thead>
+          <tr>
+            <!-- <th scope="col">Programme ID</th> -->
+            <th scope="col">Programme Name</th>
+            <th scope="col">Speaker</th>
+            <th scope="col">Gender</th>
+            <th scope="col">Description</th>
+            <th scope="col">Date</th>
+            <th scope="col">Start Time</th>
+            <th scope="col">End Time</th>
+            <th scope="col">Location</th>
+            <th scope="col">Venue</th>
+            <th scope="col">Registration Due</th>
+            <th colspan="2" style="text-align: center;" scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% csrf_token %}
+          {% for data in data %}
+          <tr class="table">
+            <!-- <th scope="row" value="{{ data.pk }}">{{ data.Session }}</th> -->
+            <th scope="row" value="{{ data.ProgrammeName }}">{{ data.ProgrammeName }}</th>
+            <th scope="row" value="{{ data.Speaker }}">{{ data.Speaker }}</th>
+            <th scope="row" value="{{ data.Gender }}">{{ data.Gender }}</th>
+            <th scope="row" value="{{ data.Description }}">{{ data.Description }}</th>
+            <th scope="row" value="{{ data.Date }}">{{ data.Date }}</th>
+            <th scope="row" value="{{ data.StartTime }}">{{ data.StartTime }}</th>
+            <th scope="row" value="{{ data.EndTime }}">{{ data.EndTime }}</th>
+            <th scope="row" value="{{ data.State }}">{{ data.State }}</th>
+            <th scope="row" value="{{ data.Venue }}">{{ data.Venue }}</th>
+
+            {% if person.Email == data.PIC.Email and data.RegistrationDue == dateTime.now %}
+            <th scope="row" value="{{ data.RegistrationDue }}">Closed</th>
+            <th><a class="btn btn-secondary" href="{% url 'workshop:UpdateWorkshop' data.id %}" role="button">Edit</a></th>
+            <th><a class="btn btn-secondary" href="{% url 'workshop:DeleteWorkshop' data.id %}" role="button">Delete</a></th>
+
+            {% elif person.Email == data.PIC.Email and data.RegistrationDue != dateTime.now %}
+            <th scope="row" value="{{ data.RegistrationDue }}">{{ data.RegistrationDue }}</th>
+            <th><a class="btn btn-primary" href="{% url 'workshop:UpdateWorkshop' data.id %}" role="button">Edit</a></th>
+            <th><a class="btn btn-danger" href="{% url 'workshop:DeleteWorkshop' data.id %}" role="button">Delete</a></th>
+
+            {% elif person.UserLevel == 'user' and data.RegistrationDue == dateTime.now %}
+            <th scope="row" value="{{ data.RegistrationDue }}">Closed</th>
+            <th><a href="" class="btn btn-secondary" role="button">Closed</a></th>
+            <th><a href="#" class="btn btn-primary" role="button">Unapplicable</a></th>
+
+            
+
+            {% elif person.UserLevel == 'user' and data.RegistrationDue != dateTime.now %}
+            <th scope="row" value="{{ data.RegistrationDue }}">{{ data.RegistrationDue }}</th>
+
+            
+            {% for booking in booking %}
+            {% if  data.id == booking.BookWorkshop.id and booking.Participant.Email == request.session.Email %}
+              <th><a href="{% url 'workshop:MainWorkshop' %}" class="btn btn-primary" role="button" onclick="return DuplicationWarning()">Booked</a></th>
+            {% elif forloop.last %}
+            <th><a href="{% url 'workshop:Booking' data.id %}" class="btn btn-primary" role="button" onclick="return ConfirmBooking()">Book</a></th>
+              {% endif %}
+            {%endfor%}
+
+            {% if not booking %}
+            <th><a href="{% url 'workshop:Booking' data.id %}" class="btn btn-primary" role="button" onclick="return ConfirmBooking()">Book</a></th>
+            {% endif %}
+
+            
+
+            {% endif %}
+
+             
+            
+            
+            
+
+          </tr>
+   
+        </tbody>
+        {%endfor%}
+      </table>
+
+    </div>
+  </div>
+
+  {% if messages %}
+  <div class="container">
+    <hr>
+    {% for msg in messages %}
+    <b>{{msg}}</b>
+    {% endfor %}
+    <hr>
+  </div>
+
+  
+  {% endif%}
+  
+  <br/>
+  {% endblock body %}
+
+</body>
+
+<script>
+  function DuplicationWarning(){
+    return confirm("You already booked this workshop. Choose another workshop available.")
+  }
+
+  function ConfirmBooking(){
+    return confirm("Confirm to join and book this workshop?")
+  }
+</script>
+</html>

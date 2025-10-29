@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <style>
+    .content {
+      max-width: 500px;
+      margin: auto;
+    }
+
+    table {
+      border: 4px solid black;
+      margin: 0 auto;
+      padding: 40px;
+      width: fit-content;
+    }
+
+    .panel {
+    margin-bottom: 30px;
+    color: #696969;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
+}
+  </style>
+</head>
+
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+  integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+
+<!-- <h1 class="p-3 mb-2 bg-success text-white text-center">iGROW Knowledge Management System</h1> -->
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+  integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+  integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+  integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js"
+  integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
+
+
+
+<div class="pos-f-t">
+  <div class="collapse" id="navbarToggleExternalContent">
+    <div class="p-4" style="background-color: #8FBC8F;">
+      <h4 class="text-white">What are you looking for?</h4>
+      <span class="text-muted">Search here...</span>
+      <form class="form-inline my-2">
+        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+        <button class="btn btn-primary" type="submit">Search</button>
+      </form>
+    </div>
+    
+  </div>
+  <nav class="navbar navbar-dark bg-success">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  </nav>
+</div>
+
+<nav class="navbar navbar-expand navbar-dark bg-success">
+  <a class="navbar-brand" href="#">P  L  A  N  T  F  E  E  D</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+        <a class="nav-link " href="{% url 'Home' %}">Home</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" href="{% url 'sharing:MainSharing' %}">Sharing</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href=" {% url 'group:MainGroup' %}">Group</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'MemberMainPage' %}">Member</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'workshop:MainWorkshop' %}">Workshop</a>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Marketplace
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="{% url 'marketplace:MainMarketplace' %}">Browse Marketplace<span class="sr-only">(current)</span></a>
+          <a class="dropdown-item" href="{% url 'marketplace:MyMarketplace' %}">My Marketplace</a>
+        </div>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Profile
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="{% url 'ViewProfile' %}">View Profile<span class="sr-only">(current)</span></a>
+          <a class="dropdown-item" href="{% url 'EditProfile' %}">Edit Profile</a>
+        </div>
+      </li>
+
+    </ul>
+    <a class="btn bg-light" href="{% url 'Logout' %}">
+      <img class="bi bi-arrow-bar-right">LOGOUT</img>
+    </a>
+  </div>
+</nav>
+<br />
+
+
+  <body>
+    <div class="container">
+    {% csrf_token %}
+    <div class="container bg-light" style="text-align: center;">
+      <label for="exampleFormControlTextarea1" style="font-size: 2em;">Sharing</label>     
+    </div>
+    <br/>
+    <div class="col-12">
+      <a class="btn btn-primary" href="{% url 'sharing:AddSharing' %}" role="button">Add New Sharing</a>
+    </div>
+    <br/>
+
+    {% if context_SoilTags %}
+    
+    <div class="container">
+     <a ></a>
+     <form method="POST" class="container row g-3" action="{% url 'sharing:Sharing_SoilTag' %}">
+       {% csrf_token %}
+       <div class="container">
+         <label for="inputSoil" class="form-label">Soil Tag : </label><br>
+         {% for soilTag in context_SoilTags.SoilTags %}
+         <input type="radio" name="SoilTag" value="{{ soilTag.id }}">{{ soilTag.SoilTagName }} <br>
+         {% endfor %}
+       </div>
+       <div class="col-12">
+         <button type="submit" class="btn btn-success " value="Filter">Filter</button>
+       </div>
+     </form>
+   </div>
+   <br/>
+   {% elif context_PlantTags %}
+
+   <div class="container">
+     <form method="POST" class="container row g-3" action="{% url 'sharing:Sharing_PlantTag' %}" attribute>
+       {% csrf_token %}
+       <div class="container">
+         <label for="inputPlant" class="form-label">Plant Tag : </label><br>
+         {% for plantTag in context_PlantTags.PlantTags %}
+         <input type="radio" name="PlantTag" value="{{ plantTag.id }}">{{ plantTag.PlantTagName }} <br>
+         {% endfor %}
+       </div>
+       <div class="col-12">
+         <button type="submit" class="btn btn-success " value="Filter">Filter</button>
+       </div>
+     </form>
+   </div>
+   <br />
+   {% else %}
+   <div class="container">
+     <h5>Filter Sharing By Tags: </h5>
+     <a href="{% url 'sharing:Sharing_SoilTag' %}" class="link-primary" target="_blank">Enable Soil Tags</a> ||
+     <a href="{% url 'sharing:Sharing_PlantTag' %}" class="link-primary" target="_blank">Enable Plant Tags</a>
+     {%endif%}
+     <br>
+     <br>
+
+   
+
+    
+
+    <div class="container">
+        <section style="background-color: #F0F2F5;">
+            <div class="container py-5">
+              <div class="main-timeline-2">
+                {% csrf_token %}
+
+                {% for allfeed in allfeed reversed %}
+                <div class="timeline-2 left-2">
+                  
+                  <div class="card" style="width: 650px;">
+                    <!-- <div class=profileIcon>
+                        <img src="media/{{ allfeed.Creator.Photo }}" alt class="d-block ui-w-100 rounded-circle" style="width: 45px; height: 45px; margin: 10px;">
+                        <b>{{ allfeed.Creator.Username }}</b>
+                    </div> -->
+                    
+                    <table style="border: 0; margin-right:550px ;">
+                      {% for person in memberList %}
+                    {% if allfeed.Creator.Email == person.from_person.Email%}
+                        <th>
+                            <div class="user-image">
+                             
+                                <img class="rounded-circle" src="media/{{ allfeed.Creator.Photo }}" style="width: 45px; height: 45px; margin: 10px;">
+                              
+                            </div>
+                        </th>
+                        <th>
+                                <div class="title">
+                                    <span class="username">{{ allfeed.Creator.Username }}</span>
+                                </div>
+                            
+                        </th>
+                    </table>
+                    
+                    
+                    
+                    <img src="media/{{allfeed.Photo}}" class="card-img-top"
+                      alt="Responsive image" style="width: 550px;margin-left: 45px;">
+                      
+                      <table style="border: none;  margin-bottom: 0; padding-bottom: 0%; text-align: center;">
+
+                        
+
+                        <th style="padding-bottom: 0; align-items: center;">
+                            <h4 style="padding-top: 15px;" value="{{ allfeed.Title }}">{{ allfeed.Title }}</h4>
+                            <p class="text-muted mb-4" style="font-size: x-small; padding: 0;" value="{{ allfeed.created_at }}"><i class="far fa-clock" aria-hidden="true"></i>{{ allfeed.created_at }}</p>
+                        </th>
+                        
+                        <th>
+                          
+                      </th>
+                        
+                      </table>
+                      
+                    
+                    <div class="card-body">
+                      <p class="mb-0" value="{{ comment.Message }}" style="margin-left: 15px;">{{ allfeed.Message }}</p>
+                    </div>
+
+
+                    
+
+                    {% for comment in comment %}
+                    {% if comment.Feed.id == allfeed.id %}
+                    <table style="border: 0; background-color: #F9E79F ; width: 550px;">
+                      <tr>
+                        <td style="text-align: left;"  colspan="2">
+                          <div class="user-image">
+                           
+                              <img class="rounded-circle" src="media/{{ comment.Commenter.Photo }}" style="width: 45px; height: 45px; margin: 10px;">
+                            
+                            <span class="username">{{ comment.Commenter.Username }}</span>
+                        </div>
+                        </td>
+                        {% if comment.Commenter.Email == request.session.Email %}
+                        <td>
+                          <a href="{% url 'sharing:DeleteComment' comment.id %}" onclick="return confirm('Are you sure you want to delete the comment?');" style="margin-right: 30px;">
+                              
+                              
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                              <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z"/>
+                            </svg>
+                          </a>
+                        </td>
+                        {% endif %}
+                      </tr>
+                      
+                      <tr>
+                        <td  colspan="2" style="text-align: center;">
+                          {% if comment.Pictures != "" %}
+                    <img src="media/{{comment.Pictures}}" class="card-img-top"
+                       style="width: 100px;margin-left: 45px;">
+                      {% endif %}
+                        </td>
+                        <td>
+
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="width: 500px;"  colspan="2">
+                          <div class="card-body">
+                            <p class="mb-0" value="{{ comment.Message }}">Message: {{ comment.Message }}</p>
+                          </div>
+                        </td>
+                        <td>
+
+                        </td>
+                      </tr>
+                      
+                  </table>
+                  {% endif %}
+                  {%endfor%}
+
+                  <br>
+                  <br>
+                    <form action="{% url 'sharing:AddComment' allfeed.id %}" method="POST" enctype="multipart/form-data" class="panel-activity__status" style="align-items: center;">
+                      {% csrf_token %}
+                      <textarea name="Message" placeholder="Share your comments here..." class="form-control"  style="width: 550px; margin-left: 30px; height: 50px;"></textarea>
+                      
+                      
+                      <div class="panel-activity__status" style="width: 550px; margin-left: 30px;">
+                        <div class="container row g-3">
+                          <div class="col-md-6">
+                            <label for="inputImage" class="form-label">Picture</label>
+                            <input type="file" class="form-control" id="inputImage" name="Pictures" placeholder="Enter image" value="Enter image">
+                            <br />
+                          </div>
+  
+                          
+                        </div>
+                      </div>
+                      
+                     
+                      <button type="submit" class="btn btn-sm btn-rounded btn-info" style="margin-left: 30px; width: 550px; margin-bottom: 10px;">
+                        Post
+                      </button>
+                  </form>
+                      
+                  
+                  
+                  {% endif %}
+                
+                {% endfor %}
+
+                {% if allfeed.Creator.Email == request.session.Email %}
+                        <th>
+                            <div class="user-image">
+                              
+                                <img class="rounded-circle" src="media/{{ allfeed.Creator.Photo }}" style="width: 45px; height: 45px; margin: 10px;">
+                              
+                            </div>
+                        </th>
+                        <th>
+                                <div class="title">
+                                    <span class="username">{{ allfeed.Creator.Username }}</span>
+                                </div>
+
+                                
+                        </th>
+                        <th> 
+                          <a href="{% url 'sharing:UpdateSharing' allfeed.id %}" style="margin-left: 50px;">
+                            
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                              <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                              <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                            </svg></a>
+                        </th>
+                        <th>
+                            <a href="{% url 'sharing:DeleteSharing' allfeed.id %}" onclick="return confirm('Are you sure you want to delete the post?');">
+                              
+                              
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                                <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z"/>
+                              </svg>
+                            </a>
+                        </th>
+                        
+                    </table>
+                    
+                    
+                    
+                    <img src="media/{{allfeed.Photo}}" class="card-img-top"
+                       style="width: 550px;margin-left: 45px;">
+                      
+                      <table style="border: none;  margin-bottom: 0; padding-bottom: 0%; text-align: center;">
+                        <th style="padding-bottom: 0; align-items: center;">
+                            <h4 style="padding-top: 15px;" value="{{ allfeed.Title }}">{{ allfeed.Title }}</h4>
+                            <p class="text-muted mb-4" style="font-size: x-small; padding: 0;" value="{{ allfeed.created_at }}"><i class="far fa-clock" aria-hidden="true"></i>{{ allfeed.created_at }}</p>
+                        </th>
+                        
+                        <th>
+                          
+                        </th>
+                      </table>
+                      
+                    
+                    <div class="card-body">
+                      <p class="mb-0" value="{{ comment.Message }}" style="margin-left: 15px;">{{ allfeed.Message }}</p>
+                    </div>
+
+
+                    
+
+                    {% for comment in comment %}
+                    {% if comment.Feed.id == allfeed.id %}
+                    <table style="border: 0; background-color: #F9E79F ; width: 550px;">
+                      <tr>
+                        <td style="text-align: left;"  colspan="2">
+                          <div class="user-image">
+                            
+                              <img class="rounded-circle" src="media/{{ comment.Commenter.Photo }}"  style="width: 45px; height: 45px; margin: 10px;">
+                            
+                            <span class="username">{{ comment.Commenter.Username }}</span>
+                        </div>
+                        </td>
+                        {% if comment.Commenter.Email == request.session.Email %}
+                        <td>
+                          <a href="{% url 'sharing:DeleteComment' comment.id %}" onclick="return confirm('Are you sure you want to delete the comment?');" style="margin-right: 30px;">
+                              
+                              
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                              <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z"/>
+                            </svg>
+                          </a>
+                        </td>
+                        {% endif %}
+                      </tr>
+                      
+                      <tr>
+                        <td  colspan="2" style="text-align: center;">
+                         {% if comment.Pictures != "" %}
+                    <img src="media/{{comment.Pictures}}" class="card-img-top"
+                       style="width: 100px;margin-left: 45px;">
+                      {% endif %}
+                        </td>
+                        <td>
+
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="width: 500px;"  colspan="2">
+                          <div class="card-body">
+                            <p class="mb-0" value="{{ comment.Message }}">Message: {{ comment.Message }}</p>
+                          </div>
+                        </td>
+                        
+                      </tr>
+                      
+                  </table>
+                  {% endif %}
+                  {%endfor%}
+
+                  <br>
+                  <br>
+                    <form action="{% url 'sharing:AddComment' allfeed.id %}" method="POST" enctype="multipart/form-data" class="panel-activity__status" style="align-items: center;">
+                      {% csrf_token %}
+                      <textarea name="Message" placeholder="Share your comments here..." class="form-control"  style="width: 550px; margin-left: 30px; height: 50px;"></textarea>
+                      
+                      
+                      <div class="panel-activity__status" style="width: 550px; margin-left: 30px;">
+                        <div class="container row g-3">
+                          <div class="col-md-6">
+                            <label for="inputImage" class="form-label">Picture</label>
+                            <input type="file" class="form-control" id="inputImage" name="Pictures" placeholder="Enter image" value="Enter image">
+                            <br />
+                          </div>
+  
+                          
+                        </div>
+                      </div>
+                      
+                     
+                      <button type="submit" class="btn btn-sm btn-rounded btn-info" style="margin-left: 30px; width: 550px; margin-bottom: 10px;">
+                        Post
+                      </button>
+                  </form>
+                      
+                  </div>
+                  
+                  {% endif %}
+                </div>
+
+                {% endfor %}
+    </div>
+    <br/>
+
+  </div>
+</body>
+
+
+
+</html>
+
+<script>
+  document.getElementById("CommentBtn").onclick = function() {Commentform()};
+
+  function Commentform()
+  {
+      // document.getElementById('comment').style.display = 'block';
+      if (document.getElementById('comment').style.display == 'none') {
+        document.getElementById('comment').style.display = "block";
+      } else {
+        document.getElementById('comment').style.display = "none";
+      }
+  }
+</script>
