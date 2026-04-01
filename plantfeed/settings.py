@@ -121,9 +121,11 @@ AUTHENTICATION_BACKENDS = (
 #    }
 #}
 
-env = environ.Env()
+# env = environ.Env()
 # reading .env file
-environ.Env.read_env()
+# environ.Env.read_env()
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 DATABASES = {
     'default': {
