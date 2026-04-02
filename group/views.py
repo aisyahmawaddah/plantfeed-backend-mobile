@@ -363,6 +363,74 @@ def PLSharing(request, pk):
         return render(request,'AddPLSharing.html', {'charts':user_charts})
 
 @csrf_exempt
+def PLSharingAPI(request, group_id):
+    """
+    Mobile-friendly JSON endpoint for PlantLink chart sharing.
+    No session required — user_id passed in body/query param.
+    GET  /group/pl-sharing-api/<group_id>/  → list charts shared to this group
+    POST /group/pl-sharing-api/<group_id>/  → share a chart to this group
+    """
+    group = get_object_or_404(Group_tbl, id=group_id)
+
+    if request.method == 'GET':
+        records = pl_graph_sharing.objects.filter(Group_fk=group).order_by('-id')
+        data = [
+            {
+                "id": r.id,
+                "title": r.title,
+                "description": r.description,
+                "link": r.link,
+                "chart_type": r.chart_type,
+                "user_id": r.Person_fk.id,
+                "username": r.Person_fk.Username,
+            }
+            for r in records
+        ]
+        return JsonResponse(data, safe=False, status=200)
+
+    elif request.method == 'POST':
+        try:
+            body = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+        user_id = body.get('user_id')
+        if not user_id:
+            return JsonResponse({'error': 'user_id is required'}, status=400)
+
+        user = get_object_or_404(Person, id=user_id)
+
+        title = body.get('title', '').strip()
+        description = body.get('description', '').strip()
+
+        if len(title) > 100:
+            return JsonResponse({'error': 'Title cannot exceed 100 characters'}, status=400)
+        if len(description) > 500:
+            return JsonResponse({'error': 'Description cannot exceed 500 characters'}, status=400)
+
+        chart_id = body.get('chart_id')
+        if chart_id:
+            chart = get_object_or_404(pl_graph_api, id=chart_id)
+            link = chart.embed_link
+            chart_type = chart.chart_type
+        else:
+            link = body.get('custom_link', '')
+            chart_type = None
+
+        record = pl_graph_sharing(
+            title=title,
+            description=description,
+            link=link,
+            chart_type=chart_type,
+            Group_fk=group,
+            Person_fk=user,
+        )
+        record.save()
+        return JsonResponse({'success': 'Chart shared to group', 'id': record.id}, status=200)
+
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+@csrf_exempt
 def PLGraphAPI(request):
     if request.method == "POST":
         try:
@@ -387,12 +455,15 @@ def PLGraphAPI(request):
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
     elif request.method == "GET":
-        try:
-            # Fetch all saved charts
-            charts = pl_graph_api.objects.all()
+       try:
+          user_id = request.GET.get('user_id')
+          if user_id:
+             charts = pl_graph_api.objects.filter(Person_fk_id=user_id)
+          else:
+             charts = pl_graph_api.objects.all()
 
-            # Serialize data into a list of dictionaries
-            chart_data = [
+            # This runs regardless of which branch above was taken
+             chart_data = [
                 {
                     "id": chart.id,
                     "name": chart.name,
@@ -401,13 +472,14 @@ def PLGraphAPI(request):
                     "start_date": chart.start_date.isoformat(),
                     "end_date": chart.end_date.isoformat(),
                     "user_id": chart.Person_fk.id,
-                }
-                for chart in charts
+                 }
+                 for chart in charts
             ]
 
-            return JsonResponse({"charts": chart_data}, status=200)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
+             return JsonResponse({"charts": chart_data}, status=200)
+       except Exception as e:
+             return JsonResponse({'error': str(e)}, status=500)
+    
     else:
         return JsonResponse({'error': 'Unsupported request method'}, status=405)
     
