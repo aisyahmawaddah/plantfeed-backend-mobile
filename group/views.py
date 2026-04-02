@@ -446,24 +446,22 @@ def PLGraphAPI(request):
             graph.start_date = timezone.make_aware(datetime.strptime(data.get('start_date'), '%Y-%m-%d'))
             graph.end_date = timezone.make_aware(datetime.strptime(data.get('end_date'), '%Y-%m-%d'))
             graph.Person_fk = user
-
             graph.save()
-
             return JsonResponse({'success': 'Chart has been saved'}, status=200)
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON format'}, status=400)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
-    elif request.method == "GET":
-       try:
-          user_id = request.GET.get('user_id')
-          if user_id:
-             charts = pl_graph_api.objects.filter(Person_fk_id=user_id)
-          else:
-             charts = pl_graph_api.objects.all()
 
-            # This runs regardless of which branch above was taken
-             chart_data = [
+    elif request.method == "GET":
+        try:
+            user_id = request.GET.get('user_id')
+            if user_id:
+                charts = pl_graph_api.objects.filter(Person_fk_id=user_id)
+            else:
+                charts = pl_graph_api.objects.all()
+
+            chart_data = [
                 {
                     "id": chart.id,
                     "name": chart.name,
@@ -472,14 +470,13 @@ def PLGraphAPI(request):
                     "start_date": chart.start_date.isoformat(),
                     "end_date": chart.end_date.isoformat(),
                     "user_id": chart.Person_fk.id,
-                 }
-                 for chart in charts
+                }
+                for chart in charts
             ]
+            return JsonResponse({"charts": chart_data}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
 
-             return JsonResponse({"charts": chart_data}, status=200)
-       except Exception as e:
-             return JsonResponse({'error': str(e)}, status=500)
-    
     else:
         return JsonResponse({'error': 'Unsupported request method'}, status=405)
     
