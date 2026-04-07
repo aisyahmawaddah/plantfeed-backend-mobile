@@ -414,7 +414,7 @@ def PLSharingAPI(request, group_id):
             link = chart.embed_link
             chart_type = chart.chart_type
         else:
-            link = body.get('custom_link', '')
+            link = body.get('link') or body.get('custom_link', '')
             chart_type = None
 
         record = pl_graph_sharing(
