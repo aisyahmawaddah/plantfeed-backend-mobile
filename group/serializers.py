@@ -85,7 +85,7 @@ class GroupTimelineSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GroupTimeline
-        fields = ['id', 'GroupTitle', 'GroupMessage', 'GroupSkill', 'GroupState', 'GroupPhoto', 'GroupVideo', 'Groupcreated_at', 'CreatorFK_id', 'GroupFK_id', 'creator_name', 'creator_photo', 'creator_username']
+        fields = ['id', 'GroupTitle', 'GroupMessage', 'GroupSkill', 'GroupState', 'GroupPhoto', 'Groupcreated_at', 'CreatorFK_id', 'GroupFK_id', 'creator_name', 'creator_photo', 'creator_username']
         ordering = ['-Groupcreated_at']
 
     def get_creator_name(self, obj):

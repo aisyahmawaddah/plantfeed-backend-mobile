@@ -220,7 +220,13 @@ CORS_ALLOW_HEADERS = [
 ]
 
 # CSRF settings
-CSRF_TRUSTED_ORIGINS = ['http://*', 'https://*', 'https://989b-2405-3800-8bb-a348-d1ed-f1e4-4aa7-4c15.ngrok-free.app',]
+CSRF_TRUSTED_ORIGINS = [
+    'https://kourtney-bottlelike-earthly.ngrok-free.dev',
+    'https://*.ngrok-free.dev',
+    'http://localhost:8001',
+    'http://127.0.0.1:8001',
+]
+
 ALLOWED_ORIGINS = CSRF_TRUSTED_ORIGINS.copy()
 
 # Cookies settings
