@@ -9,7 +9,8 @@ from rest_framework.authtoken.models import Token
 class FeedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Feed
-        fields = ['Title', 'Message', 'Creator_id']
+        fields = ['Title', 'Message', 'Creator_id', 'Photo']
+
 
 #tambah
 
