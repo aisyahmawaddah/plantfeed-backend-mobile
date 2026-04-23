@@ -174,23 +174,13 @@
                         <p></p>
                     </div>
                     <div class="iframe-container">
-                      {% if chart.link|slice:":7" == "http://" %}
-                          <iframe 
-                              src="/group/proxy/?url={{ chart.link }}" 
-                              width="100%" 
-                              height="600px" 
-                              frameborder="0">
-                          </iframe>
-                      {% else %}
-                          <iframe 
-                              src="{{ chart.link }}" 
-                              width="100%" 
-                              height="600px" 
-                              frameborder="0">
-                          </iframe>
-                      {% endif %}
-                  </div>
-                  
+                        <iframe 
+                            src="/group/proxy/?url={{ chart.link }}" 
+                            width="100%" 
+                            height="600px" 
+                            frameborder="0">
+                        </iframe>
+                    </div>
                 </div>
             </div>
         </div>

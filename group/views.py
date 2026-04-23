@@ -37,32 +37,21 @@ from urllib.parse import urljoin
 def mainGroup(request):
     if request.method=='POST':
         person=Person.objects.get(Email=request.session['Email'])
-        #Age = request.POST.get('Age')
-        #soiltag=request.POST.get('soiltag')
-        #soilTagID = SoilTag.objects.filter(SoilTagName=soiltag)
-        #plantTagID = PlantTag.objects.filter(PlantTagName=planttag)
-        #groupPlantTag=GroupPlantTagging.objects.filter(plantTag=plantTagID)
-        #groupSoilTag=GroupSoilTagging.objects.filter(soilTag=soilTagID)
-
-        #soiltag=SoilTag.objects.all()
-        #planttag=PlantTag.objects.all()
-        
         State = request.POST.get('State')
-        #searchgp=Group_tbl.objects.all()
         searchgp=Group_tbl.objects.filter(State=State)
-        return render(request,'MainPageGroup.html', {'person':person,'group':searchgp})
-    
+        groupMember=GroupMembership.objects.filter(GroupMember=person)
+        joinedGroupIds=list(groupMember.values_list('GroupName_id', flat=True))
+        return render(request,'MainPageGroup.html', {'person':person,'group':searchgp,'groupMember':groupMember,'joinedGroupIds':joinedGroupIds})
+
     try:
-        
         person=Person.objects.get(Email=request.session['Email'])
         group=Group_tbl.objects.all()
-        #soiltag=SoilTag.objects.all()
-        #planttag=PlantTag.objects.all()
         groupMember=GroupMembership.objects.filter(GroupMember=person)
+        joinedGroupIds=list(groupMember.values_list('GroupName_id', flat=True))
         searchgp=Group_tbl.objects.raw('select * from Group_tbl')
         fss =FileSystemStorage()
         uploaded_file = fss.url(group)
-        return render(request,'MainPageGroup.html',{'group':group, 'uploaded_file':uploaded_file, 'person':person, 'groupMember':groupMember})
+        return render(request,'MainPageGroup.html',{'group':group, 'uploaded_file':uploaded_file, 'person':person, 'groupMember':groupMember, 'joinedGroupIds':joinedGroupIds})
 
     except Group_tbl.DoesNotExist:
         raise Http404('Data does not exist')
@@ -652,47 +641,50 @@ class MembershipDeleteAPIView(APIView):
 
 def proxy_view(request):
     """Fetch and proxy content from an external source."""
-    target_url = request.GET.get('url')  # The target URL to fetch
+    target_url = request.GET.get('url')
     if not target_url:
         raise Http404("No URL provided.")
 
     try:
-        # Fetch the content from the target URL
-        response = requests.get(target_url)
+        from urllib.parse import urlparse
+        parsed = urlparse(target_url)
+        base_url = f"{parsed.scheme}://{parsed.netloc}"
+
+        headers = {}
+        if 'ngrok' in parsed.netloc:
+            headers['ngrok-skip-browser-warning'] = 'true'
+
+        response = requests.get(target_url, headers=headers)
         content = response.text
 
-        # Rewrite relative URLs to use the proxy
-        base_proxy_url = '/group/proxy/?url=http://52.64.72.29:8000'
+        base_proxy_url = f'/group/proxy/?url={base_url}'
         content = content.replace('href="/', f'href="{base_proxy_url}/')
         content = content.replace('src="/', f'src="{base_proxy_url}/')
         content = content.replace('action="/', f'action="{base_proxy_url}/')
 
-        # Inject JavaScript to rewrite dynamic requests
-        rewrite_script = """
+        rewrite_script = f"""
         <script>
-            document.querySelectorAll('a[href^="/"], img[src^="/"], form[action^="/"]').forEach(el => {
-                if (el.href) el.href = '/group/proxy/?url=http://52.64.72.29:8000' + el.getAttribute('href');
-                if (el.src) el.src = '/group/proxy/?url=http://52.64.72.29:8000' + el.getAttribute('src');
-                if (el.action) el.action = '/group/proxy/?url=http://52.64.72.29:8000' + el.getAttribute('action');
-            });
-
-            // Rewrite fetch and XHR requests
-            (function() {
+            document.querySelectorAll('a[href^="/"], img[src^="/"], form[action^="/"]').forEach(el => {{
+                if (el.href) el.href = '/group/proxy/?url={base_url}' + el.getAttribute('href');
+                if (el.src) el.src = '/group/proxy/?url={base_url}' + el.getAttribute('src');
+                if (el.action) el.action = '/group/proxy/?url={base_url}' + el.getAttribute('action');
+            }});
+            (function() {{
                 const originalFetch = window.fetch;
-                window.fetch = function(input, init) {
-                    if (typeof input === 'string' && input.startsWith('/')) {
-                        input = '/group/proxy/?url=http://52.64.72.29:8000' + input;
-                    }
+                window.fetch = function(input, init) {{
+                    if (typeof input === 'string' && input.startsWith('/')) {{
+                        input = '/group/proxy/?url={base_url}' + input;
+                    }}
                     return originalFetch(input, init);
-                };
+                }};
                 const originalXhrOpen = XMLHttpRequest.prototype.open;
-                XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
-                    if (url.startsWith('/')) {
-                        url = '/group/proxy/?url=http://52.64.72.29:8000' + url;
-                    }
+                XMLHttpRequest.prototype.open = function(method, url, async, user, password) {{
+                    if (url.startsWith('/')) {{
+                        url = '/group/proxy/?url={base_url}' + url;
+                    }}
                     originalXhrOpen.call(this, method, url, async, user, password);
-                };
-            })();
+                }};
+            }})();
         </script>
         """
         content = content.replace("</body>", f"{rewrite_script}</body>")
@@ -700,4 +692,5 @@ def proxy_view(request):
         return HttpResponse(content, content_type=response.headers.get('Content-Type', 'text/html'))
     except requests.exceptions.RequestException as e:
         return HttpResponse(f"Error fetching content: {e}", status=500)
+
 
