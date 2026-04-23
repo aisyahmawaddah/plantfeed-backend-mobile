@@ -203,14 +203,13 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="seller-info">
-                            <img src="media/{{ item.Person_fk.Photo }}" alt="Seller Photo">
+                            <img src="/media/{{ item.Person_fk.Photo }}" alt="Seller Photo">
                             <a href="{% url 'marketplace:viewSeller' item.Person_fk.id %}">{{ item.Person_fk.Username }}</a>
                         </div>
                         <h5 class="card-title">
                             <a href="{% url 'marketplace:viewProduct' item.productid %}" class="text-dark">{{ item.productName }}</a>
                         </h5>
-                        <img src="media/{{item.productPhoto}}" class="card-img-top" alt="Product Image">
-                        <p class="card-text mt-3">
+                        <img src="/media/{{item.productPhoto}}" class="card-img-top" alt="Product Image">
                             <span style="color: #228b22;"><strong>RM {{item.productPrice}}</strong></span>
                             <span class="float-right">{{item.productStock}} stock left</span>
                         </p>
