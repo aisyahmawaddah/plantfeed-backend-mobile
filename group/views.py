@@ -404,7 +404,7 @@ def PLSharingAPI(request, group_id):
             chart_type = chart.chart_type
         else:
             link = body.get('link') or body.get('custom_link', '')
-            chart_type = None
+            chart_type = body.get('chart_type')
 
         record = pl_graph_sharing(
             title=title,
@@ -432,8 +432,10 @@ def PLGraphAPI(request):
             graph.name = data.get('chart_name')
             graph.embed_link = data.get('embed_link')
             graph.chart_type = data.get('chart_type')
-            graph.start_date = timezone.make_aware(datetime.strptime(data.get('start_date'), '%Y-%m-%d'))
-            graph.end_date = timezone.make_aware(datetime.strptime(data.get('end_date'), '%Y-%m-%d'))
+            start_date_str = data.get('start_date')
+            end_date_str = data.get('end_date')
+            graph.start_date = timezone.make_aware(datetime.strptime(start_date_str, '%Y-%m-%d')) if start_date_str else None
+            graph.end_date = timezone.make_aware(datetime.strptime(end_date_str, '%Y-%m-%d')) if end_date_str else None
             graph.Person_fk = user
             graph.save()
             return JsonResponse({'success': 'Chart has been saved'}, status=200)
@@ -456,8 +458,9 @@ def PLGraphAPI(request):
                     "name": chart.name,
                     "embed_link": chart.embed_link,
                     "chart_type": chart.chart_type,
-                    "start_date": chart.start_date.isoformat(),
-                    "end_date": chart.end_date.isoformat(),
+                    "start_date": chart.start_date.isoformat() if chart.start_date else None,
+                    "end_date": chart.end_date.isoformat() if chart.end_date else None,
+                    "is_live": chart.start_date is None,
                     "user_id": chart.Person_fk.id,
                 }
                 for chart in charts
@@ -467,7 +470,7 @@ def PLGraphAPI(request):
             return JsonResponse({'error': str(e)}, status=500)
 
     else:
-        return JsonResponse({'error': 'Unsupported request method'}, status=405)
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
     
     
 def AddGroupSharing(request, pk):
