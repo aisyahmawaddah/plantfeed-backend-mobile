@@ -75,6 +75,6 @@ jobs:
 
       - name: Build and push image
         run: |
-          IMAGE=registry.digitalocean.com/${{ secrets.DOCR_REGISTRY }}/apps:plantfeed-backend-${{ github.sha }}
+          IMAGE=registry.digitalocean.com/${{ secrets.DOCR_REGISTRY }}/plantlink-mobile:plantfeed-${{ github.sha }}
           docker build -t $IMAGE .
           docker push $IMAGE
