@@ -9,9 +9,7 @@ WORKDIR /app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    gcc \
-    default-libmysqlclient-dev \
-    libpq-dev \ 
+    gcc pkg-config default-libmysqlclient-dev libpq-dev \
     && apt-get clean
 
 # Copy the requirements file into the container
