@@ -26,7 +26,6 @@ COPY . /app/
 
 # Debug: Print the contents of the working directory for debugging
 RUN ls -la /app
-no
 # Make port 8000 available to the world outside this container
 EXPOSE 8000
 
