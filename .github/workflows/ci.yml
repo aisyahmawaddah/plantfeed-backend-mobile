@@ -8,42 +8,58 @@ on:
   workflow_dispatch:
 
 jobs:
-    test-django:
-      runs-on: ubuntu-latest
-      services:
-        mysql:
-          image: mysql:8.0
-          env:
-            MYSQL_ROOT_PASSWORD: ''
-            MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
-            MYSQL_DATABASE: newplantfeed2
-          ports:
-            - 3306:3306
-          options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-      steps:
-        - uses: actions/checkout@v4
-  
-        - name: Set up Python
-          uses: actions/setup-python@v5
-          with:
-            python-version: "3.11"
-  
-        - name: Install dependencies
-          run: pip install -r requirements.txt
-  
-        - name: Run Django tests
-          env:
-            DATABASE_NAME: 'newplantfeed2'
-            DATABASE_USER: 'root'
-            DATABASE_PASSWORD: ''
-            DATABASE_HOST: '127.0.0.1'
-            DATABASE_PORT: '3306'
-            STRIPE_SECRET_KEY: 'sk_test_dummy'
-            STRIPE_PUBLIC_KEY: 'pk_test_dummy'
-            STRIPE_WEBHOOK_SECRET: 'whsec_dummy'
-            CSRF_COOKIE_SECURE: 'False'
-            SESSION_COOKIE_SECURE: 'False'
-          run: python manage.py test --verbosity=2
+  test-django:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ''
+          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+          MYSQL_DATABASE: newplantfeed2
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Django tests
+        env:
+          DATABASE_NAME: 'newplantfeed2'
+          DATABASE_USER: 'root'
+          DATABASE_PASSWORD: ''
+          DATABASE_HOST: '127.0.0.1'
+          DATABASE_PORT: '3306'
+          STRIPE_SECRET_KEY: 'sk_test_dummy'
+          STRIPE_PUBLIC_KEY: 'pk_test_dummy'
+          STRIPE_WEBHOOK_SECRET: 'whsec_dummy'
+          CSRF_COOKIE_SECURE: 'False'
+          SESSION_COOKIE_SECURE: 'False'
+        run: python manage.py test --verbosity=2
+
+      - name: Notify Jira on failure
+        if: failure()
+        run: |
+          curl -s -X POST "${{ secrets.JIRA_BASE_URL }}/rest/api/2/issue/" \
+            -u "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "fields": {
+                "project": {"key": "${{ secrets.JIRA_PROJECT_KEY }}"},
+                "summary": "CI Failure (Django): ${{ github.repository }} on ${{ github.ref_name }} [${{ github.sha }}]",
+                "description": "Django pipeline failed.\n\nBranch: ${{ github.ref_name }}\nCommit: ${{ github.sha }}\nAuthor: ${{ github.actor }}\nRun: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                "issuetype": {"name": "Bug"},
+                "priority": {"name": "High"}
+              }
+            }'
 
   build-and-push-docker:
     runs-on: ubuntu-latest
@@ -57,6 +73,6 @@ jobs:
 
       - name: Build and push image
         run: |
-          IMAGE=registry.digitalocean.com/${{ secrets.DOCR_REGISTRY }}/${{ github.event.repository.name }}:${{ github.sha }}
+          IMAGE=registry.digitalocean.com/${{ secrets.DOCR_REGISTRY }}/plantfeed-backend:${{ github.sha }}
           docker build -t $IMAGE .
           docker push $IMAGE
