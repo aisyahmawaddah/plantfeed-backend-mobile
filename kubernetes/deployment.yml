@@ -26,6 +26,8 @@ spec:
           value: "127.0.0.1"
         - name: DATABASE_PORT
           value: "3306"
+        - name: ALLOWED_HOSTS
+          value: "plantfeed.xyz,www.plantfeed.xyz"
 ---
 apiVersion: v1
 kind: Service
