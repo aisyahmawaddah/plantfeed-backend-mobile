@@ -20,6 +20,7 @@ RUN cat /app/requirements.txt
 
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install django-cors-headers
 
 # Copy the rest of the application code into the container
 COPY . /app/
@@ -28,6 +29,8 @@ COPY . /app/
 RUN ls -la /app
 # Make port 8000 available to the world outside this container
 EXPOSE 8000
+
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
 # Define environment variable
 ENV DJANGO_SETTINGS_MODULE=plantfeed.settings

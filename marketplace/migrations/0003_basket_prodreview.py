@@ -10,6 +10,7 @@ class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('marketplace', '0002_prodproduct_restricted'),
+        ('basket', '__first__'),
     ]
 
     operations = [

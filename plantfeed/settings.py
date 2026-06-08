@@ -225,13 +225,15 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.ngrok-free.dev',
     'http://localhost:8001',
     'http://127.0.0.1:8001',
+    'http://plantfeed.xyz',
+    'https://plantfeed.xyz',
 ]
 
 ALLOWED_ORIGINS = CSRF_TRUSTED_ORIGINS.copy()
 
 # Cookies settings
-CSRF_COOKIE_SECURE = env('CSRF_COOKIE_SECURE')
-SESSION_COOKIE_SECURE = env('SESSION_COOKIE_SECURE')
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = False
 
 X_FRAME_OPTIONS = 'ALLOWALL'  # Allows all domains to embed your content
 

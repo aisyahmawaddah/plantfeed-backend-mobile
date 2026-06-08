@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plantfeed-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: plantfeed-backend
+  template:
+    metadata:
+      labels:
+        app: plantfeed-backend
+    spec:
+      containers:
+      - name: plantfeed-backend
+        image: registry.digitalocean.com/aisyahfyp-registry/plantlink-mobile:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DATABASE_NAME
+          value: "newplantfeed2"
+        - name: DATABASE_USER
+          value: "doadmin"
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: plantfeed-secrets
+              key: DATABASE_PASSWORD
+        - name: DATABASE_HOST
+          value: "aisyahfyp-plantfeeddb-do-user-37930688-0.j.db.ondigitalocean.com"
+        - name: DATABASE_PORT
+          value: "25060"
+        - name: ALLOWED_HOSTS
+          value: "plantfeed.xyz,www.plantfeed.xyz"
+        - name: STRIPE_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: plantfeed-secrets
+              key: STRIPE_SECRET_KEY
+        - name: STRIPE_PUBLIC_KEY
+          valueFrom:
+            secretKeyRef:
+              name: plantfeed-secrets
+              key: STRIPE_PUBLIC_KEY
+        - name: STRIPE_WEBHOOK_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: plantfeed-secrets
+              key: STRIPE_WEBHOOK_SECRET
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: plantfeed-backend
+spec:
+  selector:
+    app: plantfeed-backend
+  ports:
+  - port: 80
+    targetPort: 8000
+  type: LoadBalancer
