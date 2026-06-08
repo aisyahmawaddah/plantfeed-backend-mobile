@@ -21,13 +21,33 @@ spec:
         - name: DATABASE_NAME
           value: "newplantfeed2"
         - name: DATABASE_USER
-          value: "root"
+          value: "doadmin"
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: plantfeed-secrets
+              key: DATABASE_PASSWORD
         - name: DATABASE_HOST
-          value: "127.0.0.1"
+          value: "aisyahfyp-plantfeeddb-do-user-37930688-0.j.db.ondigitalocean.com"
         - name: DATABASE_PORT
-          value: "3306"
+          value: "25060"
         - name: ALLOWED_HOSTS
           value: "plantfeed.xyz,www.plantfeed.xyz"
+        - name: STRIPE_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: plantfeed-secrets
+              key: STRIPE_SECRET_KEY
+        - name: STRIPE_PUBLIC_KEY
+          valueFrom:
+            secretKeyRef:
+              name: plantfeed-secrets
+              key: STRIPE_PUBLIC_KEY
+        - name: STRIPE_WEBHOOK_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: plantfeed-secrets
+              key: STRIPE_WEBHOOK_SECRET
 ---
 apiVersion: v1
 kind: Service
