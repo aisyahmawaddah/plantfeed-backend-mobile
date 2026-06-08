@@ -20,6 +20,7 @@ RUN cat /app/requirements.txt
 
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install django-cors-headers
 
 # Copy the rest of the application code into the container
 COPY . /app/
