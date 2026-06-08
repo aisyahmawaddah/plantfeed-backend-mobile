@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plantfeed-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: plantfeed-backend
+  template:
+    metadata:
+      labels:
+        app: plantfeed-backend
+    spec:
+      containers:
+      - name: plantfeed-backend
+        image: registry.digitalocean.com/aisyahfyp-registry/plantlink-mobile:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DATABASE_NAME
+          value: "newplantfeed2"
+        - name: DATABASE_USER
+          value: "root"
+        - name: DATABASE_HOST
+          value: "127.0.0.1"
+        - name: DATABASE_PORT
+          value: "3306"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: plantfeed-backend
+spec:
+  selector:
+    app: plantfeed-backend
+  ports:
+  - port: 80
+    targetPort: 8000
+  type: LoadBalancer
