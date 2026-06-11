@@ -102,37 +102,37 @@ class GroupPlantTagging(models.Model):
     def deleteRecordIgrow(self):
         super().delete()
 
-# class GroupTimeline(models.Model):
-#     id = models.AutoField(primary_key=True)
-#     GroupTitle = models.CharField(max_length=100)
-#     GroupMessage = models.TextField()
-#     GroupSkill = models.CharField(max_length=100)
-#     GroupState = models.CharField(max_length=100)
-#     GroupPhoto = models.ImageField(upload_to='group_photos/', null=True, blank=True)
-#     GroupVideo = models.FileField(upload_to='group_videos/', null=True, blank=True)
-#     Groupcreated_at = models.DateTimeField(auto_now_add=True)
-#     CreatorFK_id = models.IntegerField()  # Assuming CreatorFK_id is an integer field
-#     GroupFK_id = models.IntegerField()  # Assuming GroupFK_id is an integer field
+class GroupTimeline(models.Model):
+    id = models.AutoField(primary_key=True)
+    GroupTitle = models.CharField(max_length=100)
+    GroupMessage = models.TextField()
+    GroupSkill = models.CharField(max_length=100)
+    GroupState = models.CharField(max_length=100)
+    GroupPhoto = models.ImageField(upload_to='group_photos/', null=True, blank=True)
+    GroupVideo = models.FileField(upload_to='group_videos/', null=True, blank=True)
+    Groupcreated_at = models.DateTimeField(auto_now_add=True)
+    CreatorFK_id = models.IntegerField()  # Assuming CreatorFK_id is an integer field
+    GroupFK_id = models.IntegerField()  # Assuming GroupFK_id is an integer field
 
-#     def __str__(self):
-#         return self.GroupTitle
+    def __str__(self):
+        return self.GroupTitle
 
-#     class Meta:
-#         db_table = 'grouptimeline'
+    class Meta:
+        db_table = 'grouptimeline'
 
-# class GroupTimelineComment(models.Model):
-#     id = models.AutoField(primary_key=True)
-#     GrpMessage = models.TextField()
-#     GrpPictures= GrpVideo = models.FileField(upload_to='group_comment_pictures/', null=True, blank=True)
-#     GrpVideo = models.FileField(upload_to='group_comment_videos/', null=True, blank=True)
-#     GrpCommenterFK_id = models.IntegerField()
-#     GrpFeedFK_id = models.IntegerField()
+class GroupTimelineComment(models.Model):
+    id = models.AutoField(primary_key=True)
+    GrpMessage = models.TextField()
+    GrpPictures= GrpVideo = models.FileField(upload_to='group_comment_pictures/', null=True, blank=True)
+    GrpVideo = models.FileField(upload_to='group_comment_videos/', null=True, blank=True)
+    GrpCommenterFK_id = models.IntegerField()
+    GrpFeedFK_id = models.IntegerField()
 
-#     def __str__(self):
-#         return f"Comment #{self.id} for Feed #{self.GrpFeedFK_id}"
+    def __str__(self):
+        return f"Comment #{self.id} for Feed #{self.GrpFeedFK_id}"
 
-#     class Meta:
-#         db_table = 'grouptimelinecomment'
+    class Meta:
+        db_table = 'grouptimelinecomment'
 
 
 class ReplyComment(models.Model):

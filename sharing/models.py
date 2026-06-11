@@ -35,75 +35,75 @@ class Feed(models.Model):
     def deleteRecordIgrow(self):
         super().delete()
 
-class GroupTimeline(models.Model):
-    class Meta:
-        db_table = 'grouptimeline'
-    GroupTitle = models.CharField(max_length=255)
-    GroupMessage = models.CharField(max_length=255)
-    GroupSkill = models.CharField(max_length=20,default="")
-    GroupState = models.CharField(max_length=100,default="")
-    GroupPhoto = models.ImageField(upload_to ='uploads/', blank=True,null=True, default="")
-    #GroupVideo = models.FileField(upload_to='uploads/', blank=True, null=True, default="")
-    Groupcreated_at = models.DateTimeField(default=datetime.now, blank=True)
-    GroupFK = models.ForeignKey(Group_tbl, on_delete=models.CASCADE)
-    CreatorFK = models.ForeignKey(Person, on_delete=models.CASCADE)
+# class GroupTimeline(models.Model):
+#     class Meta:
+#         db_table = 'grouptimeline'
+#     GroupTitle = models.CharField(max_length=255)
+#     GroupMessage = models.CharField(max_length=255)
+#     GroupSkill = models.CharField(max_length=20,default="")
+#     GroupState = models.CharField(max_length=100,default="")
+#     GroupPhoto = models.ImageField(upload_to ='uploads/', blank=True,null=True, default="")
+#     #GroupVideo = models.FileField(upload_to='uploads/', blank=True, null=True, default="")
+#     Groupcreated_at = models.DateTimeField(default=datetime.now, blank=True)
+#     GroupFK = models.ForeignKey(Group_tbl, on_delete=models.CASCADE)
+#     CreatorFK = models.ForeignKey(Person, on_delete=models.CASCADE)
 
 
-    def save(self):
-        super().save()
-        return self.id
+#     def save(self):
+#         super().save()
+#         return self.id
         
-    def deleteRecordIgrow(self):
-        super().delete()
+#     def deleteRecordIgrow(self):
+#         super().delete()
     
 
-class Comment(models.Model):
-    class Meta:
-        db_table = 'comment'    
-    Message = models.TextField()
-    Pictures = models.ImageField(upload_to='uploads/', null=True)
-    #Video = models.FileField(upload_to='uploads/', null=True)
-    Feed = models.ForeignKey(Feed, related_name="comments", on_delete=models.CASCADE)
-    Commenter = models.ForeignKey(Person, on_delete=models.CASCADE)
+# class Comment(models.Model):
+#     class Meta:
+#         db_table = 'comment'    
+#     Message = models.TextField()
+#     Pictures = models.ImageField(upload_to='uploads/', null=True)
+#     #Video = models.FileField(upload_to='uploads/', null=True)
+#     Feed = models.ForeignKey(Feed, related_name="comments", on_delete=models.CASCADE)
+#     Commenter = models.ForeignKey(Person, on_delete=models.CASCADE)
 
-    def save(self):
-        super().save()
-        return self.id
-
-        
-    def deleteRecordIgrow(self):
-        super().delete()
-
-class Likes(models.Model):
-    class Meta:
-        db_table = 'likes'    
-    #Like = models.IntegerField()
-    Feed = models.ForeignKey(Feed, related_name="likes", on_delete=models.CASCADE)
-    Liker = models.ForeignKey(Person, on_delete=models.CASCADE)
-
-    def save(self):
-        super().save()
-        return self.id
+#     def save(self):
+#         super().save()
+#         return self.id
 
         
-    def deleteRecordIgrow(self):
-        super().delete()
+#     def deleteRecordIgrow(self):
+#         super().delete()
 
-class GroupTimelineComment(models.Model):
-    class Meta:
-        db_table = 'grouptimelinecomment'    
-    GrpMessage = models.TextField()
-    GrpPictures = models.ImageField(upload_to='uploads/', null=True)
-    #GrpVideo = models.FileField(upload_to='uploads/', null=True)
-    GrpFeedFK = models.ForeignKey(GroupTimeline, related_name="groupcomments", on_delete=models.CASCADE)
-    GrpCommenterFK = models.ForeignKey(Person, on_delete=models.CASCADE)
+# class Likes(models.Model):
+#     class Meta:
+#         db_table = 'likes'    
+#     #Like = models.IntegerField()
+#     Feed = models.ForeignKey(Feed, related_name="likes", on_delete=models.CASCADE)
+#     Liker = models.ForeignKey(Person, on_delete=models.CASCADE)
 
-    def save(self):
-        super().save()
-        return self.id
+#     def save(self):
+#         super().save()
+#         return self.id
+
         
-    def deleteRecordIgrow(self):
-        super().delete()
+#     def deleteRecordIgrow(self):
+#         super().delete()
+
+# class GroupTimelineComment(models.Model):
+#     class Meta:
+#         db_table = 'grouptimelinecomment'    
+#     GrpMessage = models.TextField()
+#     GrpPictures = models.ImageField(upload_to='uploads/', null=True)
+#     #GrpVideo = models.FileField(upload_to='uploads/', null=True)
+#     GrpFeedFK = models.ForeignKey(GroupTimeline, related_name="groupcomments", on_delete=models.CASCADE)
+#     GrpCommenterFK = models.ForeignKey(Person, on_delete=models.CASCADE)
+
+#     def save(self):
+#         super().save()
+#         return self.id
+        
+#     def deleteRecordIgrow(self):
+#         super().delete()
 
 
 class FeedSoilTagging(models.Model):
