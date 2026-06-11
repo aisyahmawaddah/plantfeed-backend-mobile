@@ -29,7 +29,15 @@ def history(request):
         person = get_object_or_404(Person, id=user_id)
         
         # Get all baskets related to the user that are checked out
-        allBasket = Basket.objects.filter(Person_fk=person.id, is_checkout=True)
+        transaction_codes_with_orders = Order.objects.filter(
+            user=person
+        ).values_list('transaction_code', flat=True)
+        
+        allBasket = Basket.objects.filter(
+            Person_fk=person.id,
+            is_checkout=True,
+            transaction_code__in=transaction_codes_with_orders
+        )
 
         # Retrieve transaction codes from baskets
         transaction_codes = allBasket.values_list('transaction_code', flat=True).distinct()
