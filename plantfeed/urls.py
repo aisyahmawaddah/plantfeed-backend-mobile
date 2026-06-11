@@ -1,6 +1,6 @@
-from member import views
-from sharing import views
-from group import views
+# from member import views
+# from sharing import views
+# from group import views
 from django.contrib import admin
 from django.urls import include, path
 from django.conf import settings
@@ -17,7 +17,7 @@ urlpatterns = [
     path('marketplace/', include('marketplace.urls')),
     path('suggestion/', include('suggestion.urls')),
     path('basket/', include('basket.urls')),
-    path('api/', include('basket.urls')),
+    # path('api/', include('basket.urls')),
     path('topic/', include('topic.urls')),
     path('payment/', include('payment.urls')),
     path('orders/', include('orders.urls')),
