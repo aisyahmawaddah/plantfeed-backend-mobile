@@ -226,7 +226,7 @@ def delete_product(request, product_id):
 def get_product_reviews(request, product_id):
     try:
         reviews = prodReview.objects.filter(productid_id=product_id)
-        review_data = [{"review_text": r.review, "rating": r.rating} for r in reviews]
+        review_data = [{"review_text": r.content} for r in reviews]
         return Response(review_data, status=status.HTTP_200_OK)
 
     except Exception as e:
