@@ -51,7 +51,7 @@ class Person(models.Model):
 class MemberRequest(models.Model):
 
     class Meta:
-        db_table = 'MemberRequest'
+        db_table = 'memberrequest'
         # unique_together = [['to_user', 'from_user']]
     
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -121,13 +121,13 @@ class Message(models.Model):
 
 class SensorData(models.Model):
     class Meta:
-        db_table = 'SensorData'    
+        db_table = 'sensordata'    
     Detail = models.CharField(max_length=255)
     Name = models.CharField(max_length=150)
 
 class Plants(models.Model):
     class Meta:
-        db_table = 'Plants'
+        db_table = 'plants'
     Pictures = models.ImageField(upload_to='uploads/')
     Species = models.CharField(max_length=150)
     Types = models.CharField(max_length=150)
@@ -159,7 +159,7 @@ class Users(models.Model):
 class SoilTag(models.Model):
     
     class Meta:
-        db_table = 'SoilTag'  
+        db_table = 'soiltag'  
 
     SoilTagName = models.CharField(max_length=50, unique=True)
 
@@ -177,7 +177,7 @@ class SoilTag(models.Model):
 class PlantTag(models.Model):
     
     class Meta:
-        db_table = 'PlantTag'  
+        db_table = 'planttag'  
 
     PlantTagName = models.CharField(max_length=50, unique=True)
 

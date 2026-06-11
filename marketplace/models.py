@@ -13,7 +13,7 @@ from member.models import Person
     
 class prodProduct(models.Model):
     class Meta:
-        db_table = 'prodProduct'
+        db_table = 'prodproduct'
     productid = models.AutoField(primary_key=True)
     productName = models.CharField(max_length=255, blank=True)
     productDesc = models.CharField(max_length=1500,blank=True)

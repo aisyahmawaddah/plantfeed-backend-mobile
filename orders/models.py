@@ -16,7 +16,7 @@ class Order(models.Model):
     ]
     
     class Meta:
-        db_table = 'Order'
+        db_table = 'order'
     name = models.CharField(max_length=150)
     email = models.CharField(max_length=1000)
     address = models.CharField(max_length=1000)

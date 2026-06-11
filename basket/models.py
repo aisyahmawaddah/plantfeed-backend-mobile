@@ -22,7 +22,7 @@ class Basket(models.Model):
 class prodReview(models.Model):
     
     class Meta:
-        db_table = 'prodReview'
+        db_table = 'prodreview'
     content = models.CharField(max_length=1500,blank=True)
     restricted = models.BooleanField(default=False)
     date = models.DateTimeField(auto_now_add=True)

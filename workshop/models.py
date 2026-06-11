@@ -10,7 +10,7 @@ from member.models import Person, SoilTag, PlantTag
 
 class Workshop(models.Model):
     class Meta:
-        db_table = 'Workshop'
+        db_table = 'workshop'
     ProgrammeName = models.CharField(max_length=150,default="")
     Speaker=models.CharField(max_length=150, default="")
     Description=models.CharField(max_length=150,default="")
@@ -38,7 +38,7 @@ class Workshop(models.Model):
    
 class WorkshopSharing(models.Model):
     class Meta:
-        db_table = 'WorkshopSharing'
+        db_table = 'workshopsharing'
     Title = models.CharField(max_length=255)
     Message = models.CharField(max_length=255)
     #Skill = models.CharField(max_length=20,default="")
@@ -65,7 +65,7 @@ class WorkshopSharing(models.Model):
 
 class Booking(models.Model):
     class Meta:
-        db_table = 'Booking'
+        db_table = 'booking'
     # Name = models.CharField(max_length=150)
     ProgrammeName = models.CharField(max_length=150,default="")
     Date = models.DateField()

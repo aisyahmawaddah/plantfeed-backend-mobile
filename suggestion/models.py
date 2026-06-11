@@ -3,7 +3,7 @@ from datetime import datetime
 
 class ChatBot(models.Model):
     class Meta:
-        db_table = 'Chatbot'
+        db_table = 'chatbot'
     Question = models.CharField(max_length=255)
     Answer = models.CharField(max_length=255)
     created_at = models.DateTimeField(default=datetime.now, blank=True)

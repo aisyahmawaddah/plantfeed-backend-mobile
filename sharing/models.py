@@ -13,7 +13,7 @@ from django.utils import timezone ##tambah
 
 class Feed(models.Model):
     class Meta:
-        db_table = 'Feed'
+        db_table = 'feed'
     Title = models.CharField(max_length=255)
     Message = models.CharField(max_length=255)
     Skill = models.CharField(max_length=20,default="")
@@ -37,7 +37,7 @@ class Feed(models.Model):
 
 class GroupTimeline(models.Model):
     class Meta:
-        db_table = 'GroupTimeline'
+        db_table = 'grouptimeline'
     GroupTitle = models.CharField(max_length=255)
     GroupMessage = models.CharField(max_length=255)
     GroupSkill = models.CharField(max_length=20,default="")
@@ -59,7 +59,7 @@ class GroupTimeline(models.Model):
 
 class Comment(models.Model):
     class Meta:
-        db_table = 'Comment'    
+        db_table = 'comment'    
     Message = models.TextField()
     Pictures = models.ImageField(upload_to='uploads/', null=True)
     #Video = models.FileField(upload_to='uploads/', null=True)
@@ -76,7 +76,7 @@ class Comment(models.Model):
 
 class Likes(models.Model):
     class Meta:
-        db_table = 'Likes'    
+        db_table = 'likes'    
     #Like = models.IntegerField()
     Feed = models.ForeignKey(Feed, related_name="likes", on_delete=models.CASCADE)
     Liker = models.ForeignKey(Person, on_delete=models.CASCADE)
@@ -91,7 +91,7 @@ class Likes(models.Model):
 
 class GroupTimelineComment(models.Model):
     class Meta:
-        db_table = 'GroupTimelineComment'    
+        db_table = 'grouptimelinecomment'    
     GrpMessage = models.TextField()
     GrpPictures = models.ImageField(upload_to='uploads/', null=True)
     #GrpVideo = models.FileField(upload_to='uploads/', null=True)
