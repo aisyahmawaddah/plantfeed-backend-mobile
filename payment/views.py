@@ -53,7 +53,7 @@ def checkoutSession(request):
         person = Person.objects.get(Email=request.session['Email'])
         selected_product_ids = request.POST.getlist('selected_products')
         selected_products = Basket.objects.filter(id__in=selected_product_ids)
-        YOUR_DOMAIN = "http://127.0.0.1:8000/payment"     
+        YOUR_DOMAIN = "http://plantfeed.xyz/payment"    
 
         line_items = []
 
@@ -112,12 +112,11 @@ def pay(request):
 
     for bas in selected_products:
         prod = get_object_or_404(prodProduct, productid=bas.productid.productid)
+        if prod.productStock < bas.productqty:  
+            return HttpResponse('Stock is not enough')
         prod.productStock -= bas.productqty
         prod.productSold += bas.productqty
-        if prod.productStock < 0:
-            return HttpResponse('Stock is not enough', content_type='application/json')
-        else:
-            prod.save()
+        prod.save()
 
         # Calculate subtotal for the product
         subtotal = (bas.productid.productPrice * bas.productqty)
@@ -141,12 +140,18 @@ def pay(request):
         address_parts.append(session.customer_details.address.line1)
     if session.customer_details.address.line2:
         address_parts.append(session.customer_details.address.line2)
+    if session.customer_details.address.line1:
+        address_parts.append(session.customer_details.address.line1)
+    if session.customer_details.address.line2:
+        address_parts.append(session.customer_details.address.line2)
     if session.customer_details.address.city:
-        address_parts.append(session.customer_details.address.postal_code)
+        address_parts.append(session.customer_details.address.city)       
     if session.customer_details.address.state:
-        address_parts.append(session.customer_details.address.city)
+        address_parts.append(session.customer_details.address.state)      
     if session.customer_details.address.postal_code:
-        address_parts.append(session.customer_details.address.state)
+        address_parts.append(session.customer_details.address.postal_code) 
+    if session.customer_details.address.country:
+        address_parts.append(session.customer_details.address.country)
     if session.customer_details.address.country:
         address_parts.append(session.customer_details.address.country)
 
