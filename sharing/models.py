@@ -6,7 +6,8 @@ from django.contrib.syndication.views import Feed
 from datetime import datetime
 from group.models import Group_tbl
 from member.models import Person, SoilTag, PlantTag
-from django.utils import timezone ##tambah
+from django.utils import timezone
+from group.models import GroupTimeline
 
 # Create your models here.
 
