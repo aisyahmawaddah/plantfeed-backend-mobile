@@ -192,6 +192,11 @@ def complete_order(request, basket_id, user_id):
 
     # 3) Fetch the associated Order using the transaction_code from the basket
     order = get_object_or_404(Order, transaction_code=basket.transaction_code)
+    
+    if order.status.lower() in ('cancel', 'partial cancel'):
+        return Response({'message': 'Cannot complete a cancelled order.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    seller_id = basket.productid.Person_fk.id
 
     # 4) Identify the "seller" (assuming prodProduct has Person_fk or similar)
     seller_id = basket.productid.Person_fk.id  # The product's seller
@@ -210,7 +215,7 @@ def complete_order(request, basket_id, user_id):
     #    or if some remain active with other sellers
     not_received_yet = Basket.objects.filter(
         transaction_code=basket.transaction_code
-    ).exclude(status="Order Received")
+    ).exclude(status__in=["Order Received", "Cancel"])
 
     if not not_received_yet.exists():
         # All baskets are received => set the order to 'Order Received'
