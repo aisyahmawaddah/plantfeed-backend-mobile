@@ -55,7 +55,7 @@ def create_checkout_session(request):
                 'quantity': product.productqty,
             })
 
-        YOUR_DOMAIN = "http://your-live-domain.com"  # Replace with your actual domain
+        YOUR_DOMAIN = "http://plantfeed.xyz" # Replace with your actual domain
 
         # Create the Stripe checkout session with shipping address collection
         checkout_session = stripe.checkout.Session.create(
@@ -96,7 +96,8 @@ def process_payment(request):
         session = stripe.checkout.Session.retrieve(session_id)
 
         # Extract metadata and user email
-        selected_product_ids = session.metadata.get('selected_product_ids', '').split(',')
+        metadata = dict(session.metadata) if session.metadata else {}
+        selected_product_ids = metadata.get('selected_product_ids', '').split(',')
         person = Person.objects.get(Email=session.customer_email)
 
         # Generate transaction code
@@ -104,8 +105,14 @@ def process_payment(request):
         order_status = "Payment Made"
 
         # Retrieve the shipping details from the metadata
-        shipping_details = json.loads(session.metadata.get('shipping_details', '{}'))
-        address = shipping_details.get('address', '')
+        # shipping_details = json.loads(session.metadata.get('shipping_details', '{}'))
+        address_parts = []
+        if session.customer_details and session.customer_details.address:
+            addr = session.customer_details.address
+            for part in [addr.line1, addr.line2, addr.city, addr.state, addr.postal_code, addr.country]:
+                if part:
+                    address_parts.append(part)
+        address = ", ".join(address_parts)
 
         # Update the database for the selected products
         selected_products = Basket.objects.filter(id__in=selected_product_ids)
@@ -118,11 +125,11 @@ def process_payment(request):
 
             # Update product stock and sold count
             product_obj = get_object_or_404(prodProduct, productid=product.productid)
+            if product_obj.productStock < bas.productqty:
+                return Response({'error': 'Insufficient stock'}, status=status.HTTP_400_BAD_REQUEST)
+            
             product_obj.productStock -= bas.productqty
             product_obj.productSold += bas.productqty
-
-            if product_obj.productStock < 0:
-                return Response({'error': 'Insufficient stock'}, status=status.HTTP_400_BAD_REQUEST)
 
             product_obj.save()
 
@@ -156,7 +163,7 @@ def process_payment(request):
             status=order_status,
             user=person,
             address=address,
-            shipping=shipping_cost  # Store total shipping
+            shipping=str(shipping_cost),  # Store total shipping
         )
 
         # Create OrderItem entry for each product in the order
