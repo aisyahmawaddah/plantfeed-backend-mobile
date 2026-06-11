@@ -180,8 +180,9 @@ def process_payment(request):
     except Person.DoesNotExist:
         return Response({'error': 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+        import traceback
+        tb = traceback.format_exc()
+        return Response({'error': str(e), 'trace': tb}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
     
