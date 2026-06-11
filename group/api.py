@@ -22,7 +22,7 @@ from group.serializers import GroupSerializer
 class GroupList(APIView):
     permission_classes =[AllowAny]
     def get(self, request):
-        groups = Group_tbl.objects
+        groups = Group_tbl.objects.all()
         serializer = GroupSerializer(groups, many=True)
         return Response(serializer.data, status =status.HTTP_200_OK)
 
