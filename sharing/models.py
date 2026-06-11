@@ -58,37 +58,37 @@ class Feed(models.Model):
 #         super().delete()
     
 
-# class Comment(models.Model):
-#     class Meta:
-#         db_table = 'comment'    
-#     Message = models.TextField()
-#     Pictures = models.ImageField(upload_to='uploads/', null=True)
-#     #Video = models.FileField(upload_to='uploads/', null=True)
-#     Feed = models.ForeignKey(Feed, related_name="comments", on_delete=models.CASCADE)
-#     Commenter = models.ForeignKey(Person, on_delete=models.CASCADE)
+class Comment(models.Model):
+    class Meta:
+        db_table = 'comment'    
+    Message = models.TextField()
+    Pictures = models.ImageField(upload_to='uploads/', null=True)
+    #Video = models.FileField(upload_to='uploads/', null=True)
+    Feed = models.ForeignKey(Feed, related_name="comments", on_delete=models.CASCADE)
+    Commenter = models.ForeignKey(Person, on_delete=models.CASCADE)
 
-#     def save(self):
-#         super().save()
-#         return self.id
-
-        
-#     def deleteRecordIgrow(self):
-#         super().delete()
-
-# class Likes(models.Model):
-#     class Meta:
-#         db_table = 'likes'    
-#     #Like = models.IntegerField()
-#     Feed = models.ForeignKey(Feed, related_name="likes", on_delete=models.CASCADE)
-#     Liker = models.ForeignKey(Person, on_delete=models.CASCADE)
-
-#     def save(self):
-#         super().save()
-#         return self.id
+    def save(self):
+        super().save()
+        return self.id
 
         
-#     def deleteRecordIgrow(self):
-#         super().delete()
+    def deleteRecordIgrow(self):
+        super().delete()
+
+class Likes(models.Model):
+    class Meta:
+        db_table = 'likes'    
+    #Like = models.IntegerField()
+    Feed = models.ForeignKey(Feed, related_name="likes", on_delete=models.CASCADE)
+    Liker = models.ForeignKey(Person, on_delete=models.CASCADE)
+
+    def save(self):
+        super().save()
+        return self.id
+
+        
+    def deleteRecordIgrow(self):
+        super().delete()
 
 # class GroupTimelineComment(models.Model):
 #     class Meta:
