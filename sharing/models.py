@@ -8,6 +8,7 @@ from group.models import Group_tbl
 from member.models import Person, SoilTag, PlantTag
 from django.utils import timezone
 from group.models import GroupTimeline, GroupTimelineComment
+from sharing.models import Feed
 
 # Create your models here.
 
