@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Person, Feed
+from .models import Person
+from sharing.models import Feed
 from rest_framework.exceptions import NotAuthenticated
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.authtoken.models import Token
