@@ -96,7 +96,7 @@ def process_payment(request):
         session = stripe.checkout.Session.retrieve(session_id)
 
         # Extract metadata and user email
-        metadata = dict(session.metadata) if session.metadata else {}
+        metadata = dict(session.metadata.items()) if session.metadata else {}
         selected_product_ids = metadata.get('selected_product_ids', '').split(',')
         person = Person.objects.get(Email=session.customer_email)
 
