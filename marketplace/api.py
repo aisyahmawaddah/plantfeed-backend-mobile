@@ -18,7 +18,10 @@ from django.conf import settings
 # Endpoint for Marketplace
 @api_view(['GET'])
 def list_products(request):
+    user_id = request.GET.get('user_id')
     products = prodProduct.objects.all()
+    if user_id:
+        products = products.exclude(Person_fk__id=user_id)
     serializer = ProductSerializer(products, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
