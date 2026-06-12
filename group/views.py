@@ -106,7 +106,7 @@ def viewGroup(request,pk):
     try:
         user=Person.objects.get(Email=request.session['Email'])
         group = Group_tbl.objects.get(id=pk)
-        groupSharing = GroupTimeline.objects.filter(GroupFK=group)
+        groupSharing = GroupTimeline.objects.filter(GroupFK_id=group.id)
         chartSharing = pl_graph_sharing.objects.filter(Group_fk=group)
         groupComment = GroupTimelineComment.objects.all()
         groupMembership=GroupMembership.objects.filter(GroupName=group)
