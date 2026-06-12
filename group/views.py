@@ -33,6 +33,7 @@ from datetime import datetime
 from django.http import HttpResponse
 import requests
 from urllib.parse import urljoin
+from .models import Group_tbl, GroupMembership, GroupPlantTagging, GroupSoilTagging, pl_graph_sharing, pl_graph_api, ReplyComment, PlGraphSharingComment
 
 #group
 def mainGroup(request):
@@ -103,17 +104,43 @@ def myGroup(request):
     except Group_tbl.DoesNotExist:
         raise Http404('Data does not exist')
 
-def viewGroup(request,pk):
+def viewGroup(request, pk):
     try:
-        user=Person.objects.get(Email=request.session['Email'])
+        user = Person.objects.get(Email=request.session['Email'])
         group = Group_tbl.objects.get(id=pk)
         groupSharing = GroupTimeline.objects.filter(GroupFK_id=group.id)
         chartSharing = pl_graph_sharing.objects.filter(Group_fk=group)
         groupComment = GroupTimelineComment.objects.all()
-        groupMembership=GroupMembership.objects.filter(GroupName=group)
-        memberList = Memberlist.objects.all().filter(to_person=user,from_person=user)
-        #memberList2 = Memberlist.objects.all().filter(to_person=user)
-        return render(request,'ViewGroup.html',{'group':group,'groupMembership':groupMembership, 'memberList':memberList, 'groupSharing':groupSharing, 'user':user, 'groupComment':groupComment, 'chartSharing':chartSharing})
+        chartComments = PlGraphSharingComment.objects.all()
+        groupMembership = GroupMembership.objects.filter(GroupName=group)
+        memberList = Memberlist.objects.all().filter(to_person=user, from_person=user)
+
+        combined_feed = []
+        for post in groupSharing:
+            combined_feed.append({'type': 'post', 'obj': post, 'date': post.Groupcreated_at})
+        for chart in chartSharing:
+            combined_feed.append({'type': 'chart', 'obj': chart, 'date': chart.created_at})
+
+        def sort_key(item):
+            from django.utils import timezone as tz
+            d = item['date']
+            if d is None:
+                return tz.datetime.min.replace(tzinfo=tz.utc)
+            return d
+
+        combined_feed.sort(key=sort_key, reverse=True)
+
+        return render(request, 'ViewGroup.html', {
+            'group': group,
+            'groupMembership': groupMembership,
+            'memberList': memberList,
+            'combined_feed': combined_feed,
+            'user': user,
+            'groupComment': groupComment,
+            'chartComments': chartComments,
+            'chartSharing': chartSharing,
+            'groupSharing': groupSharing,
+        })
     except Group_tbl.DoesNotExist:
         raise Http404('Data does not exist')
 
@@ -340,6 +367,8 @@ def PLSharing(request, pk):
             
             plGraph.link = graph.embed_link
             plGraph.chart_type = graph.chart_type
+            plGraph.start_date = graph.start_date
+            plGraph.end_date = graph.end_date
             plGraph.Group_fk = group
             plGraph.Person_fk = user
             
@@ -373,6 +402,9 @@ def PLSharingAPI(request, group_id):
                 "chart_type": r.chart_type,
                 "user_id": r.Person_fk.id,
                 "username": r.Person_fk.Username,
+                "start_date": r.start_date.isoformat() if r.start_date else None,
+                "end_date": r.end_date.isoformat() if r.end_date else None,
+                "created_at": r.created_at.isoformat() if r.created_at else None,
             }
             for r in records
         ]
@@ -403,15 +435,21 @@ def PLSharingAPI(request, group_id):
             chart = get_object_or_404(pl_graph_api, id=chart_id)
             link = chart.embed_link
             chart_type = chart.chart_type
+            start_date = chart.start_date
+            end_date = chart.end_date
         else:
             link = body.get('link') or body.get('custom_link', '')
             chart_type = body.get('chart_type')
+            start_date = None
+            end_date = None
 
         record = pl_graph_sharing(
             title=title,
             description=description,
             link=link,
             chart_type=chart_type,
+            start_date=start_date,
+            end_date=end_date,
             Group_fk=group,
             Person_fk=user,
         )
@@ -697,4 +735,53 @@ def proxy_view(request):
     except requests.exceptions.RequestException as e:
         return HttpResponse(f"Error fetching content: {e}", status=500)
 
+def PLChartSharingComment(request, pk):
+    user = Person.objects.get(Email=request.session['Email'])
+    chart_sharing = get_object_or_404(pl_graph_sharing, id=pk)
+    if request.method == 'POST':
+        message = request.POST.get('Message', '').strip()
+        picture = request.FILES.get('Pictures', None)
+        if message:
+            PlGraphSharingComment(
+                message=message,
+                pictures=picture,
+                chart_sharing_fk=chart_sharing,
+                commenter_fk=user,
+            ).save()
+    return redirect('group:ViewGroup', chart_sharing.Group_fk.id)
+
+
+@csrf_exempt
+def PLChartSharingCommentAPI(request, chart_sharing_id):
+    chart_sharing = get_object_or_404(pl_graph_sharing, id=chart_sharing_id)
+
+    if request.method == 'GET':
+        comments = PlGraphSharingComment.objects.filter(chart_sharing_fk=chart_sharing).order_by('created_at')
+        data = [
+            {
+                'id': c.id,
+                'message': c.message,
+                'commenter_name': c.commenter_fk.Name,
+                'commenter_username': c.commenter_fk.Username,
+                'commenter_photo': c.commenter_fk.Photo.url if c.commenter_fk.Photo else '',
+                'created_at': c.created_at.isoformat(),
+            }
+            for c in comments
+        ]
+        return JsonResponse(data, safe=False, status=200)
+
+    elif request.method == 'POST':
+        try:
+            body = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        user_id = body.get('user_id')
+        message = body.get('message', '').strip()
+        if not user_id or not message:
+            return JsonResponse({'error': 'user_id and message are required'}, status=400)
+        user = get_object_or_404(Person, id=user_id)
+        PlGraphSharingComment(message=message, chart_sharing_fk=chart_sharing, commenter_fk=user).save()
+        return JsonResponse({'success': 'Comment added'}, status=201)
+
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
 
