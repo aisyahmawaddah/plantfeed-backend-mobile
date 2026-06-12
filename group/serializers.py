@@ -107,7 +107,7 @@ class GroupTimelineCommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GroupTimelineComment
-        fields = ['id', 'GrpMessage', 'GrpVideo', 'GrpCommenterFK_id', 'GrpFeedFK_id', 'GrpPictures','commenter_name', 'commenter_photo', 'commenter_username']
+        fields = ['id', 'GrpMessage', 'GrpCommenterFK_id', 'GrpFeedFK_id', 'GrpPictures', 'commenter_name', 'commenter_photo', 'commenter_username']
 
     def get_commenter_name(self, obj):
         commenter = Person.objects.get(id=obj.GrpCommenterFK_id)
