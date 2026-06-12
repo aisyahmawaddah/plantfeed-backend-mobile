@@ -516,7 +516,7 @@ def AddGroupSharing(request, pk):
     
     user=Person.objects.get(Email=request.session['Email'])
     group = Group_tbl.objects.get(id=pk)
-    groupSharing = GroupTimeline.objects.filter(GroupFK_id=group)
+    groupSharing = GroupTimeline.objects.filter(GroupFK=group)
     
     groupMembership=GroupMembership.objects.filter(GroupName=group)
     memberList = Memberlist.objects.all().filter(to_person=user,from_person=user)
