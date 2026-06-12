@@ -124,7 +124,6 @@ class GroupTimelineComment(models.Model):
     id = models.AutoField(primary_key=True)
     GrpMessage = models.TextField()
     GrpPictures = models.FileField(upload_to='group_comment_pictures/', null=True, blank=True)
-    GrpVideo = models.FileField(upload_to='group_comment_videos/', null=True, blank=True)
     GrpCommenterFK_id = models.IntegerField()
     GrpFeedFK_id = models.IntegerField()
 
