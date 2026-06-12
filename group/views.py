@@ -24,7 +24,8 @@ from rest_framework.generics import RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import generics, permissions
-from sharing.models import GFeedPlantTagging, GFeedSoilTagging, GroupTimeline, GroupTimelineComment, FeedPlantTagging, FeedSoilTagging
+from sharing.models import GFeedPlantTagging, GFeedSoilTagging, FeedPlantTagging, FeedSoilTagging
+from group.models import GroupTimeline, GroupTimelineComment
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
