@@ -398,20 +398,22 @@ def PLSharingAPI(request, group_id):
     if request.method == 'GET':
         records = pl_graph_sharing.objects.filter(Group_fk=group).order_by('-id')
         data = [
-            {
-                "id": r.id,
-                "title": r.title,
-                "description": r.description,
-                "link": r.link,
-                "chart_type": r.chart_type,
-                "user_id": r.Person_fk.id,
-                "username": r.Person_fk.Username,
-                "start_date": r.start_date.isoformat() if r.start_date else None,
-                "end_date": r.end_date.isoformat() if r.end_date else None,
-                "created_at": r.created_at.isoformat() if r.created_at else None,
-            }
-            for r in records
-        ]
+    {
+        "id": r.id,
+        "title": r.title,
+        "description": r.description,
+        "link": r.link,
+        "chart_type": r.chart_type,
+        "user_id": r.Person_fk.id,
+        "username": r.Person_fk.Username,
+        "name": r.Person_fk.Name,
+        "photo": r.Person_fk.Photo.url if r.Person_fk.Photo else '',
+        "start_date": r.start_date.isoformat() if r.start_date else None,
+        "end_date": r.end_date.isoformat() if r.end_date else None,
+        "created_at": r.created_at.isoformat() if r.created_at else None,
+    }
+    for r in records
+]
         return JsonResponse(data, safe=False, status=200)
 
     elif request.method == 'POST':
