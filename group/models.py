@@ -51,12 +51,28 @@ class pl_graph_sharing(models.Model):
     description = models.CharField(max_length=1500)
     link = models.CharField(max_length=255)
     chart_type = models.CharField(max_length=255, null=True)
+    start_date = models.DateTimeField(null=True, blank=True)
+    end_date = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
     Group_fk = models.ForeignKey(Group_tbl, on_delete=models.CASCADE)
     Person_fk = models.ForeignKey(Person, on_delete=models.CASCADE)
     
     def save(self):
         super().save()
 
+class PlGraphSharingComment(models.Model):
+    message = models.CharField(max_length=1500)
+    pictures = models.ImageField(upload_to='chart_comment_pictures/', null=True, blank=True)
+    chart_sharing_fk = models.ForeignKey(pl_graph_sharing, on_delete=models.CASCADE)
+    commenter_fk = models.ForeignKey(Person, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self):
+        super().save()
+
+    class Meta:
+        db_table = 'plgraphsharingcomment'
+        
 class GroupMembership(models.Model):
     
     GroupName = models.ForeignKey(Group_tbl, on_delete=models.CASCADE)
