@@ -53,6 +53,8 @@ urlpatterns = [
     path('PlantLink-Graph-API', views.PLGraphAPI, name="PlantLink-Graph-API"),
     path('pl-sharing-api/<int:group_id>/', views.PLSharingAPI, name='pl-sharing-api'),
     path('proxy/', proxy_view, name='proxy'),
+    path('PLChartComment/<str:pk>', views.PLChartSharingComment, name='PL-Chart-Comment'),
+    path('pl-chart-comment-api/<int:chart_sharing_id>/', views.PLChartSharingCommentAPI, name='pl-chart-comment-api'),
  
 
 ] + static(settings.MEDIA_URL, document_root= settings.MEDIA_ROOT)
