@@ -140,18 +140,90 @@
           <br/>
         </div>
        
-        <div class="col-md-6">
-            <label for="inputSoil" class="form-label">Chart : </label><br>
-            {% for chart in charts %}
-                <input type="radio" name="chart" value="{{ chart.id }}" id="{{ chart.id }}" onchange="toggleCustomLink()">
-                <label for="{{ chart.id }}">&ensp;{{ chart.name }}</label><br>
-            {% endfor %}
+                <div class="col-12">
+          <div class="d-flex align-items-center mb-2">
+            <label class="form-label mb-0 mr-3"><strong>Chart :</strong></label>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="sortBtn" onclick="toggleSort()">
+              &#8595; Newest First
+            </button>
+          </div>
+
+          <label class="form-label"><strong>Sensor Charts</strong></label>
+          <table class="table table-bordered table-hover table-sm" id="sensorTable">
+            <thead class="thead-light">
+              <tr>
+                <th style="width:40px;">Select</th>
+                <th>Chart Name</th>
+                <th>Date Range</th>
+                <th>Type</th>
+              </tr>
+            </thead>
+            <tbody id="sensorBody">
+              {% for chart in charts %}
+              {% if chart.chart_type != "Channel" %}
+              <tr data-id="{{ chart.id }}">
+                <td class="text-center">
+                  <input type="radio" name="chart" value="{{ chart.id }}" id="chart_{{ chart.id }}" onchange="toggleCustomLink()">
+                </td>
+                <td><label for="chart_{{ chart.id }}" class="mb-0" style="cursor:pointer;">{{ chart.name }}</label></td>
+                <td>
+                  {% if chart.start_date|date:"Y" == "2000" and chart.end_date|date:"Y" == "2099" %}
+                    <span class="badge badge-success">Live</span>
+                  {% elif chart.start_date and chart.end_date %}
+                    {{ chart.start_date|date:"d M Y" }} – {{ chart.end_date|date:"d M Y" }}
+                  {% else %}
+                    <span class="text-muted">—</span>
+                  {% endif %}
+                </td>
+                <td><span class="badge badge-secondary">{{ chart.chart_type }}</span></td>
+              </tr>
+              {% endif %}
+              {% endfor %}
+            </tbody>
+          </table>
+
+          <label class="form-label mt-3"><strong>Channel Charts</strong></label>
+          <table class="table table-bordered table-hover table-sm" id="channelTable">
+            <thead class="thead-light">
+              <tr>
+                <th style="width:40px;">Select</th>
+                <th>Chart Name</th>
+                <th>Date Range</th>
+                <th>Type</th>
+              </tr>
+            </thead>
+            <tbody id="channelBody">
+              {% for chart in charts %}
+              {% if chart.chart_type == "Channel" %}
+              <tr data-id="{{ chart.id }}">
+                <td class="text-center">
+                  <input type="radio" name="chart" value="{{ chart.id }}" id="chart_{{ chart.id }}" onchange="toggleCustomLink()">
+                </td>
+                <td><label for="chart_{{ chart.id }}" class="mb-0" style="cursor:pointer;">{{ chart.name }}</label></td>
+                <td>
+                  {% if chart.start_date|date:"Y" == "2000" and chart.end_date|date:"Y" == "2099" %}
+                    <span class="badge badge-success">Live</span>
+                  {% elif chart.start_date and chart.end_date %}
+                    {{ chart.start_date|date:"d M Y" }} – {{ chart.end_date|date:"d M Y" }}
+                  {% else %}
+                    <span class="text-muted">—</span>
+                  {% endif %}
+                </td>
+                <td><span class="badge badge-info">Channel</span></td>
+              </tr>
+              {% endif %}
+              {% endfor %}
+            </tbody>
+          </table>
+
+          <div class="mt-2">
             <input type="radio" name="chart" value="Others" id="chart-others" onchange="toggleCustomLink()">
-            <label for="chart-others">&ensp;Others</label><br>
-            <div class="col-12" id="customLinkField" style="display: none;">
-                <input type="text" id="customLink" name="customLink">
+            <label for="chart-others">&ensp;Others (Custom Link)</label>
+            <div id="customLinkField" style="display:none;" class="mt-2">
+              <input type="text" class="form-control" id="customLink" name="customLink" placeholder="Enter embed link...">
             </div>
-            <br />
+          </div>
+          <br />
         </div>
         <br />
         <div class="col-12">
@@ -167,24 +239,39 @@
 {% endblock %}
 
 <script>
-    function toggleCustomLink() {
-        var othersRadio = document.getElementById('chart-others');
-        var customLinkField = document.getElementById('customLinkField');
-        if (othersRadio.checked) {
-            customLinkField.style.display = 'block';
-        } else {
-            customLinkField.style.display = 'none';
-        }
-    }
+  var sortAsc = false;
 
-    // Ensure that the custom link field is hidden when the page loads
-    document.addEventListener('DOMContentLoaded', function () {
-        toggleCustomLink();
+  function toggleSort() {
+    sortAsc = !sortAsc;
+    document.getElementById('sortBtn').innerHTML = sortAsc ? '&#8593; Oldest First' : '&#8595; Newest First';
+    sortTable('sensorBody');
+    sortTable('channelBody');
+  }
+
+  function sortTable(tbodyId) {
+    var tbody = document.getElementById(tbodyId);
+    var rows = Array.from(tbody.querySelectorAll('tr'));
+    rows.sort(function(a, b) {
+      var idA = parseInt(a.getAttribute('data-id'));
+      var idB = parseInt(b.getAttribute('data-id'));
+      return sortAsc ? idA - idB : idB - idA;
     });
+    rows.forEach(function(row) { tbody.appendChild(row); });
+  }
 
-    function goBack() {
-        window.history.back();
-    }
+  function toggleCustomLink() {
+    var othersRadio = document.getElementById('chart-others');
+    var customLinkField = document.getElementById('customLinkField');
+    customLinkField.style.display = othersRadio.checked ? 'block' : 'none';
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    toggleCustomLink();
+  });
+
+  function goBack() {
+    window.history.back();
+  }
 </script>
 
 </html>
