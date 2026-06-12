@@ -169,7 +169,7 @@
         <div>
           <div class="font-weight-bold small">{{ item.obj.Person_fk.Username }}</div>
           {% if item.obj.created_at %}
-          <div class="text-muted" style="font-size:11px;">{{ item.obj.created_at }}</div>
+          <div class="text-muted" style="font-size:11px;">{% if item.obj.created_at %}{{ item.obj.created_at }}{% else %}—{% endif %}</div>
           {% endif %}
         </div>
         <span class="badge badge-success ml-auto">PlantLink Chart</span>

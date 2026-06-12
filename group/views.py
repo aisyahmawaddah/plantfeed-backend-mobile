@@ -119,7 +119,11 @@ def viewGroup(request, pk):
         for post in groupSharing:
             combined_feed.append({'type': 'post', 'obj': post, 'date': post.Groupcreated_at})
         for chart in chartSharing:
-            combined_feed.append({'type': 'chart', 'obj': chart, 'date': chart.created_at})
+            combined_feed.append({
+                'type': 'chart',
+                'obj': chart,
+                'date': chart.created_at if chart.created_at else datetime.min.replace(tzinfo=timezone.utc),
+            })
 
         def sort_key(item):
             from django.utils import timezone as tz
@@ -516,7 +520,7 @@ def AddGroupSharing(request, pk):
     
     user=Person.objects.get(Email=request.session['Email'])
     group = Group_tbl.objects.get(id=pk)
-    groupSharing = GroupTimeline.objects.filter(GroupFK=group)
+    groupSharing = GroupTimeline.objects.filter(GroupFK_id=group.id)
     
     groupMembership=GroupMembership.objects.filter(GroupName=group)
     memberList = Memberlist.objects.all().filter(to_person=user,from_person=user)
