@@ -104,15 +104,10 @@ def process_payment(request):
         transaction_code = 'TRANS#' + str(timezone.now())
         order_status = "Payment Made"
 
-        # Retrieve the shipping details from the metadata
-        # shipping_details = json.loads(session.metadata.get('shipping_details', '{}'))
-        address_parts = []
-        if session.customer_details and session.customer_details.address:
-            addr = session.customer_details.address
-            for part in [addr.line1, addr.line2, addr.city, addr.state, addr.postal_code, addr.country]:
-                if part:
-                    address_parts.append(part)
-        address = ", ".join(address_parts)
+        # Retrieve the shipping details submitted via the in-app checkout form
+        shipping_details = json.loads(session.metadata.get('shipping_details', '{}')) if session.metadata else {}
+        address = shipping_details.get('address', '')
+        customer_name = shipping_details.get('name') or person.Name
 
         # Update the database for the selected products
         selected_products = Basket.objects.filter(id__in=selected_product_ids)
@@ -156,7 +151,7 @@ def process_payment(request):
 
         # Create Order instance with calculated total amount
         order = Order.objects.create(
-            name=person.Name,
+            name=customer_name,
             email=person.Email,
             transaction_code=transaction_code,
             total=total_amount,  # Store total which includes shipping
