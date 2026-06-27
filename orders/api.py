@@ -395,7 +395,7 @@ def sell_history_api(request, fk1):
             )
             products = []
             total_price_for_seller = Decimal('0.00')
-            
+            # test
             for product_basket in product_baskets:
                 subtotal = product_basket.productid.productPrice * product_basket.productqty
                 total_price_for_seller += subtotal
