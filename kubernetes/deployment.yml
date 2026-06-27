@@ -1,3 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: plantfeed-media-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -48,6 +59,13 @@ spec:
             secretKeyRef:
               name: plantfeed-secrets
               key: STRIPE_WEBHOOK_SECRET
+        volumeMounts:
+        - name: media-storage
+          mountPath: /app/media
+      volumes:
+      - name: media-storage
+        persistentVolumeClaim:
+          claimName: plantfeed-media-pvc
 ---
 apiVersion: v1
 kind: Service
