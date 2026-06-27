@@ -407,6 +407,7 @@ def sell_history_api(request, fk1):
                     "productPrice": product_basket.productid.productPrice,
                     "productCategory": product_basket.productid.productCategory,
                     "orderStatus": product_basket.status,
+                    "productPhoto": product_basket.productid.productPhoto.url if product_basket.productid.productPhoto else None,
                 })
 
             # Attach order info if available
