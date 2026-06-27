@@ -85,88 +85,75 @@ def create_checkout_session(request):
 
 
 
-@api_view(['GET'])
+# ✦ CHANGED: GET → POST so it can receive name and address in body
+@api_view(['POST'])
 def process_payment(request):
     session_id = request.GET.get('session_id')
     if not session_id:
         return Response({'error': 'No session ID provided'}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
+        # ✦ NEW: read name and address from the Flutter app form
+        name = request.data.get('name', '').strip()
+        address = request.data.get('address', '').strip()
+
         # Retrieve Stripe session
         session = stripe.checkout.Session.retrieve(session_id)
 
-        # Extract metadata and user email
         selected_product_ids_str = session.metadata['selected_product_ids'] if session.metadata else ''
         selected_product_ids = selected_product_ids_str.split(',') if selected_product_ids_str else []
         person = Person.objects.get(Email=session.customer_email)
 
-        # Generate transaction code
+        # ✦ CHANGED: use the name typed in the app; fall back to DB name if blank
+        if not name:
+            name = person.Name
+
         transaction_code = 'TRANS#' + str(timezone.now())
         order_status = "Payment Made"
 
-        # Retrieve the shipping details from the metadata
-        # shipping_details = json.loads(session.metadata.get('shipping_details', '{}'))
-        address_parts = []
-        if session.customer_details and session.customer_details.address:
-            addr = session.customer_details.address
-            for part in [addr.line1, addr.line2, addr.city, addr.state, addr.postal_code, addr.country]:
-                if part:
-                    address_parts.append(part)
-        address = ", ".join(address_parts)
-
-        # Update the database for the selected products
         selected_products = Basket.objects.filter(id__in=selected_product_ids)
-        sellers = {}  # Dictionary to track shipping per seller
-        product_total = 0  # Variable to accumulate total product price
+        sellers = {}
+        product_total = 0
 
         for bas in selected_products:
-            product = bas.productid  # Get the product
-            seller = product.Person_fk  # Assuming Person_fk is the seller
+            product = bas.productid
+            seller = product.Person_fk
 
-            # Update product stock and sold count
             product_obj = get_object_or_404(prodProduct, productid=product.productid)
             if product_obj.productStock < bas.productqty:
                 return Response({'error': 'Insufficient stock'}, status=status.HTTP_400_BAD_REQUEST)
-            
+
             product_obj.productStock -= bas.productqty
             product_obj.productSold += bas.productqty
-
             product_obj.save()
 
-            # Update basket to mark as checked out
             bas.is_checkout = 1
             bas.transaction_code = transaction_code
             bas.status = order_status
             bas.save()
 
-            # Calculate total product price
             product_total += product_obj.productPrice * bas.productqty
 
-            # Calculate shipping per seller
             if seller in sellers:
                 sellers[seller] += bas.productqty
             else:
                 sellers[seller] = bas.productqty
 
-        # Calculate shipping cost: RM 5 per quantity per seller
         shipping_cost = sum(quantity * 5 for quantity in sellers.values())
+        total_amount = product_total + shipping_cost
 
-        # Calculate final total
-        total_amount = product_total + shipping_cost  # Total including products and shipping
-
-        # Create Order instance with calculated total amount
+        # ✦ CHANGED: use name and address from Flutter form, not from Stripe session
         order = Order.objects.create(
-            name=person.Name,
+            name=name,
             email=person.Email,
             transaction_code=transaction_code,
-            total=total_amount,  # Store total which includes shipping
+            total=total_amount,
             status=order_status,
             user=person,
             address=address,
-            shipping=str(shipping_cost),  # Store total shipping
+            shipping=str(shipping_cost),
         )
 
-        # Create OrderItem entry for each product in the order
         for bas in selected_products:
             OrderItem.objects.create(
                 order=order,
