@@ -329,16 +329,19 @@ def get_products_by_seller(request, seller_id):
                 'productid': product.productid,
                 'productName': product.productName,
                 'productDesc': product.productDesc,
-                'productPrice': product.productPrice,
+                'productCategory': product.productCategory,
+                'productPrice': str(product.productPrice),
                 'productStock': product.productStock,
-                # Return relative path for productPhoto
                 'productPhoto': product.productPhoto.url if product.productPhoto else None,
-                'timePosted': product.timePosted,
+                'productRating': product.productRating,
+                'productSold': product.productSold,
+                'timePosted': product.timePosted.isoformat(),
+                'restricted': product.restricted,
             })
 
         return JsonResponse({'products': product_list}, safe=False)
-    except prodProduct.DoesNotExist:
-        return JsonResponse({'error': 'No products found for this seller'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 @api_view(['POST', 'GET'])
 def sell_product(request, fk1):
